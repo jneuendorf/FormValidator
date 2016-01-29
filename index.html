@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+
+    <title>FormValidator</title>
+
+    <script src="../includes/jquery-1.12.0.min.js" type="text/javascript"></script>
+
+    <script src="FormValidator.js" type="text/javascript"></script>
+
+    <style type="text/css">
+        .red-color {
+            color: red;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .class2 {
+            border: 1px solid red;
+        }
+        .invalid_dependency {
+            border: 2px solid blue;
+        }
+    </style>
+</head>
+<body>
+
+<form action="" id="my_form" method="get" data-fv-error-classes="red-color class2">
+
+    <span class="textlabel">text:</span>
+    <!-- data-fv-name="mein textfeld" -->
+    <input type="text" name="text" value="" data-fv-validate="text" data-fv-error-targets=".textlabel" /><br />
+
+    <span data-fv-name="numberlabel-en">english format number:</span>
+    <input type="text" name="number" value="" data-fv-validate="number" data-fv-preprocess="false" data-fv-postprocess="false" data-fv-error-targets="numberlabel-en" /><br />
+
+    <span data-fv-name="numberlabel-de">german format number:</span>
+    <input type="text" name="number" value="" data-fv-validate="number" data-fv-error-targets="numberlabel-de" /><br />
+
+    <span data-fv-name="integerlabel">optional integer:</span>
+    <input type="text" name="integer" value="" data-fv-validate="integer" data-fv-optional="true" data-fv-error-targets="self" /><br />
+
+    <span data-fv-name="integerlabel">integer:</span>
+    <input type="text" name="integer" value="" data-fv-validate="integer" /><br />
+
+    <span data-fv-name="phonelabel">optional phone:</span>
+    <input type="text" name="phone" value="" data-fv-validate="phone" data-fv-optional="true" /><br />
+
+    <span data-fv-name="emaillabel">email:</span>
+    <input type="text" name="email" value="" data-fv-validate="email" data-fv-error-targets="self error1 .outsider" /><br />
+
+    <span data-fv-name="checkboxlabel">checkbox:</span>
+    <input type="checkbox" name="checkbox" value="v1" data-fv-validate="checkbox" data-fv-error-targets="self checkboxlabel" />
+    <input type="checkbox" name="checkbox" value="v2" data-fv-validate="checkbox" />
+    <br />
+
+    <span data-fv-name="radiolabel">radio button:</span>
+    <input type="radio" name="radio" value="v1" data-fv-validate="radio" />
+    <input type="radio" name="radio" value="v2" data-fv-validate="radio" />
+    <br />
+
+    <select data-fv-validate="select" data-fv-error-targets="self">
+        <option value="">Bitte wählen</option>
+        <option value="mr">Herr</option>
+        <option value="mrs">Frau</option>
+    </select>
+    <br />
+
+    <h3>Dependencies</h3>
+
+    <input type="text" name="t1" class="parent" data-fv-name="parent1" data-fv-validate="text" data-fv-optional="true" /><br />
+    -> <input type="text" name="t11" class="child" data-fv-validate="text" data-fv-optional="true" data-fv-depends-on="parent1" /><br />
+    -> <input type="text" name="t12" class="child" data-fv-validate="text" data-fv-optional="true" data-fv-depends-on="parent1" /><br />
+    -> <input type="text" name="t13" class="child" data-fv-validate="text" data-fv-optional="true" data-fv-depends-on="parent1" /><br />
+    -> <input type="text" name="t14" class="child" data-fv-validate="text" data-fv-optional="true" data-fv-depends-on="parent1" /><br /><br />
+    <br />
+    <input type="text" name="t2" class="parent" data-fv-name="parent2" data-fv-validate="text" data-fv-optional="false" /><br />
+    -> <input type="text" name="t21" class="child" data-fv-validate="text" data-fv-optional="true" data-fv-depends-on="parent2" /><br />
+    -> <input type="text" name="t22" class="child" data-fv-validate="text" data-fv-optional="true" data-fv-depends-on="parent2" /><br />
+    -> <input type="text" name="t23" class="child" data-fv-validate="text" data-fv-optional="true" data-fv-depends-on="parent2" /><br />
+    -> <input type="text" name="t24" class="child" data-fv-validate="text" data-fv-optional="true" data-fv-depends-on="parent2" /><br />
+
+    <button class="test_dependencies" type="button">Validate Dependencies</button>
+
+    <hr>
+
+    <button class="test1" type="button">Validate1</button>
+    <button class="test2" type="button">Validate2</button>
+    <button type="button" data-fv-start="#my_form">Validate (auto binding)</button>
+    <br />
+    <hr />
+    <div data-fv-name="error1" data-fv-error-classes="red-color bold">
+        text in some div (INSIDE THE FORM TAG, USING data-fv-name) that should become red and bold for any form field with 'error1' as error target
+    </div>
+</form>
+
+<div class="outsider">
+    text in some div (OUTSIDE THE FORM TAG, USING class) that should become red and bold for any form field with '.outsider' as error target
+</div>
+
+
+<script type="text/javascript">
+$(".test_dependencies").click(function() {
+    var form_validator = B4f.FormValidator.new($("form"), {
+        dependency_error_classes: "invalid_dependency",
+        field_getter: function(form) {
+            return form.find(".parent, .child");
+        },
+        error_target_getter: function(type, elem, idx) {
+            return elem;
+        },
+        partition: function(fields) {
+            return [
+                fields.filter("[name^='t1']"),
+                fields.filter("[name^='t2']")
+            ]
+        },
+        locale: "de"
+    });
+    var res = form_validator.validate();
+    console.log(res);
+    console.log(form_validator.get_progress());
+    return true;
+});
+
+$(".test1").click(function() {
+    var form_validator = B4f.FormValidator.new($("form"), {
+        preprocessors: {
+            number: function(val, elem) {
+                return val.replace(/\./g, "").replace(/\,/g, ".");
+            }
+        },
+        postprocessors: {
+            number: function(val, elem) {
+                return "de-" + val;
+            }
+        },
+        locale: "de"
+    });
+    var res = form_validator.validate();
+    console.log(res);
+    return true;
+});
+
+$(".test2").click(function() {
+    var form_validator = B4f.FormValidator.new($("form"), {
+        field_getter: function(form) {
+            return form.find("input[type='text']");
+        },
+        error_target_getter: function(type, element, index) {
+            return element;
+        },
+        optional_field_getter: function(fields) {
+            return fields.filter("[name='email']");
+        },
+        validation_options: {
+            apply_error_styles: true
+        },
+        locale: "de",
+        error_mode: B4f.FormValidator.ERROR_MODES.SIMPLE
+    });
+    var res = form_validator.validate();
+    console.log(res);
+    return true;
+});
+
+</script>
+
+</body>
+</html>
