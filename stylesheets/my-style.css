@@ -30,3 +30,7 @@
 .tab-pane > h3 {
     text-transform: capitalize;
 }
+
+.invalid {
+    border: 1px solid rgb(187, 34, 34);
+}

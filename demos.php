@@ -1,15 +1,14 @@
 <div class="row">
     <div class="col-xs-12">
         <h3>Basic validation</h3>
-        <form id="basic_validation">
+        <form id="basic_validation" data-fv-error-classes="invalid">
             <div class="form-group">
                 <label>Email address</label>
-                <input type="text" class="form-control" placeholder="Email" data-fv-validate="email" />
+                <input type="text" class="form-control" placeholder="Email" data-fv-validate="email" data-fv-error-targets="self" />
             </div>
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox"> Check me out
-                </label>
+            <div class="form-group">
+                <label>Age</label>
+                <input type="text" class="form-control" placeholder="25" data-fv-validate="integer" data-fv-max="0" data-fv-max="130" data-fv-error-targets="self" />
             </div>
             <button type="button" class="btn btn-default" data-fv-start="#basic_validation">Submit</button>
         </form>
