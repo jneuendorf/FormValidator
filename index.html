@@ -3,16 +3,28 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Formvalidator by jneuendorf</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Formvalidator by jneuendorf</title>
+
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/my-bootstrap.css" media="screen">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeDefault.css" media="screen">
+
     <link rel="stylesheet" type="text/css" href="stylesheets/my-style.css" media="screen">
+
     <script type="text/javascript" src="js/jquery-2.2.0.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/shCore.js"></script>
+    <script type="text/javascript" src="js/brushes/shBrushJScript.js"></script>
+    <script type="text/javascript" src="js/brushes/shBrushXml.js"></script>
+
+    <script type="text/javascript" src="https://github.com/jneuendorf/FormValidator/blob/master/FormValidator.js"></script>
 </head>
 
 <body>
@@ -27,139 +39,129 @@
     <section class="main-content">
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active">
-                <a href="#features" aria-controls="features" role="tab" data-toggle="tab">Features</a>
-            </li>
-            <li role="presentation">
-                <a href="#demos" aria-controls="demos" role="tab" data-toggle="tab">Demos</a>
-            </li>
-            <li role="presentation">
-                <a href="#usage" aria-controls="usage" role="tab" data-toggle="tab">Usage</a>
-            </li>
-            <li role="presentation">
-                <a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a>
-            </li>
-            <!-- <li role="presentation">
-                <a href="#all" aria-controls="all" role="tab" data-toggle="tab">Everything README style</a>
-            </li> -->
-        </ul>
+                                <li role="presentation" class="active">
+                        <a href="#features" aria-controls="features" role="tab" data-toggle="tab">features</a>
+                    </li>
+                                        <li role="presentation" class="">
+                        <a href="#demos" aria-controls="demos" role="tab" data-toggle="tab">demos</a>
+                    </li>
+                                        <li role="presentation" class="">
+                        <a href="#usage" aria-controls="usage" role="tab" data-toggle="tab">usage</a>
+                    </li>
+                                        <li role="presentation" class="">
+                        <a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">settings</a>
+                    </li>
+                            </ul>
 
         <!-- Tab panes -->
         <div class="tab-content">
-            <!-- FEATURES -->
-            <div role="tabpanel" class="tab-pane active" id="features">
-                <h3>
-                    <a id="features" class="anchor" href="#features" aria-hidden="true">
-                        <span aria-hidden="true" class="octicon octicon-link"></span>
-                    </a>
-                    Features
-                </h3>
-                <dl>
-                    <dt>JavaScript free form validation</dt>
-                    <dd>Validate <i>any element</i> without needing to write any JavaScript (similar to Bootstrap's modal, for example).</dd>
+                                <div role="tabpanel" class="tab-pane active" id="features">
+                        <!-- <h3>
+                            <a id="features" class="anchor" href="#features" aria-hidden="true">
+                                <span aria-hidden="true" class="octicon octicon-link"></span>
+                            </a>
+                            features                        </h3> -->
+                        <dl>
+    <dt>JavaScript free form validation</dt>
+    <dd>Validate <i>any element</i> without needing to write any JavaScript (similar to Bootstrap's modal, for example).</dd>
 
-                    <dt>Simple type-based validation</dt>
-                    <dd>Validate forms simply by using some HTML element attributes.</dd>
+    <dt>Simple type-based validation</dt>
+    <dd>Validate forms simply by using some HTML element attributes.</dd>
 
-                    <dt>Required and optional fields</dt>
-                    <dd>Define what fields are optional by using a predefined attribute on the according elements.</dd>
+    <dt>Required and optional fields</dt>
+    <dd>Define what fields are optional by using a predefined attribute on the according elements.</dd>
 
-                    <dt>Easy theming</dt>
-                    <dd>Since CSS classes are applied to invalid elements, creating custom themes is easy.</dd>
+    <dt>Easy theming</dt>
+    <dd>Since CSS classes are applied to invalid elements, creating custom themes is easy.</dd>
 
-                    <dt>Dependencies</dt>
-                    <dd>Define dependencies between form fields - as always DOM-based.</dd>
+    <dt>Dependencies</dt>
+    <dd>Define dependencies between form fields - as always DOM-based.</dd>
 
-                    <dt>Detailed errors</dt>
-                    <dd>
-                        Invalid fields procude user friendly errors.<br />
-                        And it's possible to customize the degree of detail!
-                    </dd>
+    <dt>Detailed errors</dt>
+    <dd>
+        Invalid fields procude user friendly errors.<br />
+        And it's possible to customize the degree of detail!
+    </dd>
 
-                    <dt>Form progress</dt>
-                    <dd>Find out how much a user has filled in a form in real time.</dd>
+    <dt>Form progress</dt>
+    <dd>Find out how much a user has filled in a form in real time.</dd>
 
-                    <dt>i18n</dt>
-                    <dd>
-                        Each form validator generates the error messages depending on its locale property.<br />
-                        They can be customized, more can be added. English and German are predefined.
-                    </dd>
+    <dt>i18n</dt>
+    <dd>
+        Each form validator generates the error messages depending on its locale property.<br />
+        They can be customized, more can be added. English and German are predefined.
+    </dd>
 
-                    <dt>Customization</dt>
-                    <dd>Lots of other options can be used for a form validation by using the JavaScript API.</dd>
-                </dl>
-            </div>
-            <!-- DEMOS -->
-            <div role="tabpanel" class="tab-pane" id="demos">
-                <h3>
-                    <a id="demos" class="anchor" href="#demos" aria-hidden="true">
-                        <span aria-hidden="true" class="octicon octicon-link"></span>
-                    </a>
-                    Demos
-                </h3>
-            </div>
-            <!-- USAGE -->
-            <div role="tabpanel" class="tab-pane" id="usage">
-                <h3>
-                    <a id="usage" class="anchor" href="#usage" aria-hidden="true">
-                        <span aria-hidden="true" class="octicon octicon-link"></span>
-                    </a>
-                    Usage
-                </h3>
-            </div>
-            <!-- SETTINGS -->
-            <div role="tabpanel" class="tab-pane" id="settings">
-                <h3>
-                    <a id="settings" class="anchor" href="#settings" aria-hidden="true">
-                        <span aria-hidden="true" class="octicon octicon-link"></span>
-                    </a>
-                    Settings
-                </h3>
-            </div>
-            <!-- ALL -->
-            <!-- <div role="tabpanel" class="tab-pane" id="all">
-                ...
-            </div> -->
-        </div>
-
-
-        <!-- <p>
-            This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here <a href="https://guides.github.com/features/mastering-markdown/">using GitHub Flavored Markdown</a>, select
-            a template crafted by a designer, and publish. After your page is generated, you can check out the new <code>gh-pages</code> branch locally. If you’re using GitHub Desktop, simply sync your repository and you’ll see the new branch.
-        </p> -->
-
-
-        <!-- <form>
+    <dt>Customization</dt>
+    <dd>Lots of other options can be used for a form validation by using the JavaScript API.</dd>
+</dl>
+                    </div>
+                                        <div role="tabpanel" class="tab-pane " id="demos">
+                        <!-- <h3>
+                            <a id="demos" class="anchor" href="#demos" aria-hidden="true">
+                                <span aria-hidden="true" class="octicon octicon-link"></span>
+                            </a>
+                            demos                        </h3> -->
+                        <div class="row">
+    <div class="col-xs-12">
+        <h3>Basic validation</h3>
+        <form id="basic_validation">
             <div class="form-group">
                 <label>Email address</label>
-                <input type="email" class="form-control" placeholder="Email">
-            </div>
-            <div class="form-group">
-                <label for="exampleInputPassword1">Password</label>
-                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-            </div>
-            <div class="form-group">
-                <label for="exampleInputFile">File input</label>
-                <input type="file" id="exampleInputFile">
-                <p class="help-block">Example block-level help text here.</p>
+                <input type="text" class="form-control" placeholder="Email" data-fv-validate="email" />
             </div>
             <div class="checkbox">
                 <label>
                     <input type="checkbox"> Check me out
                 </label>
             </div>
-            <button type="submit" class="btn btn-default">Submit</button>
-        </form> -->
+            <button type="button" class="btn btn-default" data-fv-start="#basic_validation">Submit</button>
+        </form>
+    </div>
+</div>
+<pre class="brush: js">
+    +function ($) {
+      'use strict';
+      var version = $.fn.jquery.split(' ')[0].split('.')
+      if ((version[0] < 2 && version[1] < 9) || (version[0] == 1 && version[1] == 9 && version[2] < 1) || (version[0] > 2)) {
+        throw new Error('Bootstrap\'s JavaScript requires jQuery version 1.9.1 or higher, but lower than version 3')
+      }
+    }(jQuery);
+</pre>
+<pre class="brush: xml">
+    &lt;div class=&quot;row&quot;&gt;
+        &lt;div class=&quot;col-xs-12&quot;&gt;
+            &lt;h3&gt;Basic validation&lt;/h3&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+</pre>
+                    </div>
+                                        <div role="tabpanel" class="tab-pane " id="usage">
+                        <!-- <h3>
+                            <a id="usage" class="anchor" href="#usage" aria-hidden="true">
+                                <span aria-hidden="true" class="octicon octicon-link"></span>
+                            </a>
+                            usage                        </h3> -->
+                                            </div>
+                                        <div role="tabpanel" class="tab-pane " id="settings">
+                        <!-- <h3>
+                            <a id="settings" class="anchor" href="#settings" aria-hidden="true">
+                                <span aria-hidden="true" class="octicon octicon-link"></span>
+                            </a>
+                            settings                        </h3> -->
+                                            </div>
+                            </div>
 
         <footer class="site-footer">
             <span class="site-footer-owner"><a href="https://github.com/jneuendorf/FormValidator">Formvalidator</a> is maintained by <a href="https://github.com/jneuendorf">jneuendorf</a>.</span>
 
             <span class="site-footer-credits">This page is based on the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
         </footer>
-
     </section>
-
-
+    <script type="text/javascript">
+        SyntaxHighlighter.defaults["toolbar"] = false;
+        SyntaxHighlighter.defaults["gutter"] = false;
+        SyntaxHighlighter.all();
+    </script>
 </body>
-
 </html>

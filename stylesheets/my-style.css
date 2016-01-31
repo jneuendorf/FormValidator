@@ -7,15 +7,26 @@
 
 .nav-tabs > li > a {
     color: #159957;
+    text-transform: capitalize;
 }
 .nav > li > a:hover {
     background-color: #f7f7f7;
 }
-
+.main-content {
+    max-width: 80rem;
+}
 .main-content dl dd {
     font-size: 1rem;
 }
 
 .main-content dl dt {
     margin-top: 1.6rem;
+}
+
+.tab-content {
+    min-height: 200px;
+}
+
+.tab-pane > h3 {
+    text-transform: capitalize;
 }
