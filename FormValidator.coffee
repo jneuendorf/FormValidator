@@ -469,6 +469,8 @@ class window.FormValidator
         delete @postprocessors[type]
         return @
 
+
+
     ###*
     * @method validate
     * @param options {Object}
@@ -520,6 +522,7 @@ class window.FormValidator
 
         required = @fields.required
         fields = @fields.all
+        first_invalid_element = null
 
         for i in [1..fields.length]
             elem        = $(fields[i - 1])
@@ -539,7 +542,11 @@ class window.FormValidator
             # skip empty optional elements
             if options.all is false and not is_required and (value.length is 0 or type is "radio" or type is "checkbox")
                 # NOTE: if an optional value was invalid and was emptied the error target's error classes should be removed
-                @_apply_error_styles(elem, @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets"), true)
+                @_apply_error_styles(
+                    elem
+                    @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
+                    true
+                )
                 continue
 
             name = elem.attr("data-fv-name")
@@ -615,8 +622,15 @@ class window.FormValidator
             prev_name = name
 
             if options.apply_error_styles is true
-                @_apply_error_styles(elem, @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets"), is_valid)
+                @_apply_error_styles(
+                    elem
+                    @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
+                    is_valid
+                )
                 @_apply_dependency_error_styles(dependency_elements, is_valid)
+                if not first_invalid_element?
+                    first_invalid_element = elem
+                    elem.focus()
 
         return errors
 

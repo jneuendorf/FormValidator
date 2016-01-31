@@ -641,7 +641,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, dependencies, dependency, dependency_elem, dependency_elements, dependency_errors, dependency_validation, depends_on, elem, error_message_params, errors, fields, i, index_of_type, indices_by_type, info, is_required, is_valid, j, k, l, len, name, prev_name, ref, required, result, type, usedValFunc, validate_field, validation, validator, value;
+      var CLASS, dependencies, dependency, dependency_elem, dependency_elements, dependency_errors, dependency_validation, depends_on, elem, error_message_params, errors, fields, first_invalid_element, i, index_of_type, indices_by_type, info, is_required, is_valid, j, k, l, len, name, prev_name, ref, required, result, type, usedValFunc, validate_field, validation, validator, value;
       if (options == null) {
         options = this.validation_options || {
           apply_error_styles: true,
@@ -684,6 +684,7 @@
       })(this);
       required = this.fields.required;
       fields = this.fields.all;
+      first_invalid_element = null;
       for (i = k = 1, ref = fields.length; 1 <= ref ? k <= ref : k >= ref; i = 1 <= ref ? ++k : --k) {
         elem = $(fields[i - 1]);
         is_required = required.index(elem) >= 0;
@@ -698,7 +699,7 @@
           index_of_type = 1;
         }
         if (options.all === false && !is_required && (value.length === 0 || type === "radio" || type === "checkbox")) {
-          this._apply_error_styles(elem, (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets"), true);
+          this._apply_error_styles(elem, (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets") || elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets"), true);
           continue;
         }
         name = elem.attr("data-fv-name");
@@ -773,8 +774,12 @@
         }
         prev_name = name;
         if (options.apply_error_styles === true) {
-          this._apply_error_styles(elem, (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets"), is_valid);
+          this._apply_error_styles(elem, (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets") || elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets"), is_valid);
           this._apply_dependency_error_styles(dependency_elements, is_valid);
+          if (first_invalid_element == null) {
+            first_invalid_element = elem;
+            elem.focus();
+          }
         }
       }
       return errors;
