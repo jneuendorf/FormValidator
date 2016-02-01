@@ -359,11 +359,13 @@ class window.FormValidator
             if typeof error_targets is "string"
                 error_targets = error_targets.split /\s+/g
 
+            targets = []
             for error_target in error_targets
                 if error_target isnt "self"
                     target = @_find_target(error_target)
                 else
                     target = element
+                targets.push target
 
                 if (error_classes = target.attr("data-fv-error-classes"))?
                     if is_valid is false
@@ -375,7 +377,7 @@ class window.FormValidator
                         target.addClass @error_classes
                     else
                         target.removeClass @error_classes
-        return @
+        return targets
 
     _apply_dependency_error_styles: (error_targets, is_valid) ->
         if error_targets?
@@ -532,6 +534,7 @@ class window.FormValidator
             validation = validate_field(elem, info)
             is_valid = (validation is true)
             {type, usedValFunc, validator, value} = info
+            current_error = null
 
             if indices_by_type[type]?
                 index_of_type = ++indices_by_type[type]
@@ -584,24 +587,23 @@ class window.FormValidator
                         value:          value
                     }
 
-                    errors.push {
+                    current_error =
                         element:    elem
                         message:    @_create_error_message(@locale, error_message_params)
                         required:   is_required
                         type:       type
                         validator:  validator
                         value:      value
-                    }
                 # create additional error message if the element has unfulfilled dependencies
                 else
-                    errors.push {
+                    current_error =
                         element:    elem
                         message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {element: elem, error_message_type: "dependency"})
                         required:   is_required
                         type:       "dependency"
-                    }
                     # set flag for error styles
                     is_valid = false
+                errors.push current_error
             # element is valid
             else
                 # replace old value with post processed value
@@ -622,11 +624,15 @@ class window.FormValidator
             prev_name = name
 
             if options.apply_error_styles is true
-                @_apply_error_styles(
+                targets = @_apply_error_styles(
                     elem
                     @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
                     is_valid
                 )
+
+                if current_error?
+                    current_error.targets = targets
+
                 @_apply_dependency_error_styles(dependency_elements, is_valid)
                 if not first_invalid_element?
                     first_invalid_element = elem
