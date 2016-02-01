@@ -210,12 +210,25 @@ class window.FormValidator
     ########################################################################################################################
     # INIT
 
+    # enable autobound buttons
     $(document).on "click", "[data-fv-start!='']", () ->
         $elem = $(@)
         container = $elem.closest($elem.attr("data-fv-start"))
         if container.length is 1
             if not (form_validator = container.data("_form_validator"))?
                 form_validator = new FormValidator(container)
+                container.data("_form_validator", form_validator)
+            form_validator.validate()
+        return true
+
+    # enable real-time validation
+    $(document).on "change click keyup", "[data-fv-real-time] [data-fv-validate]", () ->
+        $elem = $(@)
+        container = $elem.closest("[data-fv-real-time]")
+        if container.length is 1
+            if not (form_validator = container.data("_form_validator"))?
+                form_validator = new FormValidator(container)
+                container.data("_form_validator", form_validator)
             form_validator.validate()
         return true
 
@@ -577,6 +590,16 @@ class window.FormValidator
             if not is_valid or dependency_errors.length > 0
                 result = false
 
+                # create error message if the element has unfulfilled dependencies
+                if dependency_errors.length > 0
+                    errors.push {
+                        element:    elem
+                        message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {element: elem, error_message_type: "dependency"})
+                        required:   is_required
+                        type:       "dependency"
+                    }
+                    is_valid = false
+                # create normal error message
                 if not is_valid
                     error_message_params = $.extend validation, {
                         element:        elem
@@ -594,16 +617,17 @@ class window.FormValidator
                         type:       type
                         validator:  validator
                         value:      value
-                # create additional error message if the element has unfulfilled dependencies
-                else
-                    current_error =
-                        element:    elem
-                        message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {element: elem, error_message_type: "dependency"})
-                        required:   is_required
-                        type:       "dependency"
-                    # set flag for error styles
-                    is_valid = false
-                errors.push current_error
+                    errors.push current_error
+                # # create additional error message if the element has unfulfilled dependencies
+                # else
+                #     current_error =
+                #         element:    elem
+                #         message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {element: elem, error_message_type: "dependency"})
+                #         required:   is_required
+                #         type:       "dependency"
+                #     # set flag for error styles
+                #     is_valid = false
+                # errors.push current_error
             # element is valid
             else
                 # replace old value with post processed value
