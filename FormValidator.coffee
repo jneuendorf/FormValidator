@@ -624,14 +624,14 @@ class window.FormValidator
             prev_name = name
 
             if options.apply_error_styles is true
-                targets = @_apply_error_styles(
+                error_targets = @_apply_error_styles(
                     elem
                     @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
                     is_valid
                 )
 
                 if current_error?
-                    current_error.targets = targets
+                    current_error.error_targets = error_targets
 
                 @_apply_dependency_error_styles(dependency_elements, is_valid)
                 if not first_invalid_element?

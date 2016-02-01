@@ -643,7 +643,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, current_error, dependencies, dependency, dependency_elem, dependency_elements, dependency_errors, dependency_validation, depends_on, elem, error_message_params, errors, fields, first_invalid_element, i, index_of_type, indices_by_type, info, is_required, is_valid, j, k, l, len, name, prev_name, ref, required, result, targets, type, usedValFunc, validate_field, validation, validator, value;
+      var CLASS, current_error, dependencies, dependency, dependency_elem, dependency_elements, dependency_errors, dependency_validation, depends_on, elem, error_message_params, error_targets, errors, fields, first_invalid_element, i, index_of_type, indices_by_type, info, is_required, is_valid, j, k, l, len, name, prev_name, ref, required, result, type, usedValFunc, validate_field, validation, validator, value;
       if (options == null) {
         options = this.validation_options || {
           apply_error_styles: true,
@@ -778,9 +778,9 @@
         }
         prev_name = name;
         if (options.apply_error_styles === true) {
-          targets = this._apply_error_styles(elem, (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets") || elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets"), is_valid);
+          error_targets = this._apply_error_styles(elem, (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets") || elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets"), is_valid);
           if (current_error != null) {
-            current_error.targets = targets;
+            current_error.error_targets = error_targets;
           }
           this._apply_dependency_error_styles(dependency_elements, is_valid);
           if (first_invalid_element == null) {
