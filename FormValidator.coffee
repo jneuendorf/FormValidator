@@ -235,6 +235,8 @@ class window.FormValidator
                 form_validator = new FormValidator(container)
                 container.data("_form_validator", form_validator)
             form_validator.validate()
+        # keep focus on the current element because the validation will move it elsewhere
+        $elem.focus()
         return true
 
     ########################################################################################################################
