@@ -6,7 +6,7 @@ locales =
             email:              "'{{value}}' ist keine gültige E-Mail-Adresse"
             email_at:           "Eine E-Mail-Adresse muss ein @-Zeichen enthalten"
             email_many_at:      "Eine E-Mail-Adresse darf höchstens ein @-Zeichen enthalten"
-            email_dot:          "'{{value}}' ist keine gültige E-Mail-Adresse (nach dem @ ist kein Punkt)"
+            email_dot:          "'{{value}}' hat keine korrekte Endung (z.B. '.de')"
             integer:            "'{{value}}' ist keine Zahl"
             integer_float:      "'{{value}}' ist keine ganze Zahl"
             positive_integer:   "'{{value}}' ist keine positive ganze Zahl"

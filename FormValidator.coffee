@@ -31,7 +31,7 @@ class window.FormValidator
                 }
             if parts.length is 2 and parts[0] isnt "" and parts[1] isnt ""
                 # check if there is a dot in domain parts
-                if str.indexOf(".", str.indexOf("@")) < 0
+                if str.indexOf(".", str.indexOf("@")) < 0 or str[str.length - 1] is "."
                     return {
                         error_message_type: "email_dot"
                     }
@@ -234,9 +234,11 @@ class window.FormValidator
             if not (form_validator = container.data("_form_validator"))?
                 form_validator = new FormValidator(container)
                 container.data("_form_validator", form_validator)
-            form_validator.validate()
-        # keep focus on the current element because the validation will move it elsewhere
-        $elem.focus()
+            errors = form_validator.validate()
+            # if there are errors, keep the focus on the current element because it would otherwise move elsewhere
+            #  without errors we just keep the focus because the form validator would not change it
+            if errors.length > 0
+                $elem.focus()
         return true
 
     ########################################################################################################################

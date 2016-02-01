@@ -46,7 +46,7 @@
         email: "'{{value}}' ist keine gültige E-Mail-Adresse",
         email_at: "Eine E-Mail-Adresse muss ein @-Zeichen enthalten",
         email_many_at: "Eine E-Mail-Adresse darf höchstens ein @-Zeichen enthalten",
-        email_dot: "'{{value}}' ist keine gültige E-Mail-Adresse (nach dem @ ist kein Punkt)",
+        email_dot: "'{{value}}' hat keine korrekte Endung (z.B. '.de')",
         integer: "'{{value}}' ist keine Zahl",
         integer_float: "'{{value}}' ist keine ganze Zahl",
         positive_integer: "'{{value}}' ist keine positive ganze Zahl",
@@ -118,7 +118,7 @@
           };
         }
         if (parts.length === 2 && parts[0] !== "" && parts[1] !== "") {
-          if (str.indexOf(".", str.indexOf("@")) < 0) {
+          if (str.indexOf(".", str.indexOf("@")) < 0 || str[str.length - 1] === ".") {
             return {
               error_message_type: "email_dot"
             };
@@ -343,7 +343,7 @@
     });
 
     $(document).on("change click keyup", "[data-fv-real-time] [data-fv-validate]", function(evt) {
-      var $elem, container, form_validator;
+      var $elem, container, errors, form_validator;
       $elem = $(this);
       if (evt.type === "click" && $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length === $elem.length) {
         return true;
@@ -354,9 +354,11 @@
           form_validator = new FormValidator(container);
           container.data("_form_validator", form_validator);
         }
-        form_validator.validate();
+        errors = form_validator.validate();
+        if (errors.length > 0) {
+          $elem.focus();
+        }
       }
-      $elem.focus();
       return true;
     });
 
