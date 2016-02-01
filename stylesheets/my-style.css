@@ -70,3 +70,6 @@ h3.project-tagline {
 .error_state.invalid {
     background-color: rgb(187, 34, 34);
 }
+.error_message {
+    margin-top: 33px;
+}

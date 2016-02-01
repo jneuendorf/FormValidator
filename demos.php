@@ -184,9 +184,7 @@
                 <div class="col-xs-1">
                     <div class="error_state"></div>
                 </div>
-                <div class="col-xs-5 error">
-
-                </div>
+                <div class="col-xs-5 error_message"></div>
             </div>
             <div class="row">
                 <div class="form-group col-xs-6">
@@ -196,70 +194,168 @@
                 <div class="col-xs-1">
                     <div class="error_state"></div>
                 </div>
-                <div class="col-xs-5 error">
-
-                </div>
+                <div class="col-xs-5 error_message"></div>
             </div>
             <div class="row">
                 <div class="form-group col-xs-6">
-                    <label>Number</label>
-                    <input type="text" class="form-control" placeholder="-5.234" data-fv-validate="number" />
+                    <label>Number n1</label>
+                    <input type="text" class="form-control" placeholder="-5.234" data-fv-validate="number" data-fv-name="n1" />
                 </div>
                 <div class="col-xs-1">
                     <div class="error_state"></div>
                 </div>
-                <div class="col-xs-5 error">
-
-                </div>
+                <div class="col-xs-5 error_message"></div>
             </div>
             <div class="row">
                 <div class="form-group col-xs-6">
-                    <label>Phone</label>
-                    <input type="text" class="form-control" placeholder="+49 (0) 30 / 123-456" data-fv-validate="phone" />
+                    <label>This number depends on n1</label>
+                    <input type="text" class="form-control" data-fv-validate="number" data-fv-depends-on="n1" />
                 </div>
                 <div class="col-xs-1">
                     <div class="error_state"></div>
                 </div>
-                <div class="col-xs-5 error">
-
-                </div>
+                <div class="col-xs-5 error_message"></div>
             </div>
             <div class="row">
                 <div class="form-group col-xs-6">
-                    <label>Text</label>
-                    <textarea class="form-control" placeholder="anything you want" data-fv-validate="text"></textarea>
+                    <label>My text area</label>
+                    <textarea class="form-control" placeholder="anything you want" data-fv-validate="text" data-fv-name="My text area"></textarea>
                 </div>
                 <div class="col-xs-1">
                     <div class="error_state"></div>
                 </div>
-                <div class="col-xs-5 error">
-
+                <div class="col-xs-5 error_message"></div>
+            </div>
+            <div class="row">
+                <div class="col-xs-1">
+                    Locale:
+                </div>
+                <div class="col-xs-1">
+                    <select class="form-control example3 locale">
+                        <option value="en">en</option>
+                        <option value="de">de</option>
+                    </select>
+                </div>
+                <div class="col-xs-2">
+                    <button type="button" class="btn btn-default" id="example3">Validate</button>
                 </div>
             </div>
-            <button type="button" class="btn btn-default" id="example3">Validate</button>
+            <div class="row">
+                <div class="col-xs-12">
+                    Keep in mind that FormValidator comes with some predefined preprocessors.<br />
+                    For example, when choosing 'de' the string <code>123.15,45</code> will be parsed as <code>12315.45</code>.
+                </div>
+            </div>
         </form>
         <script type="text/javascript">
             $("#example3").click(function() {
-                var validator = new FormValidator($("#example3").closest("form"), {
+                var form = $("#example3").closest("form"),
+                    error;
+                var validator = new FormValidator(form, {
                     error_target_getter: function(type, element, index) {
                         return element.closest(".row").find(".error_state");
-                    }
+                    },
+                    locale: form.find(".example3.locale option:selected").val()
                 });
                 var errors = validator.validate();
-                var error;
-                console.log(errors);
+                form.find(".error_message").empty();
                 for (var i = 0; i < errors.length; i++) {
                     error = errors[i];
+                    error.element.closest(".row").find(".error_message").text(error.message);
                 }
+                return true;
             });
         </script>
-        <h4>The HTML</h4>
-        <pre class="brush: xml">
-
-        </pre>
         <h4>The JavaScript</h4>
         <pre class="brush: js">
-
+            $(&quot;#example3&quot;).click(function() {
+                var form = $(&quot;#example3&quot;).closest(&quot;form&quot;),
+                    error;
+                var validator = new FormValidator(form, {
+                    // apply &apos;invalid&apos; class to circles instead of the text fields themselves
+                    error_target_getter: function(type, element, index) {
+                        return element.closest(&quot;.row&quot;).find(&quot;.error_state&quot;);
+                    },
+                    locale: form.find(&quot;.example3.locale option:selected&quot;).val()
+                });
+                var errors = validator.validate();
+                // show errors
+                form.find(&quot;.error_message&quot;).empty();
+                for (var i = 0; i &lt; errors.length; i++) {
+                    error = errors[i];
+                    error.element.closest(&quot;.row&quot;).find(&quot;.error_message&quot;).text(error.message);
+                }
+                return true;
+            });
+        </pre>
+        <h4>The HTML</h4>
+        <pre class="brush: xml">
+            &lt;form data-fv-error-classes=&quot;invalid&quot; data-fv-error-targets=&quot;self&quot;&gt;
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;div class=&quot;col-xs-6&quot;&gt;
+                        &lt;label&gt;Email&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; data-fv-validate=&quot;email&quot; /&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-1&quot;&gt;
+                        &lt;div class=&quot;error_state&quot;&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-5 error_message&quot;&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;div class=&quot;col-xs-6&quot;&gt;
+                        &lt;label&gt;Integer&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; data-fv-validate=&quot;integer&quot; /&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-1&quot;&gt;
+                        &lt;div class=&quot;error_state&quot;&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-5 error_message&quot;&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;div class=&quot;col-xs-6&quot;&gt;
+                        &lt;label&gt;Number n1&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-name=&quot;n1&quot; /&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-1&quot;&gt;
+                        &lt;div class=&quot;error_state&quot;&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-5 error_message&quot;&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;div class=&quot;col-xs-6&quot;&gt;
+                        &lt;label&gt;This number depends on n1&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-depends-on=&quot;n1&quot; /&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-1&quot;&gt;
+                        &lt;div class=&quot;error_state&quot;&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-5 error_message&quot;&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;div class=&quot;col-xs-6&quot;&gt;
+                        &lt;label&gt;My text area&lt;/label&gt;
+                        &lt;textarea data-fv-validate=&quot;text&quot; data-fv-name=&quot;My text area&quot;&gt;&lt;/textarea&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-1&quot;&gt;
+                        &lt;div class=&quot;error_state&quot;&gt;&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-5 error_message&quot;&gt;&lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;div class=&quot;col-xs-1&quot;&gt;
+                        Locale:
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-1&quot;&gt;
+                        &lt;select class=&quot;example3 locale&quot;&gt;
+                            &lt;option value=&quot;en&quot;&gt;en&lt;/option&gt;
+                            &lt;option value=&quot;de&quot;&gt;de&lt;/option&gt;
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-xs-2&quot;&gt;
+                        &lt;button id=&quot;example3&quot;&gt;Validate&lt;/button&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
         </pre>
     </div>
 </div>

@@ -478,11 +478,12 @@
     };
 
     FormValidator.prototype._apply_error_styles = function(element, error_targets, is_valid) {
-      var error_classes, error_target, k, len, target;
+      var error_classes, error_target, k, len, target, targets;
       if (error_targets != null) {
         if (typeof error_targets === "string") {
           error_targets = error_targets.split(/\s+/g);
         }
+        targets = [];
         for (k = 0, len = error_targets.length; k < len; k++) {
           error_target = error_targets[k];
           if (error_target !== "self") {
@@ -490,6 +491,7 @@
           } else {
             target = element;
           }
+          targets.push(target);
           if ((error_classes = target.attr("data-fv-error-classes")) != null) {
             if (is_valid === false) {
               target.addClass(error_classes);
@@ -505,7 +507,7 @@
           }
         }
       }
-      return this;
+      return targets;
     };
 
     FormValidator.prototype._apply_dependency_error_styles = function(error_targets, is_valid) {
@@ -641,7 +643,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, dependencies, dependency, dependency_elem, dependency_elements, dependency_errors, dependency_validation, depends_on, elem, error_message_params, errors, fields, first_invalid_element, i, index_of_type, indices_by_type, info, is_required, is_valid, j, k, l, len, name, prev_name, ref, required, result, type, usedValFunc, validate_field, validation, validator, value;
+      var CLASS, current_error, dependencies, dependency, dependency_elem, dependency_elements, dependency_errors, dependency_validation, depends_on, elem, error_message_params, error_targets, errors, fields, first_invalid_element, i, index_of_type, indices_by_type, info, is_required, is_valid, j, k, l, len, name, prev_name, ref, required, result, type, usedValFunc, validate_field, validation, validator, value;
       if (options == null) {
         options = this.validation_options || {
           apply_error_styles: true,
@@ -692,6 +694,7 @@
         validation = validate_field(elem, info);
         is_valid = validation === true;
         type = info.type, usedValFunc = info.usedValFunc, validator = info.validator, value = info.value;
+        current_error = null;
         if (indices_by_type[type] != null) {
           index_of_type = ++indices_by_type[type];
         } else {
@@ -735,16 +738,16 @@
               previous_name: prev_name,
               value: value
             });
-            errors.push({
+            current_error = {
               element: elem,
               message: this._create_error_message(this.locale, error_message_params),
               required: is_required,
               type: type,
               validator: validator,
               value: value
-            });
+            };
           } else {
-            errors.push({
+            current_error = {
               element: elem,
               message: (typeof this.create_dependency_error_message === "function" ? this.create_dependency_error_message(this.locale, dependency_errors) : void 0) || this._create_error_message(this.locale, {
                 element: elem,
@@ -752,9 +755,10 @@
               }),
               required: is_required,
               type: "dependency"
-            });
+            };
             is_valid = false;
           }
+          errors.push(current_error);
         } else {
           if ((this.postprocessors[type] != null) && elem.attr("data-fv-postprocess") !== "false") {
             value = this.postprocessors[type].call(this.postprocessors, value, elem, this.locale);
@@ -774,7 +778,10 @@
         }
         prev_name = name;
         if (options.apply_error_styles === true) {
-          this._apply_error_styles(elem, (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets") || elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets"), is_valid);
+          error_targets = this._apply_error_styles(elem, (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets") || elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets"), is_valid);
+          if (current_error != null) {
+            current_error.error_targets = error_targets;
+          }
           this._apply_dependency_error_styles(dependency_elements, is_valid);
           if (first_invalid_element == null) {
             first_invalid_element = elem;
