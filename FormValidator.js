@@ -356,6 +356,7 @@
         }
         form_validator.validate();
       }
+      $elem.focus();
       return true;
     });
 
