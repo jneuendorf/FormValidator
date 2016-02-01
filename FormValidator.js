@@ -342,10 +342,10 @@
       return true;
     });
 
-    $(document).on("change click keyup", "[data-fv-real-time] [data-fv-validate]", function() {
+    $(document).on("change click keyup", "[data-fv-real-time] [data-fv-validate]", function(evt) {
       var $elem, container, form_validator;
       $elem = $(this);
-      if ($elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length === $elem.length) {
+      if (evt.type === "click" && $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length === $elem.length) {
         return true;
       }
       container = $elem.closest("[data-fv-real-time]");

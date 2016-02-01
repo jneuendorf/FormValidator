@@ -222,11 +222,11 @@ class window.FormValidator
         return true
 
     # enable real-time validation
-    $(document).on "change click keyup", "[data-fv-real-time] [data-fv-validate]", () ->
+    $(document).on "change click keyup", "[data-fv-real-time] [data-fv-validate]", (evt) ->
         $elem = $(@)
 
         # prevent click in textfields to trigger validation
-        if $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length is $elem.length
+        if evt.type is "click" and $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length is $elem.length
             return true
 
         container = $elem.closest("[data-fv-real-time]")
