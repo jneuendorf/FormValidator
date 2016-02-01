@@ -335,6 +335,21 @@
       if (container.length === 1) {
         if ((form_validator = container.data("_form_validator")) == null) {
           form_validator = new FormValidator(container);
+          container.data("_form_validator", form_validator);
+        }
+        form_validator.validate();
+      }
+      return true;
+    });
+
+    $(document).on("change click keyup", "[data-fv-real-time] [data-fv-validate]", function() {
+      var $elem, container, form_validator;
+      $elem = $(this);
+      container = $elem.closest("[data-fv-real-time]");
+      if (container.length === 1) {
+        if ((form_validator = container.data("_form_validator")) == null) {
+          form_validator = new FormValidator(container);
+          container.data("_form_validator", form_validator);
         }
         form_validator.validate();
       }
@@ -729,6 +744,18 @@
         }
         if (!is_valid || dependency_errors.length > 0) {
           result = false;
+          if (dependency_errors.length > 0) {
+            errors.push({
+              element: elem,
+              message: (typeof this.create_dependency_error_message === "function" ? this.create_dependency_error_message(this.locale, dependency_errors) : void 0) || this._create_error_message(this.locale, {
+                element: elem,
+                error_message_type: "dependency"
+              }),
+              required: is_required,
+              type: "dependency"
+            });
+            is_valid = false;
+          }
           if (!is_valid) {
             error_message_params = $.extend(validation, {
               element: elem,
@@ -746,19 +773,8 @@
               validator: validator,
               value: value
             };
-          } else {
-            current_error = {
-              element: elem,
-              message: (typeof this.create_dependency_error_message === "function" ? this.create_dependency_error_message(this.locale, dependency_errors) : void 0) || this._create_error_message(this.locale, {
-                element: elem,
-                error_message_type: "dependency"
-              }),
-              required: is_required,
-              type: "dependency"
-            };
-            is_valid = false;
+            errors.push(current_error);
           }
-          errors.push(current_error);
         } else {
           if ((this.postprocessors[type] != null) && elem.attr("data-fv-postprocess") !== "false") {
             value = this.postprocessors[type].call(this.postprocessors, value, elem, this.locale);

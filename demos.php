@@ -250,7 +250,7 @@
         <script type="text/javascript">
             $("#example3").click(function() {
                 var form = $("#example3").closest("form"),
-                    error;
+                    error, div, text;
                 var validator = new FormValidator(form, {
                     error_target_getter: function(type, element, index) {
                         return element.closest(".row").find(".error_state");
@@ -261,7 +261,9 @@
                 form.find(".error_message").empty();
                 for (var i = 0; i < errors.length; i++) {
                     error = errors[i];
-                    error.element.closest(".row").find(".error_message").text(error.message);
+                    div = error.element.closest(".row").find(".error_message");
+                    text = div.text();
+                    div.text(text + (text.length > 0 ? "; " : "") + error.message);
                 }
                 return true;
             });
@@ -270,7 +272,7 @@
         <pre class="brush: js">
             $(&quot;#example3&quot;).click(function() {
                 var form = $(&quot;#example3&quot;).closest(&quot;form&quot;),
-                    error;
+                    error, div, text;
                 var validator = new FormValidator(form, {
                     // apply &apos;invalid&apos; class to circles instead of the text fields themselves
                     error_target_getter: function(type, element, index) {
@@ -283,7 +285,9 @@
                 form.find(&quot;.error_message&quot;).empty();
                 for (var i = 0; i &lt; errors.length; i++) {
                     error = errors[i];
-                    error.element.closest(&quot;.row&quot;).find(&quot;.error_message&quot;).text(error.message);
+                    div = error.element.closest(&quot;.row&quot;).find(&quot;.error_message&quot;);
+                    text = div.text();
+                    div.text(text + (text.length &gt; 0 ? &quot;; &quot; : &quot;&quot;) + error.message);
                 }
                 return true;
             });
@@ -359,17 +363,52 @@
         </pre>
     </div>
 </div>
-
-
-
-
-
-
-
-<!-- <pre class="brush: xml">
-    &lt;div class=&quot;row&quot;&gt;
-        &lt;div class=&quot;col-xs-12&quot;&gt;
-            &lt;h3&gt;Basic validation&lt;/h3&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-</pre> -->
+<!-- EXAMPLE 4 -->
+<div class="row">
+    <div class="col-xs-12">
+        <h3>Example 1 on the fly</h3>
+        <h4>The form</h4>
+        <div class="row">
+            <form id="example1" class="col-xs-6" data-fv-error-classes="invalid" data-fv-error-targets="self" data-fv-real-time>
+                <div class="form-group">
+                    <label>Email address</label>
+                    <input type="text" class="form-control" placeholder="Email" data-fv-validate="email" />
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="text" class="form-control" placeholder="25" data-fv-validate="integer" />
+                </div>
+                <div class="form-group">
+                    <label>Some optional text</label>
+                    <input type="text" class="form-control" data-fv-validate="text" data-fv-optional="true" />
+                </div>
+                <div class="form-group">
+                    <label>An optional number</label>
+                    <input type="text" class="form-control" data-fv-validate="number" data-fv-optional="true" />
+                </div>
+            </form>
+        </div>
+        <h4>The HTML</h4>
+        <pre class="brush: xml">
+            &lt;form id=&quot;example1&quot; data-fv-error-classes=&quot;invalid&quot; data-fv-error-targets=&quot;self&quot;&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Email address&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;email&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Age&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;integer&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Some optional text&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;text&quot; data-fv-optional=&quot;true&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;An optional number&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-optional=&quot;true&quot; /&gt;
+                &lt;/div&gt;
+                &lt;button data-fv-start=&quot;#example1&quot;&gt;Validate&lt;/button&gt;
+            &lt;/form&gt;
+        </pre>
+    </div>
+</div>

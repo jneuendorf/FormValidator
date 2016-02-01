@@ -20,6 +20,9 @@
         And it's possible to customize the degree of detail!
     </dd>
 
+    <dt>Real time validation</dt>
+    <dd>Validate form fields on the fly.</dd>
+
     <dt>Form progress</dt>
     <dd>Find out how much a user has filled in a form in real time.</dd>
 
