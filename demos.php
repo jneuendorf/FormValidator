@@ -1,32 +1,279 @@
+<!-- EXAMPLE 1 -->
 <div class="row">
     <div class="col-xs-12">
         <h3>Basic validation</h3>
-        <form id="basic_validation" data-fv-error-classes="invalid">
-            <div class="form-group">
-                <label>Email address</label>
-                <input type="text" class="form-control" placeholder="Email" data-fv-validate="email" data-fv-error-targets="self" />
-            </div>
-            <div class="form-group">
-                <label>Age</label>
-                <input type="text" class="form-control" placeholder="25" data-fv-validate="integer" data-fv-max="0" data-fv-max="130" data-fv-error-targets="self" />
-            </div>
-            <button type="button" class="btn btn-default" data-fv-start="#basic_validation">Submit</button>
-        </form>
+        <h4>The form</h4>
+        <div class="row">
+            <form id="example1" class="col-xs-6" data-fv-error-classes="invalid" data-fv-error-targets="self">
+                <div class="form-group">
+                    <label>Email address</label>
+                    <input type="text" class="form-control" placeholder="Email" data-fv-validate="email" />
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="text" class="form-control" placeholder="25" data-fv-validate="integer" />
+                </div>
+                <div class="form-group">
+                    <label>Some optional text</label>
+                    <input type="text" class="form-control" data-fv-validate="text" data-fv-optional="true" />
+                </div>
+                <div class="form-group">
+                    <label>An optional number</label>
+                    <input type="text" class="form-control" data-fv-validate="number" data-fv-optional="true" />
+                </div>
+                <button type="button" class="btn btn-default" data-fv-start="#example1">Validate</button>
+            </form>
+        </div>
+        <h4>The HTML</h4>
+        <pre class="brush: xml">
+            &lt;form id=&quot;example1&quot; data-fv-error-classes=&quot;invalid&quot; data-fv-error-targets=&quot;self&quot;&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Email address&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;email&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Age&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;integer&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Some optional text&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;text&quot; data-fv-optional=&quot;true&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;An optional number&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-optional=&quot;true&quot; /&gt;
+                &lt;/div&gt;
+                &lt;button data-fv-start=&quot;#example1&quot;&gt;Validate&lt;/button&gt;
+            &lt;/form&gt;
+        </pre>
     </div>
 </div>
-<pre class="brush: js">
-    +function ($) {
-      'use strict';
-      var version = $.fn.jquery.split(' ')[0].split('.')
-      if ((version[0] < 2 && version[1] < 9) || (version[0] == 1 && version[1] == 9 && version[2] < 1) || (version[0] > 2)) {
-        throw new Error('Bootstrap\'s JavaScript requires jQuery version 1.9.1 or higher, but lower than version 3')
-      }
-    }(jQuery);
-</pre>
-<pre class="brush: xml">
+<!-- EXAMPLE 2 -->
+<div class="row">
+    <hr />
+    <div class="col-xs-12">
+        <h3>Using all validation types (and some options)</h3>
+        <h4>The form</h4>
+        <div class="row">
+            <form id="example2" class="col-xs-6" data-fv-error-classes="invalid" data-fv-error-targets="self">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" class="form-control" placeholder="you@me.com" data-fv-validate="email" />
+                </div>
+                <div class="form-group">
+                    <label>Integer (&ge; -10)</label>
+                    <input type="text" class="form-control" placeholder="25" data-fv-validate="integer" data-fv-min="-10" />
+                </div>
+                <div class="form-group">
+                    <label>Number (&lt; 9)</label>
+                    <input type="text" class="form-control" placeholder="-5.234" data-fv-validate="number" data-fv-max="9" data-fv-include-max="false" />
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" class="form-control" placeholder="+49 (0) 30 / 123-456" data-fv-validate="phone" />
+                </div>
+                <div class="form-group">
+                    <label>Text</label>
+                    <textarea class="form-control" placeholder="anything you want" data-fv-validate="text"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Select</label>
+                    <select class="form-control" data-fv-validate="select">
+                        <option value="">- select something (invalid options) -</option>
+                        <option value="opt1">option 1</option>
+                        <option value="opt2">option 2</option>
+                        <option value="opt3">option 3</option>
+                        <option value="opt4">option 4</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Checkbox</label>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="checkbox1" data-fv-validate="checkbox" /> check me
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Radio</label>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="optionsRadios" value="option1" data-fv-validate="radio" /> check me
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="optionsRadios" value="option2" data-fv-validate="radio" /> or me
+                        </label>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-default" data-fv-start="#example2">Validate</button>
+            </form>
+        </div>
+        <h4>The HTML</h4>
+        <pre class="brush: xml">
+            &lt;form id=&quot;example2&quot; data-fv-error-classes=&quot;invalid&quot; data-fv-error-targets=&quot;self&quot;&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Email&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;email&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Integer (&amp;ge; -10)&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;integer&quot; data-fv-min=&quot;-10&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Number (&amp;lt; 9)&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-max=&quot;9&quot; data-fv-include-max=&quot;false&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Phone&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;phone&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Text&lt;/label&gt;
+                    &lt;textarea data-fv-validate=&quot;text&quot;&gt;&lt;/textarea&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Select&lt;/label&gt;
+                    &lt;select data-fv-validate=&quot;select&quot;&gt;
+                        &lt;option value=&quot;&quot;&gt;- select something (invalid options) -&lt;/option&gt;
+                        &lt;option value=&quot;opt1&quot;&gt;option 1&lt;/option&gt;
+                        &lt;option value=&quot;opt2&quot;&gt;option 2&lt;/option&gt;
+                        &lt;option value=&quot;opt3&quot;&gt;option 3&lt;/option&gt;
+                        &lt;option value=&quot;opt4&quot;&gt;option 4&lt;/option&gt;
+                    &lt;/select&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Checkbox&lt;/label&gt;
+                    &lt;div class=&quot;checkbox&quot;&gt;
+                        &lt;label&gt;
+                            &lt;input type=&quot;checkbox&quot; value=&quot;checkbox1&quot; data-fv-validate=&quot;checkbox&quot; /&gt; check me
+                        &lt;/label&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Radio&lt;/label&gt;
+                    &lt;div class=&quot;radio&quot;&gt;
+                        &lt;label&gt;
+                            &lt;input type=&quot;radio&quot; name=&quot;optionsRadios&quot; value=&quot;option1&quot; data-fv-validate=&quot;radio&quot; /&gt; check me
+                        &lt;/label&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;radio&quot;&gt;
+                        &lt;label&gt;
+                            &lt;input type=&quot;radio&quot; name=&quot;optionsRadios&quot; value=&quot;option2&quot; data-fv-validate=&quot;radio&quot; /&gt; or me
+                        &lt;/label&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;button data-fv-start=&quot;#example2&quot;&gt;Validate&lt;/button&gt;
+            &lt;/form&gt;
+        </pre>
+    </div>
+</div>
+<!-- EXAMPLE 3 -->
+<div class="row">
+    <hr />
+    <div class="col-xs-12">
+        <h3>Using JavaScript, printing error messages</h3>
+        <h4>The form</h4>
+        <form data-fv-error-classes="invalid" data-fv-error-targets="self">
+            <div class="row">
+                <div class="form-group col-xs-6">
+                    <label>Email</label>
+                    <input type="text" class="form-control" placeholder="you@me.com" data-fv-validate="email" />
+                </div>
+                <div class="col-xs-1">
+                    <div class="error_state"></div>
+                </div>
+                <div class="col-xs-5 error">
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-xs-6">
+                    <label>Integer</label>
+                    <input type="text" class="form-control" placeholder="25" data-fv-validate="integer" />
+                </div>
+                <div class="col-xs-1">
+                    <div class="error_state"></div>
+                </div>
+                <div class="col-xs-5 error">
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-xs-6">
+                    <label>Number</label>
+                    <input type="text" class="form-control" placeholder="-5.234" data-fv-validate="number" />
+                </div>
+                <div class="col-xs-1">
+                    <div class="error_state"></div>
+                </div>
+                <div class="col-xs-5 error">
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-xs-6">
+                    <label>Phone</label>
+                    <input type="text" class="form-control" placeholder="+49 (0) 30 / 123-456" data-fv-validate="phone" />
+                </div>
+                <div class="col-xs-1">
+                    <div class="error_state"></div>
+                </div>
+                <div class="col-xs-5 error">
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-xs-6">
+                    <label>Text</label>
+                    <textarea class="form-control" placeholder="anything you want" data-fv-validate="text"></textarea>
+                </div>
+                <div class="col-xs-1">
+                    <div class="error_state"></div>
+                </div>
+                <div class="col-xs-5 error">
+
+                </div>
+            </div>
+            <button type="button" class="btn btn-default" id="example3">Validate</button>
+        </form>
+        <script type="text/javascript">
+            $("#example3").click(function() {
+                var validator = new FormValidator($("#example3").closest("form"), {
+                    error_target_getter: function(type, element, index) {
+                        return element.closest(".row").find(".error_state");
+                    }
+                });
+                var errors = validator.validate();
+                var error;
+                console.log(errors);
+                for (var i = 0; i < errors.length; i++) {
+                    error = errors[i];
+                }
+            });
+        </script>
+        <h4>The HTML</h4>
+        <pre class="brush: xml">
+
+        </pre>
+        <h4>The JavaScript</h4>
+        <pre class="brush: js">
+
+        </pre>
+    </div>
+</div>
+
+
+
+
+
+
+
+<!-- <pre class="brush: xml">
     &lt;div class=&quot;row&quot;&gt;
         &lt;div class=&quot;col-xs-12&quot;&gt;
             &lt;h3&gt;Basic validation&lt;/h3&gt;
         &lt;/div&gt;
     &lt;/div&gt;
-</pre>
+</pre> -->

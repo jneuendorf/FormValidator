@@ -1,6 +1,7 @@
 <?php
 
-$tabs = ['features', 'demos', 'usage', 'settings'];
+$tab_names = ['features', 'demos', 'how to use', 'settings', 'attribute index'];
+$filenames = ['features', 'demos', 'usage', 'settings', 'attribute_index'];
 
 ?>
 <!DOCTYPE html>
@@ -36,7 +37,8 @@ $tabs = ['features', 'demos', 'usage', 'settings'];
     <section class="page-header">
         <h1 class="project-name">FormValidator</h1>
         <h2 class="project-tagline">A smart, easy-to-use, and fast JavaScript form validator.</h2>
-        <a href="https://github.com/jneuendorf/FormValidator" class="btn">View on GitHub</a>
+        <h3 class="project-tagline">All it needs is <a class="link" href="http://jquery.com/" target="_blank">jQuery</a>.</h3>
+        <a href="https://github.com/jneuendorf/FormValidator" target="_blank" class="btn">View on GitHub</a>
         <a href="https://github.com/jneuendorf/FormValidator/zipball/master" class="btn">Download .zip</a>
         <a href="https://github.com/jneuendorf/FormValidator/tarball/master" class="btn">Download .tar.gz</a>
     </section>
@@ -45,10 +47,10 @@ $tabs = ['features', 'demos', 'usage', 'settings'];
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
             <?php
-                foreach ($tabs as $idx => $tab) {
+                foreach ($tab_names as $idx => $tab_name) {
                     ?>
                     <li role="presentation" class="<?php echo $idx === 0 ? 'active' : ''; ?>">
-                        <a href="#<?php echo $tab; ?>" aria-controls="<?php echo $tab; ?>" role="tab" data-toggle="tab"><?php echo $tab; ?></a>
+                        <a href="#<?php echo $filenames[$idx]; ?>" aria-controls="<?php echo $tab_name; ?>" role="tab" data-toggle="tab"><?php echo $tab_name; ?></a>
                     </li>
                     <?php
                 }
@@ -58,16 +60,16 @@ $tabs = ['features', 'demos', 'usage', 'settings'];
         <!-- Tab panes -->
         <div class="tab-content">
             <?php
-                foreach ($tabs as $idx => $tab) {
+                foreach ($tab_names as $idx => $tab_name) {
                     ?>
-                    <div role="tabpanel" class="tab-pane <?php echo $idx === 0 ? 'active' : ''; ?>" id="<?php echo $tab; ?>">
+                    <div role="tabpanel" class="tab-pane <?php echo $idx === 0 ? 'active' : ''; ?>" id="<?php echo $filenames[$idx]; ?>">
                         <!-- <h3>
-                            <a id="<?php echo $tab; ?>" class="anchor" href="#<?php echo $tab; ?>" aria-hidden="true">
+                            <a id="<?php echo $tab_name; ?>" class="anchor" href="#<?php echo $tab_name; ?>" aria-hidden="true">
                                 <span aria-hidden="true" class="octicon octicon-link"></span>
                             </a>
-                            <?php echo $tab; ?>
+                            <?php echo $tab_name; ?>
                         </h3> -->
-                        <?php readfile($tab.'.php') ?>
+                        <?php readfile($filenames[$idx].'.php') ?>
                     </div>
                     <?php
                 }
