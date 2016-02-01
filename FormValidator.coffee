@@ -224,6 +224,11 @@ class window.FormValidator
     # enable real-time validation
     $(document).on "change click keyup", "[data-fv-real-time] [data-fv-validate]", () ->
         $elem = $(@)
+
+        # prevent click in textfields to trigger validation
+        if $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length is $elem.length
+            return true
+
         container = $elem.closest("[data-fv-real-time]")
         if container.length is 1
             if not (form_validator = container.data("_form_validator"))?
@@ -618,16 +623,9 @@ class window.FormValidator
                         validator:  validator
                         value:      value
                     errors.push current_error
-                # # create additional error message if the element has unfulfilled dependencies
-                # else
-                #     current_error =
-                #         element:    elem
-                #         message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {element: elem, error_message_type: "dependency"})
-                #         required:   is_required
-                #         type:       "dependency"
-                #     # set flag for error styles
-                #     is_valid = false
-                # errors.push current_error
+
+                if not first_invalid_element?
+                    first_invalid_element = elem
             # element is valid
             else
                 # replace old value with post processed value
@@ -658,10 +656,9 @@ class window.FormValidator
                     current_error.error_targets = error_targets
 
                 @_apply_dependency_error_styles(dependency_elements, is_valid)
-                if not first_invalid_element?
-                    first_invalid_element = elem
-                    elem.focus()
 
+
+        first_invalid_element?.focus()
         return errors
 
     get_progress: (as_percentage = false) ->

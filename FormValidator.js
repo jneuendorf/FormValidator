@@ -345,6 +345,9 @@
     $(document).on("change click keyup", "[data-fv-real-time] [data-fv-validate]", function() {
       var $elem, container, form_validator;
       $elem = $(this);
+      if ($elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length === $elem.length) {
+        return true;
+      }
       container = $elem.closest("[data-fv-real-time]");
       if (container.length === 1) {
         if ((form_validator = container.data("_form_validator")) == null) {
@@ -775,6 +778,9 @@
             };
             errors.push(current_error);
           }
+          if (first_invalid_element == null) {
+            first_invalid_element = elem;
+          }
         } else {
           if ((this.postprocessors[type] != null) && elem.attr("data-fv-postprocess") !== "false") {
             value = this.postprocessors[type].call(this.postprocessors, value, elem, this.locale);
@@ -799,11 +805,10 @@
             current_error.error_targets = error_targets;
           }
           this._apply_dependency_error_styles(dependency_elements, is_valid);
-          if (first_invalid_element == null) {
-            first_invalid_element = elem;
-            elem.focus();
-          }
         }
+      }
+      if (first_invalid_element != null) {
+        first_invalid_element.focus();
       }
       return errors;
     };
