@@ -46,7 +46,7 @@
         email: "'{{value}}' ist keine gültige E-Mail-Adresse",
         email_at: "Eine E-Mail-Adresse muss ein @-Zeichen enthalten",
         email_many_at: "Eine E-Mail-Adresse darf höchstens ein @-Zeichen enthalten",
-        email_dot: "'{{value}}' ist keine gültige E-Mail-Adresse (nach dem @ ist kein Punkt)",
+        email_dot: "'{{value}}' hat keine korrekte Endung (z.B. '.de')",
         integer: "'{{value}}' ist keine Zahl",
         integer_float: "'{{value}}' ist keine ganze Zahl",
         positive_integer: "'{{value}}' ist keine positive ganze Zahl",
@@ -118,7 +118,7 @@
           };
         }
         if (parts.length === 2 && parts[0] !== "" && parts[1] !== "") {
-          if (str.indexOf(".", str.indexOf("@")) < 0) {
+          if (str.indexOf(".", str.indexOf("@")) < 0 || str[str.length - 1] === ".") {
             return {
               error_message_type: "email_dot"
             };
@@ -342,16 +342,22 @@
       return true;
     });
 
-    $(document).on("change click keyup", "[data-fv-real-time] [data-fv-validate]", function() {
-      var $elem, container, form_validator;
+    $(document).on("change click keyup", "[data-fv-real-time] [data-fv-validate]", function(evt) {
+      var $elem, container, errors, form_validator;
       $elem = $(this);
+      if ((evt.type === "click" || evt.type === "change") && $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length === $elem.length) {
+        return true;
+      }
       container = $elem.closest("[data-fv-real-time]");
       if (container.length === 1) {
         if ((form_validator = container.data("_form_validator")) == null) {
           form_validator = new FormValidator(container);
           container.data("_form_validator", form_validator);
         }
-        form_validator.validate();
+        errors = form_validator.validate();
+        if (errors.length > 0) {
+          $elem.focus();
+        }
       }
       return true;
     });
@@ -775,6 +781,9 @@
             };
             errors.push(current_error);
           }
+          if (first_invalid_element == null) {
+            first_invalid_element = elem;
+          }
         } else {
           if ((this.postprocessors[type] != null) && elem.attr("data-fv-postprocess") !== "false") {
             value = this.postprocessors[type].call(this.postprocessors, value, elem, this.locale);
@@ -799,11 +808,10 @@
             current_error.error_targets = error_targets;
           }
           this._apply_dependency_error_styles(dependency_elements, is_valid);
-          if (first_invalid_element == null) {
-            first_invalid_element = elem;
-            elem.focus();
-          }
         }
+      }
+      if (first_invalid_element != null) {
+        first_invalid_element.focus();
       }
       return errors;
     };
