@@ -599,6 +599,7 @@ class window.FormValidator
             if not is_valid or dependency_errors.length > 0
                 result = false
 
+                # TODO: currently ANY invalid dependency will cause this error. implement the option to choose between AND and OR (any vs all)
                 # create error message if the element has unfulfilled dependencies
                 if dependency_errors.length > 0
                     errors.push {
