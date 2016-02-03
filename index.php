@@ -1,7 +1,7 @@
 <?php
 
-$tab_names = ['features', 'demos', 'how to use', 'settings', 'attribute index'];
-$filenames = ['features', 'demos', 'usage', 'settings', 'attribute_index'];
+$tab_names = ['features', 'demos', 'how to use', 'options', 'methods', 'attribute index'];
+$filenames = ['features', 'demos', 'usage', 'options', 'methods', 'attribute_index'];
 
 ?>
 <!DOCTYPE html>
@@ -37,7 +37,7 @@ $filenames = ['features', 'demos', 'usage', 'settings', 'attribute_index'];
     <section class="page-header">
         <h1 class="project-name">FormValidator</h1>
         <h2 class="project-tagline">A smart, easy-to-use, and fast JavaScript form validator.</h2>
-        <h3 class="project-tagline">All it needs is <a class="link" href="http://jquery.com/" target="_blank">jQuery</a>.</h3>
+        <h3 class="project-tagline">All it needs is <a class="link" href="http://jquery.com/" target="_blank">jQuery</a> (&ge; 1.7).</h3>
         <a href="https://github.com/jneuendorf/FormValidator" target="_blank" class="btn">View on GitHub</a>
         <a href="https://github.com/jneuendorf/FormValidator/zipball/master" class="btn">Download .zip</a>
         <a href="https://github.com/jneuendorf/FormValidator/tarball/master" class="btn">Download .tar.gz</a>

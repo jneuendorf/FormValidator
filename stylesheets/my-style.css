@@ -43,6 +43,9 @@ h3.project-tagline {
     min-height: 200px;
 }
 
+.tab-pane {
+    padding-top: 10px; 
+}
 .tab-pane > h3 {
     text-transform: capitalize;
 }

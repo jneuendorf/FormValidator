@@ -31,7 +31,7 @@
     <section class="page-header">
         <h1 class="project-name">FormValidator</h1>
         <h2 class="project-tagline">A smart, easy-to-use, and fast JavaScript form validator.</h2>
-        <h3 class="project-tagline">All it needs is <a class="link" href="http://jquery.com/" target="_blank">jQuery</a>.</h3>
+        <h3 class="project-tagline">All it needs is <a class="link" href="http://jquery.com/" target="_blank">jQuery</a> (&ge; 1.7).</h3>
         <a href="https://github.com/jneuendorf/FormValidator" target="_blank" class="btn">View on GitHub</a>
         <a href="https://github.com/jneuendorf/FormValidator/zipball/master" class="btn">Download .zip</a>
         <a href="https://github.com/jneuendorf/FormValidator/tarball/master" class="btn">Download .tar.gz</a>
@@ -50,7 +50,10 @@
                         <a href="#usage" aria-controls="how to use" role="tab" data-toggle="tab">how to use</a>
                     </li>
                                         <li role="presentation" class="">
-                        <a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">settings</a>
+                        <a href="#options" aria-controls="options" role="tab" data-toggle="tab">options</a>
+                    </li>
+                                        <li role="presentation" class="">
+                        <a href="#methods" aria-controls="methods" role="tab" data-toggle="tab">methods</a>
                     </li>
                                         <li role="presentation" class="">
                         <a href="#attribute_index" aria-controls="attribute index" role="tab" data-toggle="tab">attribute index</a>
@@ -529,14 +532,173 @@
                                 <span aria-hidden="true" class="octicon octicon-link"></span>
                             </a>
                             how to use                        </h3> -->
-                                            </div>
-                                        <div role="tabpanel" class="tab-pane " id="settings">
+                        <div class="row">
+    <div class="col-xs-12">
+        <h4>Include the FormValidator</h4>
+        <h5>include it after jQuery (it requires jQuery 1.7+ upon initialization)</h5>
+        <pre class="brush: xml">
+            &lt;script type=&quot;text/javascript&quot; src=&quot;/path/to/FormValidator(.min).js&quot;&gt;&lt;/script&gt;
+        </pre>
+    </div>
+    <div class="col-xs-12">
+        <h4>Create a form and set some attributes</h4>
+        <h5>See some <a class="goto" href="#" data-href="#demos">demos</a> or the <a class="goto" href="#" data-href="#attribute_index">attribute index</a></h5>
+        <script type="text/javascript">
+            $(".goto").click(function() {
+                $(".nav.nav-tabs a[href='" + $(this).attr("data-href") + "']").click();
+                window.scrollTo(0, 358);
+                return false;
+            });
+        </script>
+        <pre class="brush: xml">
+            &lt;form id=&quot;my_form&quot; data-fv-error-classes=&quot;invalid&quot; data-fv-error-targets=&quot;self&quot;&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Email address&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;email&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Age&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;integer&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Some optional text&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;text&quot; data-fv-optional=&quot;true&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;An optional number&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-optional=&quot;true&quot; /&gt;
+                &lt;/div&gt;
+                &lt;button data-fv-start=&quot;#my_form&quot;&gt;Validate&lt;/button&gt;
+            &lt;/form&gt;
+        </pre>
+    </div>
+</div>
+                    </div>
+                                        <div role="tabpanel" class="tab-pane " id="options">
                         <!-- <h3>
-                            <a id="settings" class="anchor" href="#settings" aria-hidden="true">
+                            <a id="options" class="anchor" href="#options" aria-hidden="true">
                                 <span aria-hidden="true" class="octicon octicon-link"></span>
                             </a>
-                            settings                        </h3> -->
-                                            </div>
+                            options                        </h3> -->
+                        <div class="row">
+    <p class="col-xs-12">
+        The following options can be passed to a new FormValidator object like so:<br />
+        <code>new FormValidator(form, options)</code>
+    </p>
+
+    <div class="col-xs-12">
+        <h4>Validation handling</h4>
+        <dl class="">
+            <dt>create_dependency_error_message</dt>
+            <dd>
+
+            </dd>
+
+            <dt>dependency_error_classes</dt>
+            <dd>
+
+            </dd>
+
+            <dt>error_classes</dt>
+            <dd>
+
+            </dd>
+
+            <dt>error_messages</dt>
+            <dd>
+
+            </dd>
+
+            <dt>error_mode</dt>
+            <dd>
+
+            </dd>
+
+            <dt>error_output_mode</dt>
+            <dd>
+
+            </dd>
+
+            <dt>error_target_getter</dt>
+            <dd>
+
+            </dd>
+        </dl>
+    </div>
+
+    <div class="col-xs-12">
+        <h4>Error handling</h4>
+        <dl class="">
+            <dt>field_getter</dt>
+            <dd>
+
+            </dd>
+            <dt>locale</dt>
+            <dd>
+                Define what locale is used. This property is relevant for:
+                <ul>
+                    <li>creating error message</li>
+                    <li>pre- and postprocessing values</li>
+                </ul>
+            </dd>
+
+            <dt>optional_field_getter</dt>
+            <dd>
+
+            </dd>
+
+            <dt>partition</dt>
+            <dd>
+
+            </dd>
+
+            <dt>preprocessors</dt>
+            <dd>
+
+            </dd>
+
+            <dt>postprocessors</dt>
+            <dd>
+
+            </dd>
+
+            <dt>required_field_getter</dt>
+            <dd>
+
+            </dd>
+
+            <dt>validation_options</dt>
+            <dd>
+                Specify options for the validation:
+                <ul>
+                    <li><code>all</code>: force validation on all fields (even if they are declared optional)</li>
+                    <li><code>apply_error_styles</code>: whether or not to add the <code>error_classes</code> to invalid elements or remove them from valid elements, respectively</li>
+                </ul>
+            </dd>
+
+            <dt>validators</dt>
+            <dd>
+                Set of validators that correspond to a validation type (<code>data-fv-validate</code>).<br />
+                They can be used to override existing validators or define new ones.
+            </dd>
+
+        </dl>
+    </div>
+</div>
+                    </div>
+                                        <div role="tabpanel" class="tab-pane " id="methods">
+                        <!-- <h3>
+                            <a id="methods" class="anchor" href="#methods" aria-hidden="true">
+                                <span aria-hidden="true" class="octicon octicon-link"></span>
+                            </a>
+                            methods                        </h3> -->
+                        <div class="row">
+    <p class="col-xs-12">
+        A FormValidator object has the following instance methods.
+        Most of the functionality can be used equally by passing options to the FormValidator's constructor which is recommended for most use cases.
+    </p>
+</div>
+                    </div>
                                         <div role="tabpanel" class="tab-pane " id="attribute_index">
                         <!-- <h3>
                             <a id="attribute index" class="anchor" href="#attribute index" aria-hidden="true">
