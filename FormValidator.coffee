@@ -157,6 +157,7 @@ class window.FormValidator
                     error_message_type: "phone"
                 }
             return true
+        # TODO: add options for minlength, maxlength
         text: (str, elem) ->
             return str.length > 0
         # element validators: expect jquery object
@@ -263,8 +264,8 @@ class window.FormValidator
         @fields = null
 
         # default css error classes. can be overridden by data-fv-error-classes on any error target
-        @error_classes          = @form.attr("data-fv-error-classes") or options.error_classes or ""
-        @dependency_error_classes = @form.attr("data-fv-dependency-error-classes") or options.dependency_error_classes or ""
+        @error_classes          = options.error_classes or @form.attr("data-fv-error-classes") or ""
+        @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or ""
         @validators             = $.extend {}, CLASS.validators, options.validators
         @validation_options     = options.validation_options or null
         @error_messages         = options.error_messages
@@ -274,7 +275,6 @@ class window.FormValidator
         @error_output_mode      = if CLASS.ERROR_OUTPUT_MODES[options.error_output_mode]? then options.error_output_mode else CLASS.ERROR_OUTPUT_MODES.DEFAULT
         @locale                 = options.locale or "en"
 
-        # TODO: global (form validator) option for error_target == self
         @error_target_getter    = options.error_target_getter or null
         @field_getter           = options.field_getter or null
         @required_field_getter  = options.required_field_getter or null
