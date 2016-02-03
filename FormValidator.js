@@ -388,7 +388,7 @@
       }
       this.fields = null;
       this.error_classes = options.error_classes || this.form.attr("data-fv-error-classes") || "";
-      this.dependency_error_classes = options.dependency_error_classes || this.form.attr("data-fv-dependency-error-classes") || "";
+      this.dependency_error_classes = options.dependency_error_classes || this.form.attr("data-fv-dependency-error-classes") || this.error_classes;
       this.validators = $.extend({}, CLASS.validators, options.validators);
       this.validation_options = options.validation_options || null;
       this.error_messages = options.error_messages;
