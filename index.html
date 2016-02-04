@@ -754,35 +754,21 @@
             <dt>validators</dt>
             <dd>
                 Set of validators that correspond to a validation type (<code>data-fv-validate</code>).
-                <br /> They can be used to override existing validators or define new ones.
+                <br> They can be used to override existing validators or define new ones.
+                <br> The predefined validators are:
+                <ul>
+                    <li><code>checkbox</code></li>
+                    <li><code>email</code></li>
+                    <li><code>integer</code></li>
+                    <li><code>number</code></li>
+                    <li><code>phone</code></li>
+                    <li><code>radio</code></li>
+                    <li><code>select</code></li>
+                    <li><code>text</code></li>
+                </ul>
             </dd>
 
         </dl>
-    </div>
-</div>
-
-<div id="target_finding_modal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Target finding</h4>
-            </div>
-            <div class="modal-body">
-                <p>
-                    A list of targets is defined as space separated <code>String</code>.<br><br>
-                    Each list element <var>E</var> is parsed like so (for a FormValidator <var>F</var>):<br>
-                    <ol>
-                        <li>tru to find an element in the form of <var>F</var> where the attribute <code>data-fv-name</code> equals <var>E</var></li>
-                        <li>otherwise <var>E</var> is interpreted as selector which will be looked for in <var>F</var></li>
-                        <li>otherwise <var>E</var> is interpreted as selector which will be looked for in the entire document</li>
-                    </ol>
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-        </div>
     </div>
 </div>
                     </div>
@@ -806,12 +792,125 @@
                             </a>
                             attribute index                        </h3> -->
                         <dl>
+    <dt><code>data-fv-name</code></dt>
+    <dd>
+        <code>String</code> (no space allowed)<br>
+        Add a name property to the element. It can be used for being identified as a target (see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>).
+    </dd>
+
+    <dt><code>data-fv-dependency-error-classes</code></dt>
+    <dd>
+        <code>String</code> (CSS class names, space separated)
+        <br> Can be used to customize which CSS classes will be applied to the error target(s) of a field with dependencies (if any of the dependencies are invalid).
+        <br> Default is whatever is defined for the <code>error_classes</code> property.
+    </dd>
+
+    <dt><code>data-fv-depends-on</code></dt>
+    <dd>
+        <code>String</code> (space separated)<br>
+        Defines what targets have to be valid for the current element to be valid (additionally to the actual validation). To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
+    </dd>
+
+    <dt><code>data-fv-error-classes</code></dt>
+    <dd>
+        <code>String</code> (CSS class names, space separated)
+        <br> Defines what CSS classes will be applied to the error target(s) of an invalid field.
+        <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).
+    </dd>
+
+    <dt><code>data-fv-error-targets</code></dt>
+    <dd>
+        <code>String</code> (CSS class names, space separated)<br>
+        Defines a list of targets which will get the defined <code>data-fv-error-classes</code> if the current element is invalid. To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
+    </dd>
+
+    <dt><code>data-fv-group</code></dt>
+    <dd>
+        Define how to create groups from all form fields. Can be used for advanced progress counting.
+        <!-- TODO -->
+    </dd>
+
+    <dt><code>data-fv-ignore-children</code></dt>
+    <dd>
+        This attribute can be used without a value. When present the default <code>field_getter</code> will ignore the elements descendants. Therefore they won't be validated.
+    </dd>
+
+    <dt><code>data-fv-include-max</code></dt>
+    <dd>
+        <code>Boolean</code><br>
+        Define whether to include the defined <code>data-fv-max</code> or not.
+    </dd>
+
+    <dt><code>data-fv-include-min</code></dt>
+    <dd>
+        <code>Boolean</code><br>
+        Define whether to include the defined <code>data-fv-min</code> or not.
+    </dd>
+
+    <dt><code>data-fv-max</code></dt>
+    <dd>
+        <code>Number</code><br>
+        Define the maximum value for an element with type <code>number</code> or <code>integer</code>.<br>
+        By default this value will be the greatest valid value. To exclude the maximum see <code>data-fv-include-max</code>.
+    </dd>
+
+    <dt><code>data-fv-min</code></dt>
+    <dd>
+        <code>Number</code><br>
+        Define the minimum value for an element with type <code>number</code> or <code>integer</code>.<br>
+        By default this value will be the smallest valid value. To exclude the minimum see <code>data-fv-include-min</code>.
+    </dd>
+
+    <dt><code>data-fv-optional</code></dt>
+    <dd>
+        <code>Boolean</code><br>
+        When <code>true</code> the field will be skipped if it has an empty value, is a checkbox, or is a radio button.
+    </dd>
+
+    <dt><code>data-fv-output-preprocessed</code></dt>
+    <dd>
+        <code>Boolean</code><br>
+        If this value is <code>true</code>, there is a preprocessor, and there is no postprocessor for the element's type the element's value will be replaced to represent whatever was created by the preprocessor. This can be used for auto correcting numbers (i.e. remove spaces).
+    </dd>
+
+    <dt><code>data-fv-postprocess</code></dt>
+    <dd>
+        <code>Boolean</code><br>
+        Define whether to apply the postprocessor for the element's type to the element's value or not.
+    </dd>
+
+    <dt><code>data-fv-preprocess</code></dt>
+    <dd>
+        <code>Boolean</code><br>
+        Define whether to apply the preprocessor for the element's type to the element's value or not.
+    </dd>
+
+    <dt><code>data-fv-real-time</code></dt>
+    <dd>
+        This attribute can be used without a value. This attribute can be defined on the form element which is supposed to be validated. All descendants of the form with a <code>data-fv-validate</code> attribute will be validated on the fly whenever something changes (on change, click, and keyup).
+    </dd>
+
+    <dt><code>data-fv-start</code></dt>
+    <dd>
+        <code>String</code> (target)<br>
+        Elements with this attribute will automatically trigger the validation of the form that corresponds to this value (which must be a valid target).  To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
+    </dd>
+
     <dt><code>data-fv-validate</code></dt>
-    <dd>Validate <i>any element</i> without needing to write any JavaScript (similar to Bootstrap's modal, for example).</dd>
-
-    <dt>Simple type-based validation</dt>
-    <dd>Validate forms simply by using some HTML element attributes.</dd>
-
+    <dd>
+        <code>String</code> (validation type)<br>
+        Define what validator to use for the current element. Possible values are:
+        <ul>
+            <li><code>checkbox</code></li>
+            <li><code>email</code></li>
+            <li><code>integer</code> (also see <code>data-fv-include-max</code>, <code>data-fv-include-min</code>, <code>data-fv-max</code>, and <code>data-fv-min</code>)</li>
+            <li><code>number</code> (also see <code>data-fv-include-max</code>, <code>data-fv-include-min</code>, <code>data-fv-max</code>, and <code>data-fv-min</code>)</li>
+            <li><code>phone</code></li>
+            <li><code>radio</code></li>
+            <li><code>select</code></li>
+            <li><code>text</code></li>
+        </ul>
+    </dd>
 </dl>
                     </div>
                                         <div role="tabpanel" class="tab-pane " id="source_code">
@@ -1480,6 +1579,32 @@
             <span class="site-footer-credits">This page is based on the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
         </footer>
     </section>
+
+    <div id="target_finding_modal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Target finding</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    A list of targets is defined as space separated <code>String</code>.<br><br>
+                    Each list element <var>E</var> is parsed like so (for a FormValidator <var>F</var>):<br>
+                    <ol>
+                        <li>tru to find an element in the form of <var>F</var> where the attribute <code>data-fv-name</code> equals <var>E</var></li>
+                        <li>otherwise <var>E</var> is interpreted as selector which will be looked for in <var>F</var></li>
+                        <li>otherwise <var>E</var> is interpreted as selector which will be looked for in the entire document</li>
+                    </ol>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <script type="text/javascript">
         SyntaxHighlighter.defaults["toolbar"] = false;
         SyntaxHighlighter.defaults["gutter"] = false;

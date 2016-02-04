@@ -83,6 +83,9 @@ $filenames = ['features', 'demos', 'usage', 'options', 'methods', 'attribute_ind
             <span class="site-footer-credits">This page is based on the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
         </footer>
     </section>
+
+    <?php readfile('target_finding_modal.php'); ?>
+
     <script type="text/javascript">
         SyntaxHighlighter.defaults["toolbar"] = false;
         SyntaxHighlighter.defaults["gutter"] = false;
