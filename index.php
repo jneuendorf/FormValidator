@@ -64,13 +64,7 @@ $filenames = ['features', 'demos', 'usage', 'options', 'methods', 'attribute_ind
                 foreach ($tab_names as $idx => $tab_name) {
                     ?>
                     <div role="tabpanel" class="tab-pane <?php echo $idx === 0 ? 'active' : ''; ?>" id="<?php echo $filenames[$idx]; ?>">
-                        <!-- <h3>
-                            <a id="<?php echo $tab_name; ?>" class="anchor" href="#<?php echo $tab_name; ?>" aria-hidden="true">
-                                <span aria-hidden="true" class="octicon octicon-link"></span>
-                            </a>
-                            <?php echo $tab_name; ?>
-                        </h3> -->
-                        <?php readfile($filenames[$idx].'.php') ?>
+                        <?php require_once($filenames[$idx].'.php') ?>
                     </div>
                     <?php
                 }
@@ -84,7 +78,7 @@ $filenames = ['features', 'demos', 'usage', 'options', 'methods', 'attribute_ind
         </footer>
     </section>
 
-    <?php readfile('target_finding_modal.php'); ?>
+    <?php require_once('target_finding_modal.php'); ?>
 
     <script type="text/javascript">
         SyntaxHighlighter.defaults["toolbar"] = false;

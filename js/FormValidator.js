@@ -664,7 +664,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, current_error, dependencies, dependency, dependency_elem, dependency_elements, dependency_errors, dependency_validation, depends_on, elem, error_message_params, error_targets, errors, fields, first_invalid_element, i, index_of_type, indices_by_type, info, is_required, is_valid, j, k, l, len, name, prev_name, ref, required, result, type, usedValFunc, validate_field, validation, validator, value;
+      var CLASS, current_error, dependencies, dependency, dependency_elem, dependency_elements, dependency_errors, dependency_validation, depends_on, elem, error_message_params, error_targets, errors, fields, first_invalid_element, i, index_of_type, indices_by_type, info, is_required, is_valid, j, k, l, len, name, prev_name, ref, ref1, ref2, required, result, type, usedValFunc, validate_field, validation, validator, value;
       if (options == null) {
         options = this.validation_options || {
           apply_error_styles: true,
@@ -785,15 +785,15 @@
             first_invalid_element = elem;
           }
         } else {
-          if ((this.postprocessors[type] != null) && elem.attr("data-fv-postprocess") !== "false") {
-            value = this.postprocessors[type].call(this.postprocessors, value, elem, this.locale);
+          if (this.elem.attr("data-fv-postprocess") !== "false") {
+            value = (ref1 = this.postprocessors[type]) != null ? ref1.call(this.postprocessors, value, elem, this.locale) : void 0;
             if (usedValFunc) {
               elem.val(value);
             } else {
               elem.text(value);
             }
           } else if (elem.attr("data-fv-output-preprocessed") === "true") {
-            value = this.preprocessors[type].call(this.preprocessors, value, elem, this.locale);
+            value = (ref2 = this.preprocessors[type]) != null ? ref2.call(this.preprocessors, value, elem, this.locale) : void 0;
             if (usedValFunc) {
               elem.val(value);
             } else {
