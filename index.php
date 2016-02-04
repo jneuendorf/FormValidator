@@ -29,6 +29,7 @@ $filenames = ['features', 'demos', 'usage', 'options', 'methods', 'attribute_ind
     <script type="text/javascript" src="js/shCore.js"></script>
     <script type="text/javascript" src="js/brushes/shBrushJScript.js"></script>
     <script type="text/javascript" src="js/brushes/shBrushXml.js"></script>
+    <script type="text/javascript" src="js/brushes/shBrushRuby.js"></script>
 
     <script type="text/javascript" src="js/FormValidator.js"></script>
 </head>
