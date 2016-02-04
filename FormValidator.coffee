@@ -1,5 +1,6 @@
 class window.FormValidator
     # TODO: performance: be lazy: whenever a form field is analyzed cache that information in form validator (because the validation is very likely to be done several times before submitting actually happens)
+    # TODO: create graph with meta data so single elements can be validated (even if they have dependencies)
 
     ########################################################################################################################
     ########################################################################################################################
@@ -226,7 +227,7 @@ class window.FormValidator
     $(document).on "change click keyup", "[data-fv-real-time] [data-fv-validate]", (evt) ->
         $elem = $(@)
 
-        # prevent click in textfields to trigger validation
+        # prevent click in textfields (which also triggers the change event on previously focussed inputs) to trigger validation
         if (evt.type is "click" or evt.type is "change") and $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length is $elem.length
             return true
 
@@ -463,8 +464,8 @@ class window.FormValidator
     * An object with an error and a result key.
     *###
     register_validator: (type, validator, error_message_types) ->
+        # check validator in dev mode
         if DEBUG
-            # check validator
             if validator.call instanceof Function and typeof(validator.call(@validators, "", $())) is "boolean" and validator.error_message_types instanceof Array
                 @validators[type] = validator
             else
@@ -634,15 +635,15 @@ class window.FormValidator
             # element is valid
             else
                 # replace old value with post processed value
-                if (@postprocessors[type]? and elem.attr("data-fv-postprocess") isnt "false")
-                    value = @postprocessors[type].call(@postprocessors, value, elem, @locale)
+                if @elem.attr("data-fv-postprocess") isnt "false"
+                    value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
                     if usedValFunc
                         elem.val value
                     else
                         elem.text value
                 # replace old value with pre processed value
                 else if elem.attr("data-fv-output-preprocessed") is "true"
-                    value = @preprocessors[type].call(@preprocessors, value, elem, @locale)
+                    value = @preprocessors[type]?.call(@preprocessors, value, elem, @locale)
                     if usedValFunc
                         elem.val value
                     else
