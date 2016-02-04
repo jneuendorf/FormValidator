@@ -283,7 +283,7 @@ class window.FormValidator
         @preprocessors          = $.extend CLASS.default_preprocessors, options.preprocessors or {}
         @postprocessors         = options.postprocessors or {}
 
-        @partition              = options.partition or null
+        @group                  = options.group or null
 
 
     ########################################################################################################################
@@ -417,7 +417,7 @@ class window.FormValidator
         return @
 
     # create list of sets where each set is 1 unit for counting progress
-    _partition: (fields) ->
+    _group: (fields) ->
         dict = {}
         fields.each (idx, elem) ->
             $elem = $ elem
@@ -672,7 +672,7 @@ class window.FormValidator
 
         fields = @fields.all
         required = @fields.required
-        groups = @partition?(fields) or @_partition(fields)
+        groups = @group?(fields) or @_group(fields)
 
         total = groups.length
         count = 0
