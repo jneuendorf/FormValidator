@@ -44,7 +44,7 @@ h3.project-tagline {
 }
 
 .tab-pane {
-    padding-top: 10px; 
+    padding-top: 10px;
 }
 .tab-pane > h3 {
     text-transform: capitalize;
@@ -75,4 +75,9 @@ h3.project-tagline {
 }
 .error_message {
     margin-top: 33px;
+}
+
+
+.modal-header .modal-title {
+    margin: inherit;
 }

@@ -1,7 +1,7 @@
 <?php
 
-$tab_names = ['features', 'demos', 'how to use', 'options', 'methods', 'attribute index'];
-$filenames = ['features', 'demos', 'usage', 'options', 'methods', 'attribute_index'];
+$tab_names = ['features', 'demos', 'how to use', 'options', 'methods', 'attribute index', 'source code'];
+$filenames = ['features', 'demos', 'usage', 'options', 'methods', 'attribute_index', 'source_code'];
 
 ?>
 <!DOCTYPE html>

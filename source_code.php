@@ -1,24 +1,9 @@
 <pre class="brush: ruby">
     class window.FormValidator
-        # TODO: performance: be lazy: whenever a form field is analyzed cache that information in form validator (because the validation is very likely to be done several times before submitting actually happens)
-
         ########################################################################################################################
         ########################################################################################################################
         # CLASS CONFIGURATION
 
-        # content validators.
-        # in all those function 'this' refers to the validators object so other validators are accessible from within any validator
-        # A validator is valid iff.:
-        # - it has a call() method,
-        # - it expects a string and a jquery object,
-        # - it returns
-        #   - for valid elements: TRUE
-        #   - for invalid elements:
-        #     - FALSE or String containing the error_message_type (those 2 are equivalent)
-        #     - an object
-        #       -> error_message_type: String (required)
-        #       -> properties needed for the according error message (-> parameters)
-        #       -> properties needed for other validators (as they will be able to access other validators' results)
         @validators =
             email: (str, elem) ->
                 if str.indexOf("@") < 0
@@ -68,10 +53,8 @@
                 str = str.replace(/\s/g, "")
                 if str[0] is "+"
                     str = str.slice(1)
-                # ".4"
                 if str[0] is "."
                     str = "0#{str}"
-                # "-.4"
                 else if str[0] is "-" and str[1] is "."
                     str = "-0.#{str.slice(2)}"
                 # remove trailing zeros
@@ -84,7 +67,6 @@
 
                 n = parseFloat(str)
 
-                # TODO: this doesnt work for inputs like 10e4 or 1e+5
                 if isNaN(n) or not isFinite(n) or str isnt "#{n}"
                     return {
                         error_message_type: "number"
@@ -150,7 +132,6 @@
                         length: 3
                     }
                 str = str.replace(/[\s+\+\-\/\(\)]/g, "")
-                # remove leading zeros because parseInt will drop them
                 while str[0] is "0"
                     str = str.slice(1)
                 if str isnt "#{parseInt(str, 10)}"
@@ -158,10 +139,8 @@
                         error_message_type: "phone"
                     }
                 return true
-            # TODO: add options for minlength, maxlength
             text: (str, elem) ->
                 return str.length > 0
-            # element validators: expect jquery object
             radio: (str, elem) ->
                 return $("[name='" + elem.attr("name") + "']:checked").length > 0
             checkbox: (str, elem) ->
@@ -249,10 +228,6 @@
         @new: (form, options) ->
             return new @(form, options)
 
-        ###*
-        * @param form {Form}
-        * @param options {Object}
-        *###
         constructor: (form, options = {}) ->
             CLASS = @constructor
 
@@ -264,15 +239,12 @@
                 throw new Error("FormValidator::constructor: Invalid form given!")
             @fields = null
 
-            # default css error classes. can be overridden by data-fv-error-classes on any error target
             @error_classes          = options.error_classes or @form.attr("data-fv-error-classes") or ""
             @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or @error_classes
             @validators             = $.extend {}, CLASS.validators, options.validators
             @validation_options     = options.validation_options or null
             @error_messages         = options.error_messages
-            # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
             @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
-            # TODO: choose how to output the generated errors (i.e. print below element (maybe even getbootstrap.com/javascript/#popovers))
             @error_output_mode      = if CLASS.ERROR_OUTPUT_MODES[options.error_output_mode]? then options.error_output_mode else CLASS.ERROR_OUTPUT_MODES.DEFAULT
             @locale                 = options.locale or "en"
 
@@ -283,13 +255,7 @@
             @create_dependency_error_message = options.create_dependency_error_message or null
             @preprocessors          = $.extend CLASS.default_preprocessors, options.preprocessors or {}
             @postprocessors         = options.postprocessors or {}
-
             @group                  = options.group or null
-
-
-        ########################################################################################################################
-        ########################################################################################################################
-        # STATIC METHODS
 
         ########################################################################################################################
         ########################################################################################################################
@@ -378,7 +344,6 @@
 
         _apply_error_styles: (element, error_targets, is_valid) ->
             if error_targets?
-                # split and trim
                 if typeof error_targets is "string"
                     error_targets = error_targets.split /\s+/g
 
@@ -451,18 +416,6 @@
             @optional_field_getter = optional_field_getter
             return @
 
-        ###*
-        * This method can be used to define a validator for a new type or to override an existing validator.
-        *
-        * @method register_validator
-        * @param type {String}
-        * The type the validator will validate.
-        # Elements that are supposed to be validated by the new validator must have the type as data-fv-validate attribute.
-        * @param validator {Function}
-        * @param error_message_types {Array of String}
-        * @return {Object}
-        * An object with an error and a result key.
-        *###
         register_validator: (type, validator, error_message_types) ->
             if DEBUG
                 # check validator
@@ -494,21 +447,10 @@
             delete @postprocessors[type]
             return @
 
-
-
-        ###*
-        * @method validate
-        * @param options {Object}
-        * Default is this.validation_option. Otherwise:
-        * Valid options are:
-        *  - apply_error_styles:    {Boolean} (default is true)
-        *  - all:                   {Boolean} (default is false)
-        *###
         validate: (options = @validation_options or {apply_error_styles: true, all: false}) ->
             if not @fields?
                 @_update()
 
-            # @reset_error_styles()
             CLASS           = @constructor
             result          = true
             errors          = []
@@ -541,10 +483,6 @@
 
                 return validation
 
-            # NOTE: remerge required and optional fields in order to:
-            # 1. have 1 loop only
-            # 2. continuous and correct indices
-
             required = @fields.required
             fields = @fields.all
             first_invalid_element = null
@@ -567,7 +505,6 @@
 
                 # skip empty optional elements
                 if options.all is false and not is_required and (value.length is 0 or type is "radio" or type is "checkbox")
-                    # NOTE: if an optional value was invalid and was emptied the error target's error classes should be removed
                     @_apply_error_styles(
                         elem
                         @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
@@ -600,7 +537,6 @@
                 if not is_valid or dependency_errors.length > 0
                     result = false
 
-                    # TODO: currently ANY invalid dependency will cause this error. implement the option to choose between AND and OR (any vs all)
                     # create error message if the element has unfulfilled dependencies
                     if dependency_errors.length > 0
                         errors.push {
@@ -695,12 +631,10 @@
 
 
                 found_error = false
-                # NOTE: elem is either a jQuery object or a DOM element (but $.fn.is() can handle both!)
                 for elem in group
                     elem = $(elem)
 
                     for error in errors when error.element.is(elem)
-                        # count++
                         found_error = true
                         break
                     if found_error

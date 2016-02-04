@@ -387,8 +387,8 @@
         throw new Error("FormValidator::constructor: Invalid form given!");
       }
       this.fields = null;
-      this.error_classes = this.form.attr("data-fv-error-classes") || options.error_classes || "";
-      this.dependency_error_classes = this.form.attr("data-fv-dependency-error-classes") || options.dependency_error_classes || "";
+      this.error_classes = options.error_classes || this.form.attr("data-fv-error-classes") || "";
+      this.dependency_error_classes = options.dependency_error_classes || this.form.attr("data-fv-dependency-error-classes") || this.error_classes;
       this.validators = $.extend({}, CLASS.validators, options.validators);
       this.validation_options = options.validation_options || null;
       this.error_messages = options.error_messages;
@@ -402,7 +402,7 @@
       this.create_dependency_error_message = options.create_dependency_error_message || null;
       this.preprocessors = $.extend(CLASS.default_preprocessors, options.preprocessors || {});
       this.postprocessors = options.postprocessors || {};
-      this.partition = options.partition || null;
+      this.group = options.group || null;
     }
 
     FormValidator.prototype._update = function() {
@@ -554,7 +554,7 @@
       return this;
     };
 
-    FormValidator.prototype._partition = function(fields) {
+    FormValidator.prototype._group = function(fields) {
       var dict, elems, name;
       dict = {};
       fields.each(function(idx, elem) {
@@ -826,7 +826,7 @@
       }
       fields = this.fields.all;
       required = this.fields.required;
-      groups = (typeof this.partition === "function" ? this.partition(fields) : void 0) || this._partition(fields);
+      groups = (typeof this.group === "function" ? this.group(fields) : void 0) || this._group(fields);
       total = groups.length;
       count = 0;
       errors = this.validate({
