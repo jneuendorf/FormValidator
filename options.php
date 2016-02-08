@@ -42,9 +42,20 @@
                         },
                         locale2: {...}
                     }
-                </pre> where <code>MESSAGE_X_Y</code> is either a <code>String</code> or a <code>Function(String locale, Object parameters) -> String</code>. The <code>parameters</code> argument depends on the error returned by the validator.
-                <br> Can be used to override the default messages object (at <code>FormValidator.error_messages</code>).
-                <br> The object is merged into the predefined so customizing single message types (even for different locales) is possible.
+                </pre> where <code>MESSAGE_X_Y</code> is either a <code>String</code> or a <code>Function(String locale, Object parameters) -> String</code>.
+                Can be used to override the default messages object (at <code>FormValidator.error_messages</code>). The object is merged into the predefined so customizing single message types (even for different locales) is possible.<br>
+                The <code>parameters</code> argument depends on the error returned by the validator. The return value has at least these properties:<br>
+                <pre class="brush: js">
+                    {
+                        element: validated_field,
+                        index: element_index (incl. optional fields),
+                        index_of_type: index_of_validation_type,
+                        name: validated_field.attr("data-fv-name"),
+                        previous_name: name_of_previously_validated_field,
+                        value: postprocessed_validated_field_value || preprocessed_validated_field_value || validated_field_value
+                    }
+                </pre>
+                Additional properties may be provided by the validator. Those could either properties describing the <a class="goto" href="#" data-href="#constraint_attributes">constraint attributes</a> or "private" properties (that should be the case only if the validator is "private"...see <a class="goto" href="#" data-href="#validators">validators</a> for more details).
             </dd>
 
             <dt>error_mode</dt>
@@ -52,8 +63,14 @@
                 <code>FormValidator.ERROR_MODES (String)</code>
                 <br> Defines how error messages are generated in general. Can be either of these values:
                 <ul>
-                    <li><code>FormValidator.ERROR_MODES.SIMPLE</code></li>
-                    <li><code>FormValidator.ERROR_MODES.NORMAL</code></li>
+                    <li>
+                        <code>FormValidator.ERROR_MODES.SIMPLE</code><br>
+                        This mode transforms all <code>error_message_types</code> (returned from the validator) to the simplest corresponding error message. That means that the messages are independent of any<code>constraint attributes</code>. For example, if a field is validated as <code>number</code> and is invalid (no matter what combination of <code>constraint attributes</code> it has) the <code>error_message_type</code> will be <code>"number"</code> (even if it techniqually valid but violates constraints).
+                    </li>
+                    <li>
+                        <code>FormValidator.ERROR_MODES.NORMAL</code><br>
+                        The <code>error_message_type</code> (returned from the validator) is untouched.
+                    </li>
                     <li><code>FormValidator.ERROR_MODES.DEFAULT (== FormValidator.ERROR_MODES.NORMAL)</code> (this value is the default obviously)</li>
                 </ul>
             </dd>
@@ -74,7 +91,17 @@
                     </li>
                     <li>
                         <code>FormValidator.ERROR_OUTPUT_MODES.NONE</code>
-                        <br> Don't show any errors! Handle them yourself.
+                        <br>The DOM will not be modified. The <code>validate</code> function returns an <code>Array of Object</code>s where each of those objects looks like this:<br>
+                        <pre class="brush: js">
+                            {
+                                element: validated_field,
+                                message: error_message,
+                                required: validated_field.attr("data-fv-optional") !== "true",
+                                type: validation_type,
+                                validator: validator_function,
+                                value: postprocessed_validated_field_value || preprocessed_validated_field_value || validated_field_value
+                            }
+                        </pre>
                     </li>
                     <li><code>FormValidator.ERROR_OUTPUT_MODES.DEFAULT (== FormValidator.ERROR_OUTPUT_MODES.NONE)</code> (this value is the default obviously)</li>
                 </ul>
@@ -130,9 +157,9 @@
                         ...,
                         validation_typeN: PREPROCESSOR_N
                     }
-                </pre> where <code>PREPROCESSOR_N</code> is a <code>Function(String locale, jQuery element, String locale) -> String</code>.
-                <br> Can be used to override or define preprocessors. They are used modify the form field's value before the validation happens. The predefined preprocessors currently exist for <code>number</code> and <code>integer</code> so the different
-                dot notation will be validated correctly (i.e. <code>de + "1,2" == en + "1.2"</code>).
+                </pre> where <code>PREPROCESSOR_N</code> is a <code>Function(String value, jQuery element, String locale) -> String</code>.
+                <br> Can be used to override or define preprocessors. They are used modify the form field's value before the validation happens.<br>
+                The predefined preprocessors currently exist for <code>number</code> and <code>integer</code>. Currently, for both types the comma will be interpreted as decimal points when the locale <code>de</code> is used.
             </dd>
 
             <dt>postprocessors</dt>
@@ -145,8 +172,9 @@
                         ...,
                         validation_typeN: POSTPROCESSOR_N
                     }
-                </pre> where <code>POSTPROCESSOR_N</code> is a <code>Function(String locale, jQuery element, String locale) -> String</code>.
-                <br> Can be used to override or define postprocessors. They are used modify the form field's value after the validation happened. For example, a value could be auto-corrected so the numeric string <code>" 1.34  "</code> would become <code>"1.34"</code>                in the according field (when valid).
+                </pre> where <code>POSTPROCESSOR_N</code> is a <code>Function(String value, jQuery element, String locale) -> String</code>.
+                <br> Can be used to override or define postprocessors. They are used modify the form field's value after the validation happened. The <code>value</code> is either the input's original or preprocessed value.<br>
+                For example, a value could be auto-corrected i.e. the numeric string <code>" 1.34  "</code> would become <code>"1.34"</code> in the according field (when valid).
             </dd>
             </dd>
 
@@ -160,8 +188,8 @@
             <dd>
                 Specify options for the validation:
                 <ul>
-                    <li><code>all</code>: force validation on all fields (even if they are declared optional)</li>
-                    <li><code>apply_error_styles</code>: whether or not to add the <code>error_classes</code> to invalid elements or remove them from valid elements, respectively</li>
+                    <li><code>Boolean all</code>: if <code>true</code> force validation on all fields (even if they are declared optional)</li>
+                    <li><code>Boolean apply_error_styles</code>: if <code>true</code> add <code>error_classes</code> to and remove them from invalid elements' error targets (otherwise the targets won't be changed)</li>
                 </ul>
             </dd>
 

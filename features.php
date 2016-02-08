@@ -3,7 +3,7 @@
     <dd>Validate <i>any element</i> without needing to write any JavaScript (similar to Bootstrap's modal, for example).</dd>
 
     <dt>Simple type-based validation</dt>
-    <dd>Validate forms simply by using some HTML element attributes.</dd>
+    <dd>Validate forms simply by using some HTML attributes.</dd>
 
     <dt>Required and optional fields</dt>
     <dd>Define what fields are optional by using a predefined attribute on the according elements.</dd>
@@ -16,7 +16,7 @@
 
     <dt>Detailed errors</dt>
     <dd>
-        Invalid fields procude user friendly errors.<br />
+        Invalid fields produce user friendly errors.<br />
         And it's possible to customize the degree of detail!
     </dd>
 

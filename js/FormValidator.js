@@ -785,12 +785,15 @@
             first_invalid_element = elem;
           }
         } else {
-          if (this.elem.attr("data-fv-postprocess") !== "false") {
+          if (elem.attr("data-fv-postprocess") === "true") {
             value = (ref1 = this.postprocessors[type]) != null ? ref1.call(this.postprocessors, value, elem, this.locale) : void 0;
             if (usedValFunc) {
               elem.val(value);
             } else {
               elem.text(value);
+            }
+            if (current_error != null) {
+              current_error.value = value;
             }
           } else if (elem.attr("data-fv-output-preprocessed") === "true") {
             value = (ref2 = this.preprocessors[type]) != null ? ref2.call(this.preprocessors, value, elem, this.locale) : void 0;
@@ -798,6 +801,9 @@
               elem.val(value);
             } else {
               elem.text(value);
+            }
+            if (current_error != null) {
+              current_error.value = value;
             }
           }
         }

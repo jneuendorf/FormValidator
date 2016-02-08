@@ -1,7 +1,27 @@
 <?php
 
-$tab_names = ['features', 'demos', 'how to use', 'options', 'methods', 'attribute index', 'source code'];
-$filenames = ['features', 'demos', 'usage', 'options', 'methods', 'attribute_index', 'source_code'];
+$tab_names = [
+    'features',
+    'how to use',
+    'demos',
+    'options',
+    'validators',
+    'methods',
+    'attributes',
+    'constraint attributes',
+    'source code'
+];
+$filenames = [
+    'features',
+    'usage',
+    'demos',
+    'options',
+    'validators',
+    'methods',
+    'attributes',
+    'constraint_attributes',
+    'source_code'
+];
 
 ?>
 <!DOCTYPE html>
@@ -84,6 +104,12 @@ $filenames = ['features', 'demos', 'usage', 'options', 'methods', 'attribute_ind
         SyntaxHighlighter.defaults["toolbar"] = false;
         SyntaxHighlighter.defaults["gutter"] = false;
         SyntaxHighlighter.all();
+
+        $(".goto").click(function() {
+            $(".nav.nav-tabs a[href='" + $(this).attr("data-href") + "']").click();
+            window.scrollTo(0, 358);
+            return false;
+        });
     </script>
 </body>
 </html>

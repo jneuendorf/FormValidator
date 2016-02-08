@@ -33,8 +33,9 @@
 
     <dt><code>data-fv-group</code></dt>
     <dd>
-        Define how to create groups from all form fields. Can be used for advanced progress counting.
-        <!-- TODO -->
+        Define how to create groups from all form fields. Can be used for advanced progress counting.<br>
+        It will not be used if the <code>group</code> option was given to the FormValidator's constructor.<br>
+        To see how counting works see the <code>get_progress</code> method.
     </dd>
 
     <dt><code>data-fv-ignore-children</code></dt>

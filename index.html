@@ -45,19 +45,25 @@
                         <a href="#features" aria-controls="features" role="tab" data-toggle="tab">features</a>
                     </li>
                                         <li role="presentation" class="">
-                        <a href="#demos" aria-controls="demos" role="tab" data-toggle="tab">demos</a>
+                        <a href="#usage" aria-controls="how to use" role="tab" data-toggle="tab">how to use</a>
                     </li>
                                         <li role="presentation" class="">
-                        <a href="#usage" aria-controls="how to use" role="tab" data-toggle="tab">how to use</a>
+                        <a href="#demos" aria-controls="demos" role="tab" data-toggle="tab">demos</a>
                     </li>
                                         <li role="presentation" class="">
                         <a href="#options" aria-controls="options" role="tab" data-toggle="tab">options</a>
                     </li>
                                         <li role="presentation" class="">
+                        <a href="#validators" aria-controls="validators" role="tab" data-toggle="tab">validators</a>
+                    </li>
+                                        <li role="presentation" class="">
                         <a href="#methods" aria-controls="methods" role="tab" data-toggle="tab">methods</a>
                     </li>
                                         <li role="presentation" class="">
-                        <a href="#attribute_index" aria-controls="attribute index" role="tab" data-toggle="tab">attribute index</a>
+                        <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">attributes</a>
+                    </li>
+                                        <li role="presentation" class="">
+                        <a href="#constraint_attributes" aria-controls="constraint attributes" role="tab" data-toggle="tab">constraint attributes</a>
                     </li>
                                         <li role="presentation" class="">
                         <a href="#source_code" aria-controls="source code" role="tab" data-toggle="tab">source code</a>
@@ -72,7 +78,7 @@
     <dd>Validate <i>any element</i> without needing to write any JavaScript (similar to Bootstrap's modal, for example).</dd>
 
     <dt>Simple type-based validation</dt>
-    <dd>Validate forms simply by using some HTML element attributes.</dd>
+    <dd>Validate forms simply by using some HTML attributes.</dd>
 
     <dt>Required and optional fields</dt>
     <dd>Define what fields are optional by using a predefined attribute on the according elements.</dd>
@@ -85,7 +91,7 @@
 
     <dt>Detailed errors</dt>
     <dd>
-        Invalid fields procude user friendly errors.<br />
+        Invalid fields produce user friendly errors.<br />
         And it's possible to customize the degree of detail!
     </dd>
 
@@ -104,6 +110,47 @@
     <dt>Customization</dt>
     <dd>Lots of other options can be used for a form validation by using the JavaScript API.</dd>
 </dl>
+                    </div>
+                                        <div role="tabpanel" class="tab-pane " id="usage">
+                        <div class="row">
+    <div class="col-xs-12">
+        <h4>Include the FormValidator</h4>
+        <h5>include it after jQuery (it requires jQuery 1.7+ upon <strong>initialization</strong>!)</h5>
+        <pre class="brush: xml">
+            &lt;script type=&quot;text/javascript&quot; src=&quot;/path/to/FormValidator(.min).js&quot;&gt;&lt;/script&gt;
+        </pre>
+    </div>
+    <div class="col-xs-12">
+        <h4>Create a form and set some attributes</h4>
+        <h5 style="margin-top: 1.2rem;">
+            For more information take a look at the
+            <a class="goto" href="#" data-href="#demos">demos</a>
+            and the
+            <a class="goto" href="#" data-href="#attribute_index">attribute index</a>.
+        </h5>
+        <pre class="brush: xml">
+            &lt;form id=&quot;my_form&quot; data-fv-error-classes=&quot;invalid&quot; data-fv-error-targets=&quot;self&quot;&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Email address&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;email&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Age&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;integer&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;Some optional text&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;text&quot; data-fv-optional=&quot;true&quot; /&gt;
+                &lt;/div&gt;
+                &lt;div&gt;
+                    &lt;label&gt;An optional number&lt;/label&gt;
+                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-optional=&quot;true&quot; /&gt;
+                &lt;/div&gt;
+                &lt;button data-fv-start=&quot;#my_form&quot;&gt;Validate&lt;/button&gt;
+            &lt;/form&gt;
+        </pre>
+    </div>
+</div>
                     </div>
                                         <div role="tabpanel" class="tab-pane " id="demos">
                         <!-- EXAMPLE 1 -->
@@ -281,7 +328,7 @@
 <div class="row">
     <hr />
     <div class="col-xs-12">
-        <h3>Using JavaScript, printing error messages</h3>
+        <h3>Using JavaScript, printing error messages, dependencies</h3>
         <h4>The form</h4>
         <form data-fv-error-classes="invalid" data-fv-error-targets="self">
             <div class="row">
@@ -306,7 +353,7 @@
             </div>
             <div class="row">
                 <div class="form-group col-xs-6">
-                    <label>Number n1</label>
+                    <label>Number n1 (when valid another field will show up)</label>
                     <input type="text" class="form-control" placeholder="-5.234" data-fv-validate="number" data-fv-name="n1" />
                 </div>
                 <div class="col-xs-1">
@@ -314,9 +361,9 @@
                 </div>
                 <div class="col-xs-5 error_message"></div>
             </div>
-            <div class="row">
+            <div class="row" style="display: none;">
                 <div class="form-group col-xs-6">
-                    <label>This number depends on n1</label>
+                    <label>This number depends on n1 to be valid</label>
                     <input type="text" class="form-control" data-fv-validate="number" data-fv-depends-on="n1" />
                 </div>
                 <div class="col-xs-1">
@@ -350,7 +397,7 @@
             </div>
             <div class="row">
                 <div class="col-xs-12">
-                    Keep in mind that FormValidator comes with some predefined preprocessors.<br />
+                    <strong>Keep in mind</strong> that FormValidator comes with some predefined preprocessors.<br />
                     For example, when choosing 'de' the string <code>123.15,45</code> will be parsed as <code>12315.45</code>.
                 </div>
             </div>
@@ -358,7 +405,7 @@
         <script type="text/javascript">
             $("#example3").click(function() {
                 var form = $("#example3").closest("form"),
-                    error, div, text;
+                    error, div, text, i;
                 var validator = new FormValidator(form, {
                     error_target_getter: function(type, element, index) {
                         return element.closest(".row").find(".error_state");
@@ -366,9 +413,19 @@
                     locale: form.find(".example3.locale option:selected").val()
                 });
                 var errors = validator.validate();
+                console.log(errors);
+
                 form.find(".error_message").empty();
-                for (var i = 0; i < errors.length; i++) {
+                for (i = 0; i < errors.length; i++) {
                     error = errors[i];
+
+                    if (error.type === "dependency" && error.element.attr("data-fv-depends-on") === "n1") {
+                        error.element.fadeOut(100);
+                    }
+                    else {
+                        error.element.fadeIn(100);
+                    }
+
                     div = error.element.closest(".row").find(".error_message");
                     text = div.text();
                     div.text(text + (text.length > 0 ? "; " : "") + error.message);
@@ -474,7 +531,7 @@
 <!-- EXAMPLE 4 -->
 <div class="row">
     <div class="col-xs-12">
-        <h3>Example 1 on the fly</h3>
+        <h3>Example 1 in real time</h3>
         <h4>The form</h4>
         <div class="row">
             <form id="example4" class="col-xs-6" data-fv-error-classes="invalid" data-fv-error-targets="self" data-fv-real-time>
@@ -515,49 +572,6 @@
                     &lt;label&gt;An optional number&lt;/label&gt;
                     &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-optional=&quot;true&quot; /&gt;
                 &lt;/div&gt;
-            &lt;/form&gt;
-        </pre>
-    </div>
-</div>
-                    </div>
-                                        <div role="tabpanel" class="tab-pane " id="usage">
-                        <div class="row">
-    <div class="col-xs-12">
-        <h4>Include the FormValidator</h4>
-        <h5>include it after jQuery (it requires jQuery 1.7+ upon initialization)</h5>
-        <pre class="brush: xml">
-            &lt;script type=&quot;text/javascript&quot; src=&quot;/path/to/FormValidator(.min).js&quot;&gt;&lt;/script&gt;
-        </pre>
-    </div>
-    <div class="col-xs-12">
-        <h4>Create a form and set some attributes</h4>
-        <h5>See some <a class="goto" href="#" data-href="#demos">demos</a> or the <a class="goto" href="#" data-href="#attribute_index">attribute index</a></h5>
-        <script type="text/javascript">
-            $(".goto").click(function() {
-                $(".nav.nav-tabs a[href='" + $(this).attr("data-href") + "']").click();
-                window.scrollTo(0, 358);
-                return false;
-            });
-        </script>
-        <pre class="brush: xml">
-            &lt;form id=&quot;my_form&quot; data-fv-error-classes=&quot;invalid&quot; data-fv-error-targets=&quot;self&quot;&gt;
-                &lt;div&gt;
-                    &lt;label&gt;Email address&lt;/label&gt;
-                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;email&quot; /&gt;
-                &lt;/div&gt;
-                &lt;div&gt;
-                    &lt;label&gt;Age&lt;/label&gt;
-                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;integer&quot; /&gt;
-                &lt;/div&gt;
-                &lt;div&gt;
-                    &lt;label&gt;Some optional text&lt;/label&gt;
-                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;text&quot; data-fv-optional=&quot;true&quot; /&gt;
-                &lt;/div&gt;
-                &lt;div&gt;
-                    &lt;label&gt;An optional number&lt;/label&gt;
-                    &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-optional=&quot;true&quot; /&gt;
-                &lt;/div&gt;
-                &lt;button data-fv-start=&quot;#my_form&quot;&gt;Validate&lt;/button&gt;
             &lt;/form&gt;
         </pre>
     </div>
@@ -608,9 +622,20 @@
                         },
                         locale2: {...}
                     }
-                </pre> where <code>MESSAGE_X_Y</code> is either a <code>String</code> or a <code>Function(String locale, Object parameters) -> String</code>. The <code>parameters</code> argument depends on the error returned by the validator.
-                <br> Can be used to override the default messages object (at <code>FormValidator.error_messages</code>).
-                <br> The object is merged into the predefined so customizing single message types (even for different locales) is possible.
+                </pre> where <code>MESSAGE_X_Y</code> is either a <code>String</code> or a <code>Function(String locale, Object parameters) -> String</code>.
+                Can be used to override the default messages object (at <code>FormValidator.error_messages</code>). The object is merged into the predefined so customizing single message types (even for different locales) is possible.<br>
+                The <code>parameters</code> argument depends on the error returned by the validator. The return value has at least these properties:<br>
+                <pre class="brush: js">
+                    {
+                        element: validated_field,
+                        index: element_index (incl. optional fields),
+                        index_of_type: index_of_validation_type,
+                        name: validated_field.attr("data-fv-name"),
+                        previous_name: name_of_previously_validated_field,
+                        value: postprocessed_validated_field_value || preprocessed_validated_field_value || validated_field_value
+                    }
+                </pre>
+                Additional properties may be provided by the validator. Those could either properties describing the <a class="goto" href="#" data-href="#constraint_attributes">constraint attributes</a> or "private" properties (that should be the case only if the validator is "private"...see <a class="goto" href="#" data-href="#validators">validators</a> for more details).
             </dd>
 
             <dt>error_mode</dt>
@@ -618,8 +643,14 @@
                 <code>FormValidator.ERROR_MODES (String)</code>
                 <br> Defines how error messages are generated in general. Can be either of these values:
                 <ul>
-                    <li><code>FormValidator.ERROR_MODES.SIMPLE</code></li>
-                    <li><code>FormValidator.ERROR_MODES.NORMAL</code></li>
+                    <li>
+                        <code>FormValidator.ERROR_MODES.SIMPLE</code><br>
+                        This mode transforms all <code>error_message_types</code> (returned from the validator) to the simplest corresponding error message. That means that the messages are independent of any<code>constraint attributes</code>. For example, if a field is validated as <code>number</code> and is invalid (no matter what combination of <code>constraint attributes</code> it has) the <code>error_message_type</code> will be <code>"number"</code> (even if it techniqually valid but violates constraints).
+                    </li>
+                    <li>
+                        <code>FormValidator.ERROR_MODES.NORMAL</code><br>
+                        The <code>error_message_type</code> (returned from the validator) is untouched.
+                    </li>
                     <li><code>FormValidator.ERROR_MODES.DEFAULT (== FormValidator.ERROR_MODES.NORMAL)</code> (this value is the default obviously)</li>
                 </ul>
             </dd>
@@ -640,7 +671,17 @@
                     </li>
                     <li>
                         <code>FormValidator.ERROR_OUTPUT_MODES.NONE</code>
-                        <br> Don't show any errors! Handle them yourself.
+                        <br>The DOM will not be modified. The <code>validate</code> function returns an <code>Array of Object</code>s where each of those objects looks like this:<br>
+                        <pre class="brush: js">
+                            {
+                                element: validated_field,
+                                message: error_message,
+                                required: validated_field.attr("data-fv-optional") !== "true",
+                                type: validation_type,
+                                validator: validator_function,
+                                value: postprocessed_validated_field_value || preprocessed_validated_field_value || validated_field_value
+                            }
+                        </pre>
                     </li>
                     <li><code>FormValidator.ERROR_OUTPUT_MODES.DEFAULT (== FormValidator.ERROR_OUTPUT_MODES.NONE)</code> (this value is the default obviously)</li>
                 </ul>
@@ -696,9 +737,9 @@
                         ...,
                         validation_typeN: PREPROCESSOR_N
                     }
-                </pre> where <code>PREPROCESSOR_N</code> is a <code>Function(String locale, jQuery element, String locale) -> String</code>.
-                <br> Can be used to override or define preprocessors. They are used modify the form field's value before the validation happens. The predefined preprocessors currently exist for <code>number</code> and <code>integer</code> so the different
-                dot notation will be validated correctly (i.e. <code>de + "1,2" == en + "1.2"</code>).
+                </pre> where <code>PREPROCESSOR_N</code> is a <code>Function(String value, jQuery element, String locale) -> String</code>.
+                <br> Can be used to override or define preprocessors. They are used modify the form field's value before the validation happens.<br>
+                The predefined preprocessors currently exist for <code>number</code> and <code>integer</code>. Currently, for both types the comma will be interpreted as decimal points when the locale <code>de</code> is used.
             </dd>
 
             <dt>postprocessors</dt>
@@ -711,8 +752,9 @@
                         ...,
                         validation_typeN: POSTPROCESSOR_N
                     }
-                </pre> where <code>POSTPROCESSOR_N</code> is a <code>Function(String locale, jQuery element, String locale) -> String</code>.
-                <br> Can be used to override or define postprocessors. They are used modify the form field's value after the validation happened. For example, a value could be auto-corrected so the numeric string <code>" 1.34  "</code> would become <code>"1.34"</code>                in the according field (when valid).
+                </pre> where <code>POSTPROCESSOR_N</code> is a <code>Function(String value, jQuery element, String locale) -> String</code>.
+                <br> Can be used to override or define postprocessors. They are used modify the form field's value after the validation happened. The <code>value</code> is either the input's original or preprocessed value.<br>
+                For example, a value could be auto-corrected i.e. the numeric string <code>" 1.34  "</code> would become <code>"1.34"</code> in the according field (when valid).
             </dd>
             </dd>
 
@@ -726,8 +768,8 @@
             <dd>
                 Specify options for the validation:
                 <ul>
-                    <li><code>all</code>: force validation on all fields (even if they are declared optional)</li>
-                    <li><code>apply_error_styles</code>: whether or not to add the <code>error_classes</code> to invalid elements or remove them from valid elements, respectively</li>
+                    <li><code>Boolean all</code>: if <code>true</code> force validation on all fields (even if they are declared optional)</li>
+                    <li><code>Boolean apply_error_styles</code>: if <code>true</code> add <code>error_classes</code> to and remove them from invalid elements' error targets (otherwise the targets won't be changed)</li>
                 </ul>
             </dd>
 
@@ -752,15 +794,85 @@
     </div>
 </div>
                     </div>
+                                        <div role="tabpanel" class="tab-pane " id="validators">
+                                            </div>
                                         <div role="tabpanel" class="tab-pane " id="methods">
                         <div class="row">
-    <p class="col-xs-12">
-        A FormValidator object has the following instance methods.
-        Most of the functionality can be used equally by passing options to the FormValidator's constructor which is recommended for most use cases.
-    </p>
+    <div class="col-xs-12">
+        <h4>Instance methods</h4>
+        <div>
+            A FormValidator object has the following instance methods.
+            Most of the functionality can be used equally by passing options to the FormValidator's constructor which is recommended for most use cases.
+        </div>
+        <dl>
+            <dt><code>Function deregister_preprocessor(String validation_type)</code></dt>
+            <dd>Removes the preprocessor for the given <code>validation_type</code> from the set of preprocessors.</dd>
+
+            <dt><code>Function deregister_postprocessor(String validation_type)</code></dt>
+            <dd>Removes the postprocessor for the given <code>validation_type</code> from the set of postprocessors.</dd>
+
+            <dt><code>Functino deregister_validator(String validation_type)</code></dt>
+            <dd>Removes the validator for the given <code>validation_type</code> from the set of validators.</dd>
+
+            <dt><code>Function get_progress(as_percentage=false)</code></dt>
+            <dd>
+                Calculate how much the form has been filled in.
+            </dd>
+
+            <dt><code>Function register_preprocessor(String validation_type, Function preprocessor)</code></dt>
+            <dd>
+                Add the preprocessor for the given <code>validation_type</code> to the set of preprocessors.<br>
+                The <code>preprocessor</code> parameter has this signature: <code>Function(String value, jQuery element, String locale) -> String</code>. In this function <code>this</code> refers to the preprocessor object so other preprocessors can easily be called from within each preprocessor.
+            </dd>
+
+            <dt><code>Function register_postprocessor(String validation_type, Function postprocessor)</code></dt>
+            <dd>
+                Add the postprocessor for the given <code>validation_type</code> to the set of postprocessors.<br>
+                The <code>postprocessor</code> parameter has this signature: <code>Function(String value, jQuery element, String locale) -> String</code>. In this function <code>this</code> refers to the postprocessor object so other preprocessors can easily be called from within each postprocessor.
+            </dd>
+
+            <dt><code>Function register_validator(String validation_type, Function validator)</code></dt>
+            <dd>
+                Add the validator for the given <code>validation_type</code> to the set of validators.<br>
+                The <code>validator</code> parameter has this signature: <code>Function(String value, jQuery element) -> Boolean | String | Object</code>. In this function <code>this</code> refers to the validator object so other validators can easily be called from within each validator.
+            </dd>
+
+            <dt><code>Function set_error_target_getter(Function error_target_getter)</code></dt>
+            <dd>
+                The <code>error_target_getter</code> parameter defines the error target for each validated element. The signature is <code>Function(String validation_type, jQuery element, Number index) -> jQuery</code>.<br>
+                By default the form validator instance will check the <code>data-fv-error-targets</code> attribute.
+            </dd>
+
+            <dt><code>set_field_getter</code></dt>
+            <dd></dd>
+
+            <dt><code>set_optional_field_getter</code></dt>
+            <dd></dd>
+
+            <dt><code>set_optional_field_getter</code></dt>
+            <dd></dd>
+
+            <dt><code>validate</code></dt>
+            <dd></dd>
+        </dl>
+    </div>
+
+    <div class="col-xs-12">
+        <h4>Class methods</h4>
+        <div>
+            A FormValidator class has the following class methods.
+        </div>
+        <dl>
+            <dt><code>Function FormValidator.new(jQuery form, Object options)</code></dt>
+            <dd>
+                Returns a new instance of the FormValidator class. Right now using this method is equal to creating a new instance with <code>new</code>.<br>
+                It may provide additional functionality in future versions so using this method is recommended.
+            </dd>
+        </dl>
+    </div>
 </div>
                     </div>
-                                        <div role="tabpanel" class="tab-pane " id="attribute_index">
+                                        <div role="tabpanel" class="tab-pane " id="attributes">
                         <dl>
     <dt><code>data-fv-name</code></dt>
     <dd>
@@ -796,8 +908,9 @@
 
     <dt><code>data-fv-group</code></dt>
     <dd>
-        Define how to create groups from all form fields. Can be used for advanced progress counting.
-        <!-- TODO -->
+        Define how to create groups from all form fields. Can be used for advanced progress counting.<br>
+        It will not be used if the <code>group</code> option was given to the FormValidator's constructor.<br>
+        To see how counting works see the <code>get_progress</code> method.
     </dd>
 
     <dt><code>data-fv-ignore-children</code></dt>
@@ -883,6 +996,8 @@
     </dd>
 </dl>
                     </div>
+                                        <div role="tabpanel" class="tab-pane " id="constraint_attributes">
+                                            </div>
                                         <div role="tabpanel" class="tab-pane " id="source_code">
                         <pre class="brush: js">
     // Generated by CoffeeScript 1.10.0
@@ -1672,12 +1787,15 @@
             first_invalid_element = elem;
           }
         } else {
-          if (this.elem.attr("data-fv-postprocess") !== "false") {
+          if (elem.attr("data-fv-postprocess") !== "false") {
             value = (ref1 = this.postprocessors[type]) != null ? ref1.call(this.postprocessors, value, elem, this.locale) : void 0;
             if (usedValFunc) {
               elem.val(value);
             } else {
               elem.text(value);
+            }
+            if (current_error != null) {
+              current_error.value = value;
             }
           } else if (elem.attr("data-fv-output-preprocessed") === "true") {
             value = (ref2 = this.preprocessors[type]) != null ? ref2.call(this.preprocessors, value, elem, this.locale) : void 0;
@@ -1685,6 +1803,9 @@
               elem.val(value);
             } else {
               elem.text(value);
+            }
+            if (current_error != null) {
+              current_error.value = value;
             }
           }
         }
@@ -1805,6 +1926,12 @@
         SyntaxHighlighter.defaults["toolbar"] = false;
         SyntaxHighlighter.defaults["gutter"] = false;
         SyntaxHighlighter.all();
+
+        $(".goto").click(function() {
+            $(".nav.nav-tabs a[href='" + $(this).attr("data-href") + "']").click();
+            window.scrollTo(0, 358);
+            return false;
+        });
     </script>
 </body>
 </html>

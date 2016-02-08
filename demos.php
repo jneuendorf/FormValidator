@@ -173,7 +173,7 @@
 <div class="row">
     <hr />
     <div class="col-xs-12">
-        <h3>Using JavaScript, printing error messages</h3>
+        <h3>Using JavaScript, printing error messages, dependencies</h3>
         <h4>The form</h4>
         <form data-fv-error-classes="invalid" data-fv-error-targets="self">
             <div class="row">
@@ -198,7 +198,7 @@
             </div>
             <div class="row">
                 <div class="form-group col-xs-6">
-                    <label>Number n1</label>
+                    <label>Number n1 (when valid another field will show up)</label>
                     <input type="text" class="form-control" placeholder="-5.234" data-fv-validate="number" data-fv-name="n1" />
                 </div>
                 <div class="col-xs-1">
@@ -206,9 +206,9 @@
                 </div>
                 <div class="col-xs-5 error_message"></div>
             </div>
-            <div class="row">
+            <div class="row" style="display: none;">
                 <div class="form-group col-xs-6">
-                    <label>This number depends on n1</label>
+                    <label>This number depends on n1 to be valid</label>
                     <input type="text" class="form-control" data-fv-validate="number" data-fv-depends-on="n1" />
                 </div>
                 <div class="col-xs-1">
@@ -242,7 +242,7 @@
             </div>
             <div class="row">
                 <div class="col-xs-12">
-                    Keep in mind that FormValidator comes with some predefined preprocessors.<br />
+                    <strong>Keep in mind</strong> that FormValidator comes with some predefined preprocessors.<br />
                     For example, when choosing 'de' the string <code>123.15,45</code> will be parsed as <code>12315.45</code>.
                 </div>
             </div>
@@ -250,7 +250,7 @@
         <script type="text/javascript">
             $("#example3").click(function() {
                 var form = $("#example3").closest("form"),
-                    error, div, text;
+                    error, div, text, i;
                 var validator = new FormValidator(form, {
                     error_target_getter: function(type, element, index) {
                         return element.closest(".row").find(".error_state");
@@ -258,9 +258,19 @@
                     locale: form.find(".example3.locale option:selected").val()
                 });
                 var errors = validator.validate();
+                console.log(errors);
+
                 form.find(".error_message").empty();
-                for (var i = 0; i < errors.length; i++) {
+                for (i = 0; i < errors.length; i++) {
                     error = errors[i];
+
+                    if (error.type === "dependency" && error.element.attr("data-fv-depends-on") === "n1") {
+                        error.element.fadeOut(100);
+                    }
+                    else {
+                        error.element.fadeIn(100);
+                    }
+
                     div = error.element.closest(".row").find(".error_message");
                     text = div.text();
                     div.text(text + (text.length > 0 ? "; " : "") + error.message);
@@ -366,7 +376,7 @@
 <!-- EXAMPLE 4 -->
 <div class="row">
     <div class="col-xs-12">
-        <h3>Example 1 on the fly</h3>
+        <h3>Example 1 in real time</h3>
         <h4>The form</h4>
         <div class="row">
             <form id="example4" class="col-xs-6" data-fv-error-classes="invalid" data-fv-error-targets="self" data-fv-real-time>
