@@ -785,7 +785,7 @@
             first_invalid_element = elem;
           }
         } else {
-          if (elem.attr("data-fv-postprocess") !== "false") {
+          if (elem.attr("data-fv-postprocess") === "true") {
             value = (ref1 = this.postprocessors[type]) != null ? ref1.call(this.postprocessors, value, elem, this.locale) : void 0;
             if (usedValFunc) {
               elem.val(value);

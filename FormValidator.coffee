@@ -635,7 +635,7 @@ class window.FormValidator
             # element is valid
             else
                 # replace old value with post processed value
-                if elem.attr("data-fv-postprocess") isnt "false"
+                if elem.attr("data-fv-postprocess") is "true"
                     value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
                     if usedValFunc
                         elem.val value
