@@ -266,7 +266,7 @@ class window.FormValidator
 
         # default css error classes. can be overridden by data-fv-error-classes on any error target
         @error_classes          = options.error_classes or @form.attr("data-fv-error-classes") or ""
-        @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or @error_classes
+        @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or ""
         @validators             = $.extend {}, CLASS.validators, options.validators
         @validation_options     = options.validation_options or null
         @error_messages         = options.error_messages
