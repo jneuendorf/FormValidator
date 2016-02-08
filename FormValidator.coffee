@@ -641,6 +641,7 @@ class window.FormValidator
                         elem.val value
                     else
                         elem.text value
+                    current_error?.value = value
                 # replace old value with pre processed value
                 else if elem.attr("data-fv-output-preprocessed") is "true"
                     value = @preprocessors[type]?.call(@preprocessors, value, elem, @locale)
@@ -648,6 +649,7 @@ class window.FormValidator
                         elem.val value
                     else
                         elem.text value
+                    current_error?.value = value
 
             prev_name = name
 

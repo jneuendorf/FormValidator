@@ -792,12 +792,18 @@
             } else {
               elem.text(value);
             }
+            if (current_error != null) {
+              current_error.value = value;
+            }
           } else if (elem.attr("data-fv-output-preprocessed") === "true") {
             value = (ref2 = this.preprocessors[type]) != null ? ref2.call(this.preprocessors, value, elem, this.locale) : void 0;
             if (usedValFunc) {
               elem.val(value);
             } else {
               elem.text(value);
+            }
+            if (current_error != null) {
+              current_error.value = value;
             }
           }
         }
