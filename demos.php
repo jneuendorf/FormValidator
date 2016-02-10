@@ -1,7 +1,7 @@
 <!-- EXAMPLE 1 -->
 <div class="row">
     <div class="col-xs-12">
-        <h3>Basic validation</h3>
+        <h3>(1) Basic validation</h3>
         <h4>The form</h4>
         <div class="row">
             <form id="example1" class="col-xs-6" data-fv-error-classes="invalid" data-fv-error-targets="self">
@@ -52,7 +52,7 @@
 <div class="row">
     <hr />
     <div class="col-xs-12">
-        <h3>Using all validation types (and some options)</h3>
+        <h3>(2) Using all validation types (and some options)</h3>
         <h4>The form</h4>
         <div class="row">
             <form id="example2" class="col-xs-6" data-fv-error-classes="invalid" data-fv-error-targets="self">
@@ -173,7 +173,7 @@
 <div class="row">
     <hr />
     <div class="col-xs-12">
-        <h3>Using JavaScript, printing error messages, dependencies</h3>
+        <h3>(3) Using JavaScript, printing error messages, dependencies</h3>
         <h4>The form</h4>
         <form data-fv-error-classes="invalid" data-fv-error-targets="self">
             <div class="row">
@@ -250,7 +250,7 @@
         <script type="text/javascript">
             $("#example3").click(function() {
                 var form = $("#example3").closest("form"),
-                    error, div, text, i;
+                    error, div, text, i, j, target, hide_field;
                 var validator = new FormValidator(form, {
                     error_target_getter: function(type, element, index) {
                         return element.closest(".row").find(".error_state");
@@ -258,17 +258,25 @@
                     locale: form.find(".example3.locale option:selected").val()
                 });
                 var errors = validator.validate();
-                console.log(errors);
 
                 form.find(".error_message").empty();
                 for (i = 0; i < errors.length; i++) {
                     error = errors[i];
 
-                    if (error.type === "dependency" && error.element.attr("data-fv-depends-on") === "n1") {
-                        error.element.fadeOut(100);
-                    }
-                    else {
-                        error.element.fadeIn(100);
+                    if ((target = error.element.attr("data-fv-depends-on")) != null) {
+                        hide_field = false;
+                        for (j = 0; j < errors.length; j++) {
+                            if (errors[j].element.attr("data-fv-name") === target) {
+                                hide_field = true;
+                                break;
+                            }
+                        }
+                        if (hide_field) {
+                            error.element.closest(".row").slideUp(100);
+                        }
+                        else {
+                            error.element.closest(".row").slideDown(100);
+                        }
                     }
 
                     div = error.element.closest(".row").find(".error_message");
@@ -282,19 +290,35 @@
         <pre class="brush: js">
             $(&quot;#example3&quot;).click(function() {
                 var form = $(&quot;#example3&quot;).closest(&quot;form&quot;),
-                    error, div, text;
+                    error, div, text, i, j, target, hide_field;
                 var validator = new FormValidator(form, {
-                    // apply &apos;invalid&apos; class to circles instead of the text fields themselves
                     error_target_getter: function(type, element, index) {
                         return element.closest(&quot;.row&quot;).find(&quot;.error_state&quot;);
                     },
                     locale: form.find(&quot;.example3.locale option:selected&quot;).val()
                 });
                 var errors = validator.validate();
-                // show errors
+
                 form.find(&quot;.error_message&quot;).empty();
-                for (var i = 0; i &lt; errors.length; i++) {
+                for (i = 0; i &lt; errors.length; i++) {
                     error = errors[i];
+
+                    if ((target = error.element.attr(&quot;data-fv-depends-on&quot;)) != null) {
+                        hide_field = false;
+                        for (j = 0; j &lt; errors.length; j++) {
+                            if (errors[j].element.attr(&quot;data-fv-name&quot;) === target) {
+                                hide_field = true;
+                                break;
+                            }
+                        }
+                        if (hide_field) {
+                            error.element.closest(&quot;.row&quot;).slideUp(100);
+                        }
+                        else {
+                            error.element.closest(&quot;.row&quot;).slideDown(100);
+                        }
+                    }
+
                     div = error.element.closest(&quot;.row&quot;).find(&quot;.error_message&quot;);
                     text = div.text();
                     div.text(text + (text.length &gt; 0 ? &quot;; &quot; : &quot;&quot;) + error.message);
@@ -376,7 +400,7 @@
 <!-- EXAMPLE 4 -->
 <div class="row">
     <div class="col-xs-12">
-        <h3>Example 1 in real time</h3>
+        <h3>(4) Example 1 in real time</h3>
         <h4>The form</h4>
         <div class="row">
             <form id="example4" class="col-xs-6" data-fv-error-classes="invalid" data-fv-error-targets="self" data-fv-real-time>

@@ -12,14 +12,16 @@
             <dd>
                 <code>Function(String locale, Array (of Object) dependency_errors) -> String</code>
                 <br> Can be used to customize what dependency error messages look like.
-                <br> The default message is whatever error message is defined for the current locale at the key <code>dependency</code>.
+                <br> The default message is whatever error message is defined for the current locale at the key <code>dependency</code>.<br>
+                Take a look at example 3 on the <a class="goto" href="#" data-href="#demos">demos</a> page to see how dependencies work.
             </dd>
 
             <dt>dependency_error_classes</dt>
             <dd>
                 <code>String</code> (CSS class names, space separated)
-                <br> Can be used to customize which CSS classes will be applied to the error target(s) of a field with dependencies (if any of the dependencies are invalid).
-                <br> Default is whatever is defined for the <code>error_classes</code> property.
+                <br> Can be used to customize which CSS classes will be applied to the error target(s) of the fields the current field depends on (if any of the dependencies are invalid).
+                <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).<br>
+                Take a look at example 3 on the <a class="goto" href="#" data-href="#demos">demos</a> page to see how dependencies work.
             </dd>
 
             <dt>error_classes</dt>
