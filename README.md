@@ -1,2 +1,3 @@
 # FormValidator
-A smart and fast JavaScript form validator
+
+See this [web page](http://jneuendorf.github.io/FormValidator/).
