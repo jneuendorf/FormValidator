@@ -251,7 +251,7 @@
             $("#example3").click(function() {
                 var form = $("#example3").closest("form"),
                     error, div, text, i, j, target, hide_field;
-                var validator = new FormValidator(form, {
+                var validator = FormValidator.new(form, {
                     error_target_getter: function(type, element, index) {
                         return element.closest(".row").find(".error_state");
                     },
@@ -291,7 +291,7 @@
             $(&quot;#example3&quot;).click(function() {
                 var form = $(&quot;#example3&quot;).closest(&quot;form&quot;),
                     error, div, text, i, j, target, hide_field;
-                var validator = new FormValidator(form, {
+                var validator = FormValidator.new(form, {
                     error_target_getter: function(type, element, index) {
                         return element.closest(&quot;.row&quot;).find(&quot;.error_state&quot;);
                     },
