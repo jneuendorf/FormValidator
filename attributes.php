@@ -2,7 +2,7 @@
     <dt><code>data-fv-name</code></dt>
     <dd>
         <code>String</code> (no space allowed)<br>
-        Add a name property to the element. It can be used for being identified as a target (see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>).
+        Add a name property to the current element. It can be used for being identified as a target (see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>).
     </dd>
 
     <dt><code>data-fv-dependency-error-classes</code></dt>
@@ -10,6 +10,14 @@
         <code>String</code> (CSS class names, space separated)
         <br> Can be used to customize which CSS classes will be applied to the error target(s) of a field with dependencies (if any of the dependencies are invalid).
         <br> Default is whatever is defined for the <code>error_classes</code> property.
+    </dd>
+
+    <dt><code>data-fv-dependency-mode</code></dt>
+    <dd>
+        <code>String -> "all" or "any"</code>
+        <br> Defines whether <strong>all</strong> dependencies need to be fulfilled for the current element to be able to be valid or if one (<strong>any</strong>) is sufficient.
+        <br> Default is <code>"all"</code>.<br>
+        For a more detailed explanation see <a class="goto" href="#" data-href="#dependencies">dependencies</a>.
     </dd>
 
     <dt><code>data-fv-depends-on</code></dt>
@@ -33,14 +41,17 @@
 
     <dt><code>data-fv-group</code></dt>
     <dd>
-        Define how to create groups from all form fields. Can be used for advanced progress counting.<br>
+        <code>String</code><br>
+        Assigning the current element to a logical group - the value can be any string.<br>
+        By assigning (potentially) all form fields to groups this defines a set of group for the form. This is used for progress counting.<br>
         It will not be used if the <code>group</code> option was given to the FormValidator's constructor.<br>
         To see how counting works see the <code>get_progress</code> method.
     </dd>
 
     <dt><code>data-fv-ignore-children</code></dt>
     <dd>
-        This attribute can be used without a value. When present the default <code>field_getter</code> will ignore the elements descendants. Therefore they won't be validated.
+        <code>String</code> (any value)<br>
+        This attribute can be used <i>without a value</i>. When present the default <code>field_getter</code> will ignore the elements descendants. Therefore they won't be validated.
     </dd>
 
     <dt><code>data-fv-include-max</code></dt>
@@ -95,7 +106,8 @@
 
     <dt><code>data-fv-real-time</code></dt>
     <dd>
-        This attribute can be used without a value. This attribute can be defined on the form element which is supposed to be validated. All descendants of the form with a <code>data-fv-validate</code> attribute will be validated on the fly whenever something changes (on change, click, and keyup).
+        <code>String</code> (any value)<br>
+        This attribute can be used <i>without a value</i>. This attribute can be defined on the form element which is supposed to be validated. All descendants of the form with a <code>data-fv-validate</code> attribute will be validated on the fly whenever something changes (on change, click, and keyup).
     </dd>
 
     <dt><code>data-fv-start</code></dt>

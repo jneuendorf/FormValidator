@@ -13,6 +13,9 @@ h3.project-tagline {
     color: inherit;
     text-decoration: underline;
 }
+.page-header .btn:focus {
+    color: rgba(255, 255, 255, 0.7);
+}
 
 
 

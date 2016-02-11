@@ -6,10 +6,10 @@ $tab_names = [
     'demos',
     'options',
     'validators',
+    'dependencies',
     'methods',
     'attributes',
-    'constraint attributes',
-    'source code'
+    'constraint attributes'
 ];
 $filenames = [
     'features',
@@ -17,10 +17,10 @@ $filenames = [
     'demos',
     'options',
     'validators',
+    'dependencies',
     'methods',
     'attributes',
-    'constraint_attributes',
-    'source_code'
+    'constraint_attributes'
 ];
 
 ?>

@@ -13,8 +13,9 @@
 
     <dt>Dependencies</dt>
     <dd>
-        Define dependencies between form fields - as always DOM-based.<br>
-        That means that a dependent field can only become valid when its required fields are also valid. One example: Such a field could be visible if only if its required fields are valid (see example 3).
+        Define dependencies between form fields.<br>
+        That means that a dependent field can only become valid when its required fields (dependencies) are also valid.
+        Event handlers can automatically be triggered, for example, such a field's visibility could be toggled (see example 3).
     </dd>
 
     <dt>Detailed errors</dt>
