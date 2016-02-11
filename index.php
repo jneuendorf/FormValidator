@@ -44,6 +44,7 @@ $filenames = [
 
     <link rel="stylesheet" type="text/css" href="stylesheets/my-style.css" media="screen">
 
+    <!-- <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script> -->
     <script type="text/javascript" src="js/jquery-2.2.0.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/shCore.js"></script>

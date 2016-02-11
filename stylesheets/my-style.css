@@ -3,6 +3,18 @@ textarea {
     min-height: 60px;
 }
 
+.math {
+    font-family: STIXGeneral-Regular;
+}
+var.math {
+    font-family: STIXGeneral-Italic;
+}
+
+ul.spaced li {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
 
 h3.project-tagline {
     font-size: 1rem;
