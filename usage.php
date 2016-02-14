@@ -5,6 +5,7 @@
         <pre class="brush: xml">
             &lt;script type=&quot;text/javascript&quot; src=&quot;/path/to/FormValidator(.min).js&quot;&gt;&lt;/script&gt;
         </pre>
+        The development version (FormValidator.js) throws more exceptions and prints errors. Therefore, it is recommended to be used for more convenient development. ;)
     </div>
     <div class="col-xs-12">
         <h4>Create a form and set some attributes</h4>
