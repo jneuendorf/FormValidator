@@ -69,14 +69,14 @@
     <dt><code>data-fv-max</code></dt>
     <dd>
         <code>Number</code><br>
-        Define the maximum value for an element with type <code>number</code> or <code>integer</code>.<br>
+        Define either the maximum value for an element with the validation type <code>number</code> or <code>integer</code>, or the maximum length for an element with the validation type <code>phone</code>, <code>select</code>, or <code>text</code>).<br>
         By default this value will be the greatest valid value. To exclude the maximum see <code>data-fv-include-max</code>.
     </dd>
 
     <dt><code>data-fv-min</code></dt>
     <dd>
         <code>Number</code><br>
-        Define the minimum value for an element with type <code>number</code> or <code>integer</code>.<br>
+        Define either the minimum value for an element with the validation type <code>number</code> or <code>integer</code>, or the minimum length for an element with the validation type <code>phone</code>, <code>select</code>, or <code>text</code>).<br>
         By default this value will be the smallest valid value. To exclude the minimum see <code>data-fv-include-min</code>.
     </dd>
 
