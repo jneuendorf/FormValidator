@@ -366,9 +366,12 @@ class window.FormValidator
             value: value
         }
 
-    _find_target: (target) ->
+    _find_target: (target, element) ->
         result = @form.find("[data-fv-name='#{target}']")
-        # nothing found => try jquery selector instead of data-fv-name property
+        # nothing found => try closest matching jquery selector instead of data-fv-name property
+        if result.length is 0
+            result = element.closest(target)
+        # nothing found => try jquery selector in from
         if result.length is 0
             result = @form.find(target)
         # nothing found => try to find selector in entire document
@@ -385,7 +388,7 @@ class window.FormValidator
             targets = []
             for error_target in error_targets
                 if error_target isnt "self"
-                    target = @_find_target(error_target)
+                    target = @_find_target(error_target, element)
                 else
                     target = element
                 targets.push target
@@ -584,7 +587,7 @@ class window.FormValidator
             if depends_on?
                 dependencies = depends_on.split /\s+/g
                 for dependency, j in dependencies
-                    dependency_elem = @_find_target(dependency)
+                    dependency_elem = @_find_target(dependency, elem)
                     dependency_elements.push dependency_elem
                     info = {}
                     dependency_validation = validate_field(dependency_elem, info)
