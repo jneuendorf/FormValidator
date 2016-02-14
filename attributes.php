@@ -2,7 +2,7 @@
     <dt><code>data-fv-name</code></dt>
     <dd>
         <code>String</code> (no space allowed)<br>
-        Add a name property to the current element. It can be used for being identified as a target (see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>).
+        Add a name property to the current element. It can be used for being identified as a target (see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>) and for supplying a <code>name</code> variable in the error message.
     </dd>
 
     <dt><code>data-fv-dependency-error-classes</code></dt>
@@ -35,7 +35,7 @@
 
     <dt><code>data-fv-error-targets</code></dt>
     <dd>
-        <code>String</code> (CSS class names, space separated)<br>
+        <code>String</code> (CSS class names or target names, space separated)<br>
         Defines a list of targets which will get the defined <code>data-fv-error-classes</code> if the current element is invalid. To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
     </dd>
 
@@ -51,7 +51,7 @@
     <dt><code>data-fv-ignore-children</code></dt>
     <dd>
         <code>String</code> (any value)<br>
-        This attribute can be used <i>without a value</i>. When present the default <code>field_getter</code> will ignore the elements descendants. Therefore they won't be validated.
+        This attribute can be used <i>without a value</i>. When present the default <code>field_getter</code> will ignore the elements' descendants. Therefore they won't be validated. The default <code>field_getter</code> is used unless you define your own (by passing the <code>field_getter</code> option to the constructor).
     </dd>
 
     <dt><code>data-fv-include-max</code></dt>
@@ -113,7 +113,7 @@
     <dt><code>data-fv-start</code></dt>
     <dd>
         <code>String</code> (target)<br>
-        Elements with this attribute will automatically trigger the validation of the form that corresponds to this value (which must be a valid target).  To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
+        Elements with this attribute will automatically trigger the validation of the form that corresponds to this value (which must be a valid target). To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
     </dd>
 
     <dt><code>data-fv-validate</code></dt>
@@ -130,5 +130,6 @@
             <li><code>select</code></li>
             <li><code>text</code></li>
         </ul>
+        For more details see <a class="goto" href="#" data-href="#validators">validators</a>.
     </dd>
 </dl>

@@ -36,4 +36,7 @@
             &lt;/form&gt;
         </pre>
     </div>
+    <div class="col-xs-12">
+        <h4>Enjoy ;)</h4>
+    </div>
 </div>

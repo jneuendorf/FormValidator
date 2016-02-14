@@ -8,8 +8,7 @@ $tab_names = [
     'validators',
     'dependencies',
     'methods',
-    'attributes',
-    'constraint attributes'
+    'attributes'
 ];
 $filenames = [
     'features',
@@ -19,14 +18,12 @@ $filenames = [
     'validators',
     'dependencies',
     'methods',
-    'attributes',
-    'constraint_attributes'
+    'attributes'
 ];
 
 ?>
 <!DOCTYPE html>
 <html lang="en-us">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -39,8 +36,10 @@ $filenames = [
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/my-bootstrap.css" media="screen">
 
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeDefault.css" media="screen">
+    <!-- <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen"> -->
+    <!-- <link rel="stylesheet" type="text/css" href="stylesheets/shThemeDefault.css" media="screen"> -->
+    <link rel="stylesheet" type="text/css" href="stylesheets/shCoreRDark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen">
 
     <link rel="stylesheet" type="text/css" href="stylesheets/my-style.css" media="screen">
 
@@ -50,7 +49,7 @@ $filenames = [
     <script type="text/javascript" src="js/shCore.js"></script>
     <script type="text/javascript" src="js/brushes/shBrushJScript.js"></script>
     <script type="text/javascript" src="js/brushes/shBrushXml.js"></script>
-    <script type="text/javascript" src="js/brushes/shBrushRuby.js"></script>
+    <!-- <script type="text/javascript" src="js/brushes/shBrushRuby.js"></script> -->
 
     <script type="text/javascript" src="js/FormValidator.js"></script>
 </head>

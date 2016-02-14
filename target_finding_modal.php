@@ -8,11 +8,14 @@
             <div class="modal-body">
                 <p>
                     A list of targets is defined as space separated <code>String</code>.<br><br>
-                    Each list element <var>E</var> is parsed like so (for a FormValidator <var>F</var>):<br>
+                    Each list element <var class="math">E</var> is parsed like so (for a FormValidator <var class="math">F</var>):<br>
                     <ol>
-                        <li>tru to find an element in the form of <var>F</var> where the attribute <code>data-fv-name</code> equals <var>E</var></li>
-                        <li>otherwise <var>E</var> is interpreted as selector which will be looked for in <var>F</var></li>
-                        <li>otherwise <var>E</var> is interpreted as selector which will be looked for in the entire document</li>
+                        <li>try to find an element in the form of <var class="math">F</var> where the attribute <code>data-fv-name</code> equals <var class="math">E</var></li>
+                        <li>
+                            otherwise <var class="math">E</var> is interpreted as selector which will be looked for in the path to <var class="math">F</var> (using jQuery's <code>closest()</code>), this makes it easy to affect container elements of <var class="math">E</var>
+                        </li>
+                        <li>otherwise <var class="math">E</var> is interpreted as selector which will be looked for in <var class="math">F</var></li>
+                        <li>otherwise <var class="math">E</var> is interpreted as selector which will be looked for in the entire document</li>
                     </ol>
                 </p>
             </div>

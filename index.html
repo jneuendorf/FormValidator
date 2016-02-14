@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en-us">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,8 +12,10 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/my-bootstrap.css" media="screen">
 
-    <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeDefault.css" media="screen">
+    <!-- <link rel="stylesheet" type="text/css" href="stylesheets/shCore.css" media="screen"> -->
+    <!-- <link rel="stylesheet" type="text/css" href="stylesheets/shThemeDefault.css" media="screen"> -->
+    <link rel="stylesheet" type="text/css" href="stylesheets/shCoreRDark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/shThemeRDark.css" media="screen">
 
     <link rel="stylesheet" type="text/css" href="stylesheets/my-style.css" media="screen">
 
@@ -24,7 +25,7 @@
     <script type="text/javascript" src="js/shCore.js"></script>
     <script type="text/javascript" src="js/brushes/shBrushJScript.js"></script>
     <script type="text/javascript" src="js/brushes/shBrushXml.js"></script>
-    <script type="text/javascript" src="js/brushes/shBrushRuby.js"></script>
+    <!-- <script type="text/javascript" src="js/brushes/shBrushRuby.js"></script> -->
 
     <script type="text/javascript" src="js/FormValidator.js"></script>
 </head>
@@ -65,9 +66,6 @@
                     </li>
                                         <li role="presentation" class="">
                         <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">attributes</a>
-                    </li>
-                                        <li role="presentation" class="">
-                        <a href="#constraint_attributes" aria-controls="constraint attributes" role="tab" data-toggle="tab">constraint attributes</a>
                     </li>
                             </ul>
 
@@ -154,6 +152,9 @@
                 &lt;button data-fv-start=&quot;#my_form&quot;&gt;Validate&lt;/button&gt;
             &lt;/form&gt;
         </pre>
+    </div>
+    <div class="col-xs-12">
+        <h4>Enjoy ;)</h4>
     </div>
 </div>
                     </div>
@@ -411,7 +412,7 @@
             $("#example3").click(function() {
                 var form = $("#example3").closest("form"),
                     error, div, text, i, j, target, hide_field;
-                var validator = new FormValidator(form, {
+                var validator = FormValidator.new(form, {
                     error_target_getter: function(type, element, index) {
                         return element.closest(".row").find(".error_state");
                     },
@@ -451,7 +452,7 @@
             $(&quot;#example3&quot;).click(function() {
                 var form = $(&quot;#example3&quot;).closest(&quot;form&quot;),
                     error, div, text, i, j, target, hide_field;
-                var validator = new FormValidator(form, {
+                var validator = FormValidator.new(form, {
                     error_target_getter: function(type, element, index) {
                         return element.closest(&quot;.row&quot;).find(&quot;.error_state&quot;);
                     },
@@ -839,16 +840,16 @@
     <li>
         <code>integer</code><br>
         any integer <var class="math">x</var> &#8712; &#8484;,<br>
-        Range can be defined with <code>data-fv-min</code> &amp; <code>data-fv-max</code>.
+        Range can be defined with <code>data-fv-min</code> &amp; <code>data-fv-max</code> (and <code>data-fv-include-min</code> &amp; <code>data-fv-include-max</code> but that wouldn't make so much sense).
     </li>
     <li>
         <code>number</code><br>
-        any number <var class="math">x</var> &#8712; &#8477; (more exactly <span class="math">&#8474;</span>),<br>
+        any number <var class="math">x</var> &#8712; &#8477; (that JavaScript can represent),<br>
         Range can be defined with <code>data-fv-min</code> &amp; <code>data-fv-max</code> and <code>data-fv-include-min</code> &amp; <code>data-fv-include-max</code>.
     </li>
     <li>
         <code>phone</code><br>
-        any combination of <code>"0123456789+-/() "</code> that's longer than 2 characters,<br>
+        any combination of <code>"0123456789+-/() "</code> (that's longer than 2 characters by default),<br>
         As with <code>text</code> a minimum and maximum length can be defined using <code>data-fv-min</code> and <code>data-fv-max</code>.
     </li>
     <li>
@@ -857,12 +858,12 @@
     </li>
     <li>
         <code>select</code><br>
-        the selected item's value is not <code>null</code> and at least 1 character long,
+        the selected item's value is not <code>null</code> and at least 1 character long,<br>
         As with <code>text</code> a minimum and maximum length can be defined using <code>data-fv-min</code> and <code>data-fv-max</code>.
     </li>
     <li>
         <code>text</code><br>
-        anything longer than 0 characters,
+        anything longer than 0 characters,<br>
         A minimum and maximum length can be defined using <code>data-fv-min</code> and <code>data-fv-max</code>.
     </li>
 </ul>
@@ -931,55 +932,83 @@
             Most of the functionality can be used equally by passing options to the FormValidator's constructor which is recommended for most use cases.
         </div>
         <dl>
-            <dt><code>Function deregister_preprocessor(String validation_type)</code></dt>
+            <dt><code>Function deregister_preprocessor(String validation_type) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
             <dd>Removes the preprocessor for the given <code>validation_type</code> from the set of preprocessors.</dd>
 
-            <dt><code>Function deregister_postprocessor(String validation_type)</code></dt>
+            <dt><code>Function deregister_postprocessor(String validation_type) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
             <dd>Removes the postprocessor for the given <code>validation_type</code> from the set of postprocessors.</dd>
 
-            <dt><code>Functino deregister_validator(String validation_type)</code></dt>
+            <dt><code>Function deregister_validator(String validation_type) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
             <dd>Removes the validator for the given <code>validation_type</code> from the set of validators.</dd>
 
-            <dt><code>Function get_progress(as_percentage=false)</code></dt>
+            <dt><code>Function get_progress(as_percentage=false) -> Object | Number</code></dt>
             <dd>
                 Calculate how much the form has been filled in.
             </dd>
 
-            <dt><code>Function register_preprocessor(String validation_type, Function preprocessor)</code></dt>
+            <dt><code>Function register_preprocessor(String validation_type, Function preprocessor) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
             <dd>
-                Add the preprocessor for the given <code>validation_type</code> to the set of preprocessors.<br>
+                Adds the preprocessor for the given <code>validation_type</code> to the set of preprocessors.<br>
                 The <code>preprocessor</code> parameter has this signature: <code>Function(String value, jQuery element, String locale) -> String</code>. In this function <code>this</code> refers to the preprocessor object so other preprocessors can easily be called from within each preprocessor.
             </dd>
 
-            <dt><code>Function register_postprocessor(String validation_type, Function postprocessor)</code></dt>
+            <dt><code>Function register_postprocessor(String validation_type, Function postprocessor) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
             <dd>
-                Add the postprocessor for the given <code>validation_type</code> to the set of postprocessors.<br>
+                Adds the postprocessor for the given <code>validation_type</code> to the set of postprocessors.<br>
                 The <code>postprocessor</code> parameter has this signature: <code>Function(String value, jQuery element, String locale) -> String</code>. In this function <code>this</code> refers to the postprocessor object so other preprocessors can easily be called from within each postprocessor.
             </dd>
 
-            <dt><code>Function register_validator(String validation_type, Function validator)</code></dt>
+            <dt><code>Function register_validator(String validation_type, Function validator) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
             <dd>
-                Add the validator for the given <code>validation_type</code> to the set of validators.<br>
+                Adds the validator for the given <code>validation_type</code> to the set of validators.<br>
                 The <code>validator</code> parameter has this signature: <code>Function(String value, jQuery element) -> Boolean | String | Object</code>. In this function <code>this</code> refers to the validator object so other validators can easily be called from within each validator.
             </dd>
 
-            <dt><code>Function set_error_target_getter(Function error_target_getter)</code></dt>
+            <dt><code>Function set_error_target_getter(Function error_target_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
             <dd>
                 The <code>error_target_getter</code> parameter defines the error target for each validated element. The signature is <code>Function(String validation_type, jQuery element, Number index) -> jQuery</code>.<br>
                 By default the form validator instance will check the <code>data-fv-error-targets</code> attribute.
             </dd>
 
-            <dt><code>set_field_getter</code></dt>
-            <dd></dd>
+            <dt><code>Function set_field_getter(Function field_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
+            <dd>
+                The <code>field_getter</code> parameter defines what elements (in the form) will be validated. The signature is <code>Function(jQuery form) -> jQuery</code>.<br>
+                If you want the <code>data-fv-ignore-children</code> attribute to have an effect use it here.<br>
+                By default all fields with a <code>data-fv-validate</code> attribute will be validated - excluding the ignored children.
+            </dd>
 
-            <dt><code>set_optional_field_getter</code></dt>
-            <dd></dd>
+            <dt><code>Function set_optional_field_getter(Function optional_field_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
+            <dd>
+                The <code>optional_field_getter</code> parameter defines what fields of all fields (defined by the <code>field_getter</code>) are optional. The signature is <code>Function(jQuery fields) -> jQuery</code>.
+            </dd>
 
-            <dt><code>set_optional_field_getter</code></dt>
-            <dd></dd>
+            <dt><code>Function set_optional_field_getter(Function required_field_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
+            <dd>
+                The <code>required_field_getter</code> parameter defines what fields of all fields (defined by the <code>field_getter</code>) are required (...mandatory == non-optional). The signature is <code>Function(jQuery fields) -> jQuery</code>.
+            </dd>
 
-            <dt><code>validate</code></dt>
-            <dd></dd>
+            <div style="border-radius: 4px; box-shadow: 0px 0px 20px #c1c1c1; margin-top: 30px; padding: 1px 25px 10px 25px;">
+                <dt><code>Function validate(Object validation_options={all: false, apply_error_styles: true}) -> Array (of Object)</code></dt>
+                <dd>
+                    Validates the form and returns a list of errors. Each error looks like this:
+                    <pre class="brush: js">
+                        {
+                            element: validated_element (jQuery),
+                            message: error_message (String),
+                            required: is_required (Boolean),
+                            type: validation_type (String),
+                            validator: validator (Function),
+                            value: value (String)
+                        }
+                    </pre>
+                    The <code>validator</code> and <code>value</code> properties are not present in dependency errors.<br><br>
+                    The <code>validation_options</code> has the following properties:
+                    <ul>
+                        <li><code>Boolean all</code>: if <code>true</code> force validation on all fields (even if they are declared optional)</li>
+                        <li><code>Boolean apply_error_styles</code>: if <code>true</code> add <code>error_classes</code> to and remove them from invalid elements' error targets (otherwise the targets won't be changed)</li>
+                    </ul>
+                </dd>
+            </div>
         </dl>
     </div>
 
@@ -1003,7 +1032,7 @@
     <dt><code>data-fv-name</code></dt>
     <dd>
         <code>String</code> (no space allowed)<br>
-        Add a name property to the current element. It can be used for being identified as a target (see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>).
+        Add a name property to the current element. It can be used for being identified as a target (see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>) and for supplying a <code>name</code> variable in the error message.
     </dd>
 
     <dt><code>data-fv-dependency-error-classes</code></dt>
@@ -1036,7 +1065,7 @@
 
     <dt><code>data-fv-error-targets</code></dt>
     <dd>
-        <code>String</code> (CSS class names, space separated)<br>
+        <code>String</code> (CSS class names or target names, space separated)<br>
         Defines a list of targets which will get the defined <code>data-fv-error-classes</code> if the current element is invalid. To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
     </dd>
 
@@ -1052,7 +1081,7 @@
     <dt><code>data-fv-ignore-children</code></dt>
     <dd>
         <code>String</code> (any value)<br>
-        This attribute can be used <i>without a value</i>. When present the default <code>field_getter</code> will ignore the elements descendants. Therefore they won't be validated.
+        This attribute can be used <i>without a value</i>. When present the default <code>field_getter</code> will ignore the elements' descendants. Therefore they won't be validated. The default <code>field_getter</code> is used unless you define your own (by passing the <code>field_getter</code> option to the constructor).
     </dd>
 
     <dt><code>data-fv-include-max</code></dt>
@@ -1114,7 +1143,7 @@
     <dt><code>data-fv-start</code></dt>
     <dd>
         <code>String</code> (target)<br>
-        Elements with this attribute will automatically trigger the validation of the form that corresponds to this value (which must be a valid target).  To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
+        Elements with this attribute will automatically trigger the validation of the form that corresponds to this value (which must be a valid target). To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
     </dd>
 
     <dt><code>data-fv-validate</code></dt>
@@ -1131,11 +1160,10 @@
             <li><code>select</code></li>
             <li><code>text</code></li>
         </ul>
+        For more details see <a class="goto" href="#" data-href="#validators">validators</a>.
     </dd>
 </dl>
                     </div>
-                                        <div role="tabpanel" class="tab-pane " id="constraint_attributes">
-                                            </div>
                             </div>
 
         <footer class="site-footer">
@@ -1155,11 +1183,14 @@
             <div class="modal-body">
                 <p>
                     A list of targets is defined as space separated <code>String</code>.<br><br>
-                    Each list element <var>E</var> is parsed like so (for a FormValidator <var>F</var>):<br>
+                    Each list element <var class="math">E</var> is parsed like so (for a FormValidator <var class="math">F</var>):<br>
                     <ol>
-                        <li>tru to find an element in the form of <var>F</var> where the attribute <code>data-fv-name</code> equals <var>E</var></li>
-                        <li>otherwise <var>E</var> is interpreted as selector which will be looked for in <var>F</var></li>
-                        <li>otherwise <var>E</var> is interpreted as selector which will be looked for in the entire document</li>
+                        <li>try to find an element in the form of <var class="math">F</var> where the attribute <code>data-fv-name</code> equals <var class="math">E</var></li>
+                        <li>
+                            otherwise <var class="math">E</var> is interpreted as selector which will be looked for in the path to <var class="math">F</var> (using jQuery's <code>closest()</code>), this makes it easy to affect container elements of <var class="math">E</var>
+                        </li>
+                        <li>otherwise <var class="math">E</var> is interpreted as selector which will be looked for in <var class="math">F</var></li>
+                        <li>otherwise <var class="math">E</var> is interpreted as selector which will be looked for in the entire document</li>
                     </ol>
                 </p>
             </div>
