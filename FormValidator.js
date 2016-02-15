@@ -261,7 +261,7 @@
         }
         return true;
       },
-      text: function(str, elem) {
+      text: function(str, elem, min, max) {
         return str.length > 0;
       },
       radio: function(str, elem) {
@@ -663,6 +663,7 @@
     * Valid options are:
     *  - apply_error_styles:    {Boolean} (default is true)
     *  - all:                   {Boolean} (default is false)
+    *  - focus_invalid:         {Boolean} (default is true)
     *
      */
 
@@ -671,7 +672,8 @@
       if (options == null) {
         options = this.validation_options || {
           apply_error_styles: true,
-          all: false
+          all: false,
+          focus_invalid: true
         };
       }
       if (this.fields == null) {
@@ -819,8 +821,10 @@
           this._apply_dependency_error_styles(dependency_elements, is_valid);
         }
       }
-      if (first_invalid_element != null) {
-        first_invalid_element.focus();
+      if (options.focus_invalid === true) {
+        if (first_invalid_element != null) {
+          first_invalid_element.focus();
+        }
       }
       return errors;
     };

@@ -1,6 +1,8 @@
 class window.FormValidator
     # TODO: performance: be lazy: whenever a form field is analyzed cache that information in form validator (because the validation is very likely to be done several times before submitting actually happens)
     # TODO: create graph with meta data so single elements can be validated (even if they have dependencies)
+    # TODO: add onchange handler to standard elements: check only changed elements (also for real time validation)
+    # TODO: add effects for dependencies
 
     ########################################################################################################################
     ########################################################################################################################
@@ -30,6 +32,7 @@ class window.FormValidator
                 return {
                     error_message_type: "email_many_at"
                 }
+            # TODO: check for trailing dot?
             if parts.length is 2 and parts[0] isnt "" and parts[1] isnt ""
                 # check if there is a dot in domain parts
                 if str.indexOf(".", str.indexOf("@")) < 0 or str[str.length - 1] is "."
@@ -159,7 +162,7 @@ class window.FormValidator
                 }
             return true
         # TODO: add options for minlength, maxlength
-        text: (str, elem) ->
+        text: (str, elem, min, max) ->
             return str.length > 0
         # element validators: expect jquery object
         radio: (str, elem) ->
@@ -506,8 +509,9 @@ class window.FormValidator
     * Valid options are:
     *  - apply_error_styles:    {Boolean} (default is true)
     *  - all:                   {Boolean} (default is false)
+    *  - focus_invalid:         {Boolean} (default is true)
     *###
-    validate: (options = @validation_options or {apply_error_styles: true, all: false}) ->
+    validate: (options = @validation_options or {apply_error_styles: true, all: false, focus_invalid: true}) ->
         if not @fields?
             @_update()
 
@@ -668,8 +672,8 @@ class window.FormValidator
 
                 @_apply_dependency_error_styles(dependency_elements, is_valid)
 
-
-        first_invalid_element?.focus()
+        if options.focus_invalid is true
+            first_invalid_element?.focus()
         return errors
 
     get_progress: (as_percentage = false) ->
