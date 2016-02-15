@@ -24,7 +24,6 @@
                 <li>
                     <code>fade</code> *<br>
                     Fade the element in (on <code>onDependenciesValid</code>) or out (on <code>onDependenciesInvalid</code>).<br>
-                    The default duration used for the animation is jQuery's default value (currently <code>400</code>). This is the same for all changes marked with *.<br>
                     See jQuery's <code>fadeIn</code> and <code>fadeOut</code>.
                 </li>
                 <li>
@@ -48,6 +47,7 @@
                     The same as <code>show</code> but without animnation (changes the <code>display</code> style).
                 </li>
             </ul>
+            * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change automatically if jQuery changes it.
         </p>
     </div>
 </div>
