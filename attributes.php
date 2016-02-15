@@ -33,6 +33,13 @@
         <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).
     </dd>
 
+    <dt><code>data-fv-error-styles</code></dt>
+    <dd>
+        <code>String</code> (CSS styles)
+        <br> Defines what CSS styles will be applied to the error target(s) of an invalid field. Preferably, <code>data-fv-error-classes</code> should be used though.
+        <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).
+    </dd>
+
     <dt><code>data-fv-error-targets</code></dt>
     <dd>
         <code>String</code> (CSS class names or target names, space separated)<br>
