@@ -3,6 +3,7 @@ class window.FormValidator
     # TODO: create graph with meta data so single elements can be validated (even if they have dependencies)
     # TODO: add onchange handler to standard elements: check only changed elements (also for real time validation)
     # TODO: add effects for dependencies
+    # TODO: define constraint validators for constraints that are independent from type validators
 
     ########################################################################################################################
     ########################################################################################################################
@@ -22,50 +23,6 @@ class window.FormValidator
     #       -> properties needed for the according error message (-> parameters)
     #       -> properties needed for other validators (as they will be able to access other validators' results)
     @validators =
-        email: (str, elem) ->
-            if str.indexOf("@") < 0
-                return {
-                    error_message_type: "email_at"
-                }
-            parts = str.split "@"
-            if parts.length > 2
-                return {
-                    error_message_type: "email_many_at"
-                }
-            # TODO: check for trailing dot?
-            if parts.length is 2 and parts[0] isnt "" and parts[1] isnt ""
-                # check if there is a dot in domain parts
-                if str.indexOf(".", str.indexOf("@")) < 0 or str[str.length - 1] is "."
-                    return {
-                        error_message_type: "email_dot"
-                    }
-                return true
-            return {
-                error_message_type: "email"
-            }
-        integer: (str, elem, min, max, include_min, include_max) ->
-            res = @_number(str, elem, min, max, include_min, include_max)
-            if res.valid is true
-                if res._number is Math.floor(res._number)
-                    return true
-                return {
-                    error_message_type: "integer_float"
-                }
-
-            str = res._string
-            n = Math.floor(res._number)
-
-            if isNaN(n) or not isFinite(n) or str isnt "#{n}"
-                return {
-                    error_message_type: "integer"
-                }
-            res.error_message_type = res.error_message_type.replace("number_", "integer_")
-            return res
-        number: (str, elem, min, max, include_min, include_max) ->
-            res = @_number(str, elem, min, max, include_min, include_max)
-            if res.valid is true
-                return true
-            return res
         # "private" validator (used in other validators)
         _number: (str, elem, min, max, include_min = true, include_max = true) ->
             str = str.replace(/\s/g, "")
@@ -146,6 +103,52 @@ class window.FormValidator
                 _number: n
                 _string: str
             }
+        _text: (str, elem, min, max) ->
+            return str.length > 0
+        email: (str, elem) ->
+            if str.indexOf("@") < 0
+                return {
+                    error_message_type: "email_at"
+                }
+            parts = str.split "@"
+            if parts.length > 2
+                return {
+                    error_message_type: "email_many_at"
+                }
+            # TODO: check for trailing dot?
+            if parts.length is 2 and parts[0] isnt "" and parts[1] isnt ""
+                # check if there is a dot in domain parts
+                if str.indexOf(".", str.indexOf("@")) < 0 or str[str.length - 1] is "."
+                    return {
+                        error_message_type: "email_dot"
+                    }
+                return true
+            return {
+                error_message_type: "email"
+            }
+        integer: (str, elem, min, max, include_min, include_max) ->
+            res = @_number(str, elem, min, max, include_min, include_max)
+            if res.valid is true
+                if res._number is Math.floor(res._number)
+                    return true
+                return {
+                    error_message_type: "integer_float"
+                }
+
+            str = res._string
+            n = Math.floor(res._number)
+
+            if isNaN(n) or not isFinite(n) or str isnt "#{n}"
+                return {
+                    error_message_type: "integer"
+                }
+            res.error_message_type = res.error_message_type.replace("number_", "integer_")
+            return res
+        number: (str, elem, min, max, include_min, include_max) ->
+            res = @_number(str, elem, min, max, include_min, include_max)
+            if res.valid is true
+                return true
+            return res
         phone: (str, elem) ->
             if str.length < 3
                 return {
@@ -171,6 +174,15 @@ class window.FormValidator
             return elem.prop("checked") is true
         select: (str, elem) ->
             return @text(elem.val())
+
+    @constraint_validators =
+        blacklist: (value) ->
+        max: (value) ->
+        max_length: (value) ->
+        min: (value) ->
+        min_length: (value) ->
+        whitelist: (value) ->
+
 
     # define an error_message_type for each error mode (of ERROR_MODES) (for each validator that supports different error modes)
     @get_error_message_type: (special_type, error_mode) ->
@@ -269,6 +281,7 @@ class window.FormValidator
 
         # default css error classes. can be overridden by data-fv-error-classes on any error target
         @error_classes          = options.error_classes or @form.attr("data-fv-error-classes") or ""
+        @error_styles           = options.error_styles or @form.attr("data-fv-error-styles") or ""
         @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or ""
         @validators             = $.extend {}, CLASS.validators, options.validators
         @validation_options     = options.validation_options or null
@@ -382,6 +395,7 @@ class window.FormValidator
             result = $(target)
         return result
 
+    # apply error classes and styles to element if invalid
     _apply_error_styles: (element, error_targets, is_valid) ->
         if error_targets?
             # split and trim
@@ -396,6 +410,9 @@ class window.FormValidator
                     target = element
                 targets.push target
 
+                # TODO: add function for parsing error styles string to be able to restore the old style
+
+                # apply element's or the form's error classes
                 if (error_classes = target.attr("data-fv-error-classes"))?
                     if is_valid is false
                         target.addClass error_classes
@@ -436,6 +453,56 @@ class window.FormValidator
             return true
 
         return (elems for name, elems of dict)
+
+    _validate_element: (element, type, value, usedValFunc, info) ->
+        # type = element.attr("data-fv-validate")
+        # {value, usedValFunc} = @_get_value(element, type)
+
+        validator = @validators[type]
+        if not validator?
+            throw new Error("FormValidator::_validate_element: No validator found for type '#{type}'. Make sure the type is correct or define a validator!")
+        validation = validator.call(@validators, value, element)
+
+        # if a simple return value was used (false/string containing the error message type) => create object
+        if validation is false
+            validation = {
+                error_message_type: type
+            }
+        else if typeof validation is "string"
+            validation = {
+                error_message_type: validation
+            }
+
+        if info?
+            info.type = type
+            info.usedValFunc = usedValFunc
+            info.validator = validator
+            info.value = value
+
+        return validation
+
+    # validation - phase 1
+    _validate_dependencies: (element, type) ->
+        errors = []
+        elements = []
+        if (depends_on = element.attr("data-fv-depends-on"))?
+            dependencies = depends_on.split /\s+/g
+            for dependency, j in dependencies
+                dependency_elem = @_find_target(dependency, element)
+                elements.push dependency_elem
+                info = {}
+                dependency_validation = @_validate_element(dependency_elem, type, @_get_value(element, type) info)
+                if dependency_validation isnt true
+                    errors.push $.extend(dependency_validation, {
+                        element: dependency_elem
+                        index:   j
+                        type:    info.type
+                        value:   info.value
+                    })
+        return {
+            dependency_errors: errors
+            dependency_elements: elements
+        }
 
     ########################################################################################################################
     ########################################################################################################################
@@ -515,38 +582,12 @@ class window.FormValidator
         if not @fields?
             @_update()
 
-        # @reset_error_styles()
         CLASS           = @constructor
         result          = true
         errors          = []
         prev_name       = null
         indices_by_type = {}
         usedValFunc     = false
-
-        validate_field = (field, info) =>
-            type = elem.attr("data-fv-validate")
-            {value, usedValFunc} = @_get_value(field, type)
-
-            validator = @validators[type]
-            validation = validator.call(@validators, value, elem)
-
-            # if a simple return value was used (false/string containing the error message type) => create object
-            if validation is false
-                validation = {
-                    error_message_type: type
-                }
-            else if typeof validation is "string"
-                validation = {
-                    error_message_type: validation
-                }
-
-            if info?
-                info.type = type
-                info.usedValFunc = usedValFunc
-                info.validator = validator
-                info.value = value
-
-            return validation
 
         # NOTE: remerge required and optional fields in order to:
         # 1. have 1 loop only
@@ -559,18 +600,8 @@ class window.FormValidator
         for i in [1..fields.length]
             elem        = $(fields[i - 1])
             is_required = required.index(elem) >= 0
-
-            info = {}
-            validation = validate_field(elem, info)
-            is_valid = (validation is true)
-            {type, usedValFunc, validator, value} = info
-            current_error = null
-
-            if indices_by_type[type]?
-                index_of_type = ++indices_by_type[type]
-            else
-                indices_by_type[type] = 1
-                index_of_type = 1
+            type = elem.attr("data-fv-validate")
+            {value, usedValFunc} = @_get_value(elem, type)
 
             # skip empty optional elements
             if options.all is false and not is_required and (value.length is 0 or type is "radio" or type is "checkbox")
@@ -582,60 +613,58 @@ class window.FormValidator
                 )
                 continue
 
-            name = elem.attr("data-fv-name")
-            depends_on = elem.attr("data-fv-depends-on")
+            # PHASE 1: check if dependencies are fulfilled
+            {dependency_errors, dependency_elements} = @_validate_dependencies(elem, type)
+            # TODO: currently ANY invalid dependency will cause this error. implement the option to choose between AND and OR (any vs all)
+            if dependency_errors.length > 0
+                result = false
+                is_valid = false
+                # create error if the element has unfulfilled dependencies
+                errors.push {
+                    element:    elem
+                    message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {element: elem, error_message_type: "dependency"})
+                    required:   is_required
+                    type:       "dependency"
+                }
+                if not first_invalid_element?
+                    first_invalid_element = elem
+                # TODO skip remaing loop content until error classes are applied
 
-            # check if dependencies are fulfilled
-            dependency_errors = []
-            dependency_elements = []
-            if depends_on?
-                dependencies = depends_on.split /\s+/g
-                for dependency, j in dependencies
-                    dependency_elem = @_find_target(dependency, elem)
-                    dependency_elements.push dependency_elem
-                    info = {}
-                    dependency_validation = validate_field(dependency_elem, info)
-                    if dependency_validation isnt true
-                        dependency_errors.push $.extend(dependency_validation, {
-                            element: dependency_elem
-                            index:   j
-                            type:    info.type
-                            value:   info.value
-                        })
+            # PHASE 2: validate the value
+            info = {}
+            validation = @_validate_element(elem, type, value, usedValFunc, info)
+            is_valid = (validation is true)
+            {validator} = info
+            current_error = null
+
+            if indices_by_type[type]?
+                index_of_type = ++indices_by_type[type]
+            else
+                indices_by_type[type] = 1
+                index_of_type = 1
+
+            name = elem.attr("data-fv-name")
 
             # element is invalid
-            if not is_valid or dependency_errors.length > 0
+            if not is_valid
                 result = false
 
-                # TODO: currently ANY invalid dependency will cause this error. implement the option to choose between AND and OR (any vs all)
-                # create error message if the element has unfulfilled dependencies
-                if dependency_errors.length > 0
-                    errors.push {
-                        element:    elem
-                        message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {element: elem, error_message_type: "dependency"})
-                        required:   is_required
-                        type:       "dependency"
-                    }
-                    is_valid = false
-                # create normal error message
-                if not is_valid
-                    error_message_params = $.extend validation, {
-                        element:        elem
-                        index:          i
-                        index_of_type:  index_of_type
-                        name:           name
-                        previous_name:  prev_name
-                        value:          value
-                    }
-
-                    current_error =
-                        element:    elem
-                        message:    @_create_error_message(@locale, error_message_params)
-                        required:   is_required
-                        type:       type
-                        validator:  validator
-                        value:      value
-                    errors.push current_error
+                error_message_params = $.extend validation, {
+                    element:        elem
+                    index:          i
+                    index_of_type:  index_of_type
+                    name:           name
+                    previous_name:  prev_name
+                    value:          value
+                }
+                current_error =
+                    element:    elem
+                    message:    @_create_error_message(@locale, error_message_params)
+                    required:   is_required
+                    type:       type
+                    validator:  validator
+                    value:      value
+                errors.push current_error
 
                 if not first_invalid_element?
                     first_invalid_element = elem
