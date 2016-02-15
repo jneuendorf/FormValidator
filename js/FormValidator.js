@@ -261,7 +261,7 @@
         }
         return true;
       },
-      text: function(str, elem) {
+      text: function(str, elem, min, max) {
         return str.length > 0;
       },
       radio: function(str, elem) {
@@ -486,9 +486,12 @@
       };
     };
 
-    FormValidator.prototype._find_target = function(target) {
+    FormValidator.prototype._find_target = function(target, element) {
       var result;
       result = this.form.find("[data-fv-name='" + target + "']");
+      if (result.length === 0) {
+        result = element.closest(target);
+      }
       if (result.length === 0) {
         result = this.form.find(target);
       }
@@ -508,7 +511,7 @@
         for (k = 0, len = error_targets.length; k < len; k++) {
           error_target = error_targets[k];
           if (error_target !== "self") {
-            target = this._find_target(error_target);
+            target = this._find_target(error_target, element);
           } else {
             target = element;
           }
@@ -660,6 +663,7 @@
     * Valid options are:
     *  - apply_error_styles:    {Boolean} (default is true)
     *  - all:                   {Boolean} (default is false)
+    *  - focus_invalid:         {Boolean} (default is true)
     *
      */
 
@@ -668,7 +672,8 @@
       if (options == null) {
         options = this.validation_options || {
           apply_error_styles: true,
-          all: false
+          all: false,
+          focus_invalid: true
         };
       }
       if (this.fields == null) {
@@ -734,7 +739,7 @@
           dependencies = depends_on.split(/\s+/g);
           for (j = l = 0, len = dependencies.length; l < len; j = ++l) {
             dependency = dependencies[j];
-            dependency_elem = this._find_target(dependency);
+            dependency_elem = this._find_target(dependency, elem);
             dependency_elements.push(dependency_elem);
             info = {};
             dependency_validation = validate_field(dependency_elem, info);
@@ -816,8 +821,10 @@
           this._apply_dependency_error_styles(dependency_elements, is_valid);
         }
       }
-      if (first_invalid_element != null) {
-        first_invalid_element.focus();
+      if (options.focus_invalid === true) {
+        if (first_invalid_element != null) {
+          first_invalid_element.focus();
+        }
       }
       return errors;
     };

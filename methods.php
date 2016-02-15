@@ -62,7 +62,7 @@
             </dd>
 
             <div style="border-radius: 4px; box-shadow: 0px 0px 20px #c1c1c1; margin-top: 30px; padding: 1px 25px 10px 25px;">
-                <dt><code>Function validate(Object validation_options={all: false, apply_error_styles: true}) -> Array (of Object)</code></dt>
+                <dt><code>Function validate(Object validation_options={all: false, apply_error_styles: true, focus_invalid: true}) -> Array (of Object)</code></dt>
                 <dd>
                     Validates the form and returns a list of errors. Each error looks like this:
                     <pre class="brush: js">
@@ -80,6 +80,7 @@
                     <ul>
                         <li><code>Boolean all</code>: if <code>true</code> force validation on all fields (even if they are declared optional)</li>
                         <li><code>Boolean apply_error_styles</code>: if <code>true</code> add <code>error_classes</code> to and remove them from invalid elements' error targets (otherwise the targets won't be changed)</li>
+                        <li><code>Boolean focus_invalid</code>: if <code>true</code> focus the first invalid element (otherwise the focus won't be changed)</li>
                     </ul>
                 </dd>
             </div>
