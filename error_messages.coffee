@@ -1,7 +1,9 @@
 # valid variables are: value, index, index_of_type, name, previous_name, element
 # and whatever else is passed from the validator
+# TODO: make all messages function (instead of mustache-like style)
 error_messages =
     de:
+        # validators
         email:              "'{{value}}' ist keine gültige E-Mail-Adresse"
         email_at:           "Eine E-Mail-Adresse muss ein @-Zeichen enthalten"
         email_many_at:      "Eine E-Mail-Adresse darf höchstens ein @-Zeichen enthalten"
@@ -31,6 +33,8 @@ error_messages =
             if params.previous_name
                 return "Bitte füllen Sie das Feld nach '#{params.previous_name}' aus"
             return "Bitte füllen Sie das #{params.index_of_type}. Textfeld aus"
+        # constraint validators
+        # v: () ->
     # TODO: adjust english messages
     en:
         email:              "'{{value}}' is no valid e-mail address"

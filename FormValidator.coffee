@@ -334,11 +334,11 @@ class window.FormValidator
         return validation
 
     # validation - phase 1
-    _validate_dependencies: (element, type) ->
+    _validate_dependencies: (element, data) ->
         errors = []
         elements = []
-        if (depends_on = element.attr("data-fv-depends-on"))?
-            elements = @_find_targets(depends_on, element)
+        if data.depends_on?
+            elements = data.depends_on
             for dependency_elem, i in elements
                 elements.push dependency_elem
                 info = {}
@@ -354,7 +354,9 @@ class window.FormValidator
                     })
 
         # at least 1 dependency is valid <=> valid
-        if element.attr("data-fv-dependency-mode") is "any"
+        if not data.dependency_mode?
+            data.dependency_mode = element.attr("data-fv-dependency-mode")
+        if data.dependency_mode is "any"
             valid = errors.length < elements.length
             mode = "any"
         # no dependency is invalid <=> valid
@@ -366,13 +368,20 @@ class window.FormValidator
             dependency_errors: errors
             dependency_elements: elements
             valid_dependencies: valid
-            dependency_mode: mode
+            dependency_mode: data.dependency_mode
         }
 
-    _validate_constraints: (element) ->
-        return {
+    _validate_constraints: (element, data) ->
+        # prefix = "data-fv-"
+        # special =
+        #     type: "validate"
+        #     required: "optional"
+        CLASS = @constructor
+        results = []
+        for constraint_name, constraint_validator of CLASS.constraint_validators
+            true
 
-        }
+        return results
 
 
     ########################################################################################################################
@@ -522,6 +531,7 @@ class window.FormValidator
 
             prev_phase_valid = true
 
+            #########################################################
             # PHASE 1: check if dependencies are fulfilled
             {dependency_errors, dependency_elements, dependency_mode, valid_dependencies} = @_validate_dependencies(elem, type)
             if not valid_dependencies
@@ -544,46 +554,55 @@ class window.FormValidator
                     first_invalid_element = elem
                 # TODO skip remaing loop content until error classes are applied
 
-            # PHASE 2: validate the value
-            if prev_phase_valid
-                info = {}
-                # TODO: cache validation result (for dependency validation)
-                validation = @_validate_element(elem, type, value, usedValFunc, info)
-                is_valid = (validation is true)
-                {validator} = info
-                current_error = null
+            # validate the current value only if it has changed
+            # TODO: see how to check the above: should it maybe be done in @_validate_element? or here and there?
+            if value isnt data.value
+                data.value = value
 
-                # element is invalid
-                if not is_valid
-                    error_message_params = $.extend validation, {
-                        element:        elem
-                        index:          i
-                        index_of_type:  index_of_type
-                        name:           name
-                        previous_name:  prev_name
-                        value:          value
-                    }
-                    current_error =
-                        element:    elem
-                        message:    @_create_error_message(@locale, error_message_params)
-                        required:   is_required
-                        type:       type
-                        validator:  validator
-                        value:      value
-                    errors.push current_error
+                #########################################################
+                # PHASE 2: validate the value
+                # TODO: go into 2nd + 3rd phase also when a certain option is given ('all errors')
+                if prev_phase_valid
+                    info = {}
+                    # TODO: cache validation result (for dependency validation)
+                    validation = @_validate_element(elem, type, value, usedValFunc, info)
+                    {validator} = info
+                    current_error = null
 
-                    if not first_invalid_element?
-                        first_invalid_element = elem
+                    # element is invalid
+                    if validation isnt true
+                        error_message_params = $.extend validation, {
+                            element:        elem
+                            index:          i
+                            index_of_type:  index_of_type
+                            name:           name
+                            previous_name:  prev_name
+                            value:          value
+                        }
+                        current_error =
+                            element:    elem
+                            message:    @_create_error_message(@locale, error_message_params)
+                            required:   is_required
+                            type:       type
+                            validator:  validator
+                            value:      value
+                        errors.push current_error
 
+                        if not first_invalid_element?
+                            first_invalid_element = elem
 
-            # PHASE 3 - validate constraints
-            if prev_phase_valid
-                # TODO
-                @_validate_constraints(elem)
-                true
+                #########################################################
+                # PHASE 3 - validate constraints
+                if prev_phase_valid
+                    # TODO
+                    for result in @_validate_constraints(elem, data) when result isnt true
+                        errors.push {}
+
+                    true
 
             # no validation phase was invalid => element is valid
             if prev_phase_valid
+                data.valid = true
                 # replace old value with post processed value
                 if elem.attr("data-fv-postprocess") is "true"
                     value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
@@ -600,18 +619,20 @@ class window.FormValidator
                     else
                         elem.text value
                     current_error?.value = value
+            else
+                data.valid = false
 
             if options.apply_error_styles is true
                 error_targets = @_apply_error_styles(
                     elem
                     @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
-                    is_valid
+                    prev_phase_valid
                 )
 
                 if current_error?
                     current_error.error_targets = error_targets
 
-                @_apply_dependency_error_styles(dependency_elements, is_valid)
+                @_apply_dependency_error_styles(dependency_elements, prev_phase_valid)
 
             prev_name = name
 
