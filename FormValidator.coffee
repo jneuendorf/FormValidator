@@ -311,7 +311,7 @@ class window.FormValidator
     ########################################################################################################################
     # PRIVATE
 
-    _update: () ->
+    _cache: () ->
         fields = @_get_fields(@form)
 
         @fields =
@@ -491,6 +491,7 @@ class window.FormValidator
                 dependency_elem = @_find_target(dependency, element)
                 elements.push dependency_elem
                 info = {}
+                # TODO: use cached validation results
                 dependency_validation = @_validate_element(dependency_elem, type, @_get_value(element, type) info)
                 if dependency_validation isnt true
                     errors.push $.extend(dependency_validation, {
@@ -499,10 +500,28 @@ class window.FormValidator
                         type:    info.type
                         value:   info.value
                     })
+
+        # at least 1 dependency is valid <=> valid
+        if element.attr("data-fv-dependency-mode") is "any"
+            valid = errors.length < dependencies.length
+            mode = "any"
+        # no dependency is invalid <=> valid
+        else
+            valid = errors.length is 0
+            mode = "all"
+
         return {
             dependency_errors: errors
             dependency_elements: elements
+            valid_dependencies: valid
+            dependency_mode: mode
         }
+
+    _validate_constraints: (element) ->
+        return {
+
+        }
+
 
     ########################################################################################################################
     ########################################################################################################################
@@ -577,13 +596,22 @@ class window.FormValidator
     *  - apply_error_styles:    {Boolean} (default is true)
     *  - all:                   {Boolean} (default is false)
     *  - focus_invalid:         {Boolean} (default is true)
+    *  - recache:               {Boolean} (default is false)
     *###
-    validate: (options = @validation_options or {apply_error_styles: true, all: false, focus_invalid: true}) ->
-        if not @fields?
-            @_update()
+    validate: (options = @validation_options or {apply_error_styles: true, all: false, focus_invalid: true, recache: false}) ->
+        default_options =
+            apply_error_styles: true
+            all: false
+            focus_invalid: true
+            recache: false
+
+        options = $.extend default_options, @validation_options, options
+
+
+        if not @fields? or options.recache is true
+            @_cache()
 
         CLASS           = @constructor
-        result          = true
         errors          = []
         prev_name       = null
         indices_by_type = {}
@@ -597,11 +625,17 @@ class window.FormValidator
         fields = @fields.all
         first_invalid_element = null
 
-        for i in [1..fields.length]
-            elem        = $(fields[i - 1])
+        for i in [0...fields.length]
+            elem        = fields.eq(i)
             is_required = required.index(elem) >= 0
             type = elem.attr("data-fv-validate")
             {value, usedValFunc} = @_get_value(elem, type)
+
+            if indices_by_type[type]?
+                index_of_type = ++indices_by_type[type]
+            else
+                indices_by_type[type] = 1
+                index_of_type = 1
 
             # skip empty optional elements
             if options.all is false and not is_required and (value.length is 0 or type is "radio" or type is "checkbox")
@@ -613,63 +647,72 @@ class window.FormValidator
                 )
                 continue
 
+            name = elem.attr("data-fv-name")
+
+            prev_phase_valid = true
+
             # PHASE 1: check if dependencies are fulfilled
-            {dependency_errors, dependency_elements} = @_validate_dependencies(elem, type)
-            # TODO: currently ANY invalid dependency will cause this error. implement the option to choose between AND and OR (any vs all)
-            if dependency_errors.length > 0
-                result = false
+            {dependency_errors, dependency_elements, dependency_mode, valid_dependencies} = @_validate_dependencies(elem, type)
+            if not valid_dependencies
                 is_valid = false
+                prev_phase_valid = false
                 # create error if the element has unfulfilled dependencies
                 errors.push {
                     element:    elem
-                    message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {element: elem, error_message_type: "dependency"})
+                    message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {
+                        element: elem
+                        error_message_type: "dependency"
+                        dependency_mode: dependency_mode
+                        dependency_errors: dependency_errors
+                    })
                     required:   is_required
                     type:       "dependency"
+                    mode:       dependency_mode
                 }
                 if not first_invalid_element?
                     first_invalid_element = elem
                 # TODO skip remaing loop content until error classes are applied
 
             # PHASE 2: validate the value
-            info = {}
-            validation = @_validate_element(elem, type, value, usedValFunc, info)
-            is_valid = (validation is true)
-            {validator} = info
-            current_error = null
+            if prev_phase_valid
+                info = {}
+                # TODO: cache validation result (for dependency validation)
+                validation = @_validate_element(elem, type, value, usedValFunc, info)
+                is_valid = (validation is true)
+                {validator} = info
+                current_error = null
 
-            if indices_by_type[type]?
-                index_of_type = ++indices_by_type[type]
-            else
-                indices_by_type[type] = 1
-                index_of_type = 1
+                # element is invalid
+                if not is_valid
+                    error_message_params = $.extend validation, {
+                        element:        elem
+                        index:          i
+                        index_of_type:  index_of_type
+                        name:           name
+                        previous_name:  prev_name
+                        value:          value
+                    }
+                    current_error =
+                        element:    elem
+                        message:    @_create_error_message(@locale, error_message_params)
+                        required:   is_required
+                        type:       type
+                        validator:  validator
+                        value:      value
+                    errors.push current_error
 
-            name = elem.attr("data-fv-name")
+                    if not first_invalid_element?
+                        first_invalid_element = elem
 
-            # element is invalid
-            if not is_valid
-                result = false
 
-                error_message_params = $.extend validation, {
-                    element:        elem
-                    index:          i
-                    index_of_type:  index_of_type
-                    name:           name
-                    previous_name:  prev_name
-                    value:          value
-                }
-                current_error =
-                    element:    elem
-                    message:    @_create_error_message(@locale, error_message_params)
-                    required:   is_required
-                    type:       type
-                    validator:  validator
-                    value:      value
-                errors.push current_error
+            # PHASE 3 - validate constraints
+            if prev_phase_valid
+                # TODO
+                @_validate_constraints(elem)
+                true
 
-                if not first_invalid_element?
-                    first_invalid_element = elem
-            # element is valid
-            else
+            # no validation phase was invalid => element is valid
+            if prev_phase_valid
                 # replace old value with post processed value
                 if elem.attr("data-fv-postprocess") is "true"
                     value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
@@ -687,8 +730,6 @@ class window.FormValidator
                         elem.text value
                     current_error?.value = value
 
-            prev_name = name
-
             if options.apply_error_styles is true
                 error_targets = @_apply_error_styles(
                     elem
@@ -701,13 +742,15 @@ class window.FormValidator
 
                 @_apply_dependency_error_styles(dependency_elements, is_valid)
 
+            prev_name = name
+
         if options.focus_invalid is true
             first_invalid_element?.focus()
         return errors
 
-    get_progress: (as_percentage = false) ->
+    get_progress: (options = {as_percentage: false, recache: false}) ->
         if not @fields?
-            @_update()
+            @_cache()
 
         fields = @fields.all
         required = @fields.required
@@ -731,14 +774,12 @@ class window.FormValidator
                     break
 
 
-
             found_error = false
             # NOTE: elem is either a jQuery object or a DOM element (but $.fn.is() can handle both!)
             for elem in group
                 elem = $(elem)
 
                 for error in errors when error.element.is(elem)
-                    # count++
                     found_error = true
                     break
                 if found_error
