@@ -1,5 +1,7 @@
 constraint_validators =
     blacklist: (value) ->
+    include_max: () ->
+    include_min: () ->
     max: (value) ->
     max_length: (value) ->
     min: (value) ->

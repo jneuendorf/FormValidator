@@ -56,6 +56,16 @@ class window.FormValidator
         NONE: "NONE"
     @ERROR_OUTPUT_MODES.DEFAULT = @ERROR_OUTPUT_MODES.NONE
 
+    # list of meta data that can be cached right away because each item is needed for a basic validation (all other data will be cached when it is needed)
+    # => this is the list of data that is always cached
+    CACHED_FIELD_DATA = [
+        "depends_on"
+        "name"
+        "preprocess"
+        "required"
+        "type"
+    ]
+
     ########################################################################################################################
     ########################################################################################################################
     # INIT
@@ -114,7 +124,6 @@ class window.FormValidator
 
         # default css error classes. can be overridden by data-fv-error-classes on any error target
         @error_classes          = options.error_classes or @form.attr("data-fv-error-classes") or ""
-        @error_styles           = options.error_styles or @form.attr("data-fv-error-styles") or ""
         @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or ""
         @validators             = $.extend {}, CLASS.validators, options.validators
         @validation_options     = options.validation_options or null
@@ -143,16 +152,44 @@ class window.FormValidator
     ########################################################################################################################
     # PRIVATE
 
-    _cache: () ->
-        fields = @_get_fields(@form)
+    # CACHING
 
-        @fields =
-            all: fields
-            required: @_get_required(fields)
-            # NOTE: now implicit
-            # optional: @_get_optional(fields)
+    # used to get the element's attribute's value for a given part of the cache
+    _get_attribute_value_for_key: (element, key) ->
+        prefix = "data-fv-"
+        special =
+            type: "validate"
+            required: "optional"
+        boolean = [
+            "preprocess"
+            "required"
+        ]
 
+        if not special[key]?
+            attribute = prefix + key.replace(/\_/g, "-")
+        else
+            attribute = prefix + special[key]
+
+        value = element.attr(attribute).trim()
+
+        if key in boolean
+            value = if value is "true" then true else false
+
+        # special because 'required' corresponds to 'optional'
+        if key is "required"
+            value = not value
+
+        return value
+
+
+    # data is the last validation result + the last validated value
+    _set_element_data: (element, data) ->
+        $.data(element, "_fv", data)
         return @
+
+    _get_element_data: (element) ->
+        return $.data(element, "_fv")
+
 
     _create_error_message: (locale, params) ->
         CLASS = @constructor
@@ -181,14 +218,16 @@ class window.FormValidator
     _get_required: (fields) ->
         return @required_field_getter?(fields) or fields.not("[data-fv-optional='true']")
 
-    _get_value: (element, type) ->
+    _get_value: (element, data) ->
+        {type, preprocess} = data
         usedValFunc = true
         value = element.val()
         if not value?
             usedValFunc = false
             value = element.text()
 
-        if @preprocessors[type]? and element.attr("data-fv-preprocess") isnt "false"
+
+        if @preprocessors[type]? and preprocess isnt false
             value = @preprocessors[type].call(@preprocessors, value, element, @locale)
 
         return {
@@ -196,7 +235,14 @@ class window.FormValidator
             value: value
         }
 
+    _find_targets: (targets, element) ->
+        if typeof targets is "string"
+            return (@_find_target(target, element) for target in targets.split(/\s+/g))
+        return targets or []
+
     _find_target: (target, element) ->
+        if target is "self"
+            return element
         result = @form.find("[data-fv-name='#{target}']")
         # nothing found => try closest matching jquery selector instead of data-fv-name property
         if result.length is 0
@@ -216,16 +262,8 @@ class window.FormValidator
             if typeof error_targets is "string"
                 error_targets = error_targets.split /\s+/g
 
-            targets = []
-            for error_target in error_targets
-                if error_target isnt "self"
-                    target = @_find_target(error_target, element)
-                else
-                    target = element
-                targets.push target
-
-                # TODO: add function for parsing error styles string to be able to restore the old style
-
+            targets = @_find_targets(error_targets, element)
+            for target in targets
                 # apply element's or the form's error classes
                 if (error_classes = target.attr("data-fv-error-classes"))?
                     if is_valid is false
@@ -237,7 +275,8 @@ class window.FormValidator
                         target.addClass @error_classes
                     else
                         target.removeClass @error_classes
-        return targets
+            return targets
+        return []
 
     _apply_dependency_error_styles: (error_targets, is_valid) ->
         if error_targets?
@@ -271,9 +310,6 @@ class window.FormValidator
     # VALIDATION HELPERS
 
     _validate_element: (element, type, value, usedValFunc, info) ->
-        # type = element.attr("data-fv-validate")
-        # {value, usedValFunc} = @_get_value(element, type)
-
         validator = @validators[type]
         if not validator?
             throw new Error("FormValidator::_validate_element: No validator found for type '#{type}'. Make sure the type is correct or define a validator!")
@@ -302,24 +338,24 @@ class window.FormValidator
         errors = []
         elements = []
         if (depends_on = element.attr("data-fv-depends-on"))?
-            dependencies = depends_on.split /\s+/g
-            for dependency, j in dependencies
-                dependency_elem = @_find_target(dependency, element)
+            elements = @_find_targets(depends_on, element)
+            for dependency_elem, i in elements
                 elements.push dependency_elem
                 info = {}
                 # TODO: use cached validation results
+                # FIXME: do not use given elements type and value BUT THE DEPENDENCY FIELD'S
                 dependency_validation = @_validate_element(dependency_elem, type, @_get_value(element, type) info)
                 if dependency_validation isnt true
                     errors.push $.extend(dependency_validation, {
                         element: dependency_elem
-                        index:   j
+                        index:   i
                         type:    info.type
                         value:   info.value
                     })
 
         # at least 1 dependency is valid <=> valid
         if element.attr("data-fv-dependency-mode") is "any"
-            valid = errors.length < dependencies.length
+            valid = errors.length < elements.length
             mode = "any"
         # no dependency is invalid <=> valid
         else
@@ -343,6 +379,8 @@ class window.FormValidator
     ########################################################################################################################
     # PUBLIC
 
+    # GETTERS + SETTERS
+
     set_error_target_getter: (error_target_getter) ->
         @error_target_getter = error_target_getter
         return @
@@ -355,18 +393,6 @@ class window.FormValidator
         @required_field_getter = required_field_getter
         return @
 
-    ###*
-    * This method can be used to define a validator for a new type or to override an existing validator.
-    *
-    * @method register_validator
-    * @param type {String}
-    * The type the validator will validate.
-    # Elements that are supposed to be validated by the new validator must have the type as data-fv-validate attribute.
-    * @param validator {Function}
-    * @param error_message_types {Array of String}
-    * @return {Object}
-    * An object with an error and a result key.
-    *###
     register_validator: (type, validator, error_message_types) ->
         # check validator in dev mode
         if DEBUG
@@ -398,6 +424,42 @@ class window.FormValidator
         delete @postprocessors[type]
         return @
 
+    # ACTUAL FUNCTIONALITY
+
+    # can be used to eagerly load all data
+    cache: () ->
+        fields = @_get_fields(@form)
+
+        @fields =
+            all: fields
+            required: @_get_required(fields)
+
+        for i in [0...fields.length]
+            elem = fields.eq(i)
+            data = @_get_element_data(elem)
+            if not data?
+                keys = CACHED_FIELD_DATA
+                # set keys that are cached later to null (which means unknow)
+                data =
+                    # field data
+                    dependency_mode: null
+                    error_targets: null
+                    group: null
+                    output_preprocessed: null
+                    postprocess: null
+                    # validation (meta) data
+                    constraints: null
+                    valid: null
+                    value: null
+                for key in keys
+                    data[key] = @_get_attribute_value_for_key(key)
+                # already parse the list of dependencies as list of jquery elements ("" => [], null => [])
+                data.depends_on = @_find_targets(data.depends_on, elem)
+
+                @_set_element_data(elem, data)
+
+        return @
+
     ###*
     * @method validate
     * @param options {Object}
@@ -417,9 +479,8 @@ class window.FormValidator
 
         options = $.extend default_options, @validation_options, options
 
-
         if not @fields? or options.recache is true
-            @_cache()
+            @cache()
 
         CLASS           = @constructor
         errors          = []
@@ -436,10 +497,11 @@ class window.FormValidator
         first_invalid_element = null
 
         for i in [0...fields.length]
-            elem        = fields.eq(i)
-            is_required = required.index(elem) >= 0
-            type = elem.attr("data-fv-validate")
-            {value, usedValFunc} = @_get_value(elem, type)
+            elem = fields.eq(i)
+            data = @_get_element_data(elem)
+            is_required = data.required
+            {type, name} = data
+            {value, usedValFunc} = @_get_value(elem, data)
 
             if indices_by_type[type]?
                 index_of_type = ++indices_by_type[type]
@@ -455,9 +517,8 @@ class window.FormValidator
                     @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
                     true
                 )
+                # TODO also reset dependency styles
                 continue
-
-            name = elem.attr("data-fv-name")
 
             prev_phase_valid = true
 
@@ -560,7 +621,7 @@ class window.FormValidator
 
     get_progress: (options = {as_percentage: false, recache: false}) ->
         if not @fields? or options.recache is true
-            @_cache()
+            @cache()
 
         fields = @fields.all
         required = @fields.required
