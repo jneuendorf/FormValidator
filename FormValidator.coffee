@@ -1,9 +1,19 @@
 class window.FormValidator
-    # TODO: performance: be lazy: whenever a form field is analyzed cache that information in form validator (because the validation is very likely to be done several times before submitting actually happens)
+    # TODO: performance: be lazy: whenever a form field is analyzed cache that information in that element (because the validation is very likely to be done several times before submitting actually happens)
     # TODO: create graph with meta data so single elements can be validated (even if they have dependencies)
     # TODO: add onchange handler to standard elements: check only changed elements (also for real time validation)
     # TODO: add effects for dependencies
     # TODO: define constraint validators for constraints that are independent from type validators
+
+
+    ########################################################################################################################
+    ########################################################################################################################
+    # CONSTANTS
+
+    @ERROR_MODES = ERROR_MODES
+    @ERROR_OUTPUT_MODES = ERROR_OUTPUT_MODES
+    # NOTE: CACHED_FIELD_DATA is already available in the closure
+
 
     ########################################################################################################################
     ########################################################################################################################
@@ -17,17 +27,6 @@ class window.FormValidator
 
     # defined in error_messages.coffee
     @error_messages = error_messages
-
-    # define an error_message_type for each error mode (of ERROR_MODES) (for each validator that supports different error modes)
-    @get_error_message_type: (special_type, error_mode) ->
-        if error_mode is @ERROR_MODES.SIMPLE
-            base_type = special_type.split("_")[0]
-            switch base_type
-                when "integer"
-                    return "integer"
-                when "number"
-                    return "number"
-        return special_type
 
     @default_preprocessors =
         number: (str, elem, locale) ->
@@ -44,27 +43,20 @@ class window.FormValidator
             return str
 
 
-    @ERROR_MODES =
-        NORMAL: "NORMAL"
-        SIMPLE: "SIMPLE"
-    @ERROR_MODES.DEFAULT = @ERROR_MODES.NORMAL
+    ########################################################################################################################
+    ########################################################################################################################
+    # STATIC METHODS
 
-    @ERROR_OUTPUT_MODES =
-        BELOW: "BELOW"
-        BOOTSTRAP_POPOVER: "BOOTSTRAP_POPOVER"
-        BOOTSTRAP_POPOVER_ON_FOCUS: "BOOTSTRAP_POPOVER_ON_FOCUS"
-        NONE: "NONE"
-    @ERROR_OUTPUT_MODES.DEFAULT = @ERROR_OUTPUT_MODES.NONE
-
-    # list of meta data that can be cached right away because each item is needed for a basic validation (all other data will be cached when it is needed)
-    # => this is the list of data that is always cached
-    CACHED_FIELD_DATA = [
-        "depends_on"
-        "name"
-        "preprocess"
-        "required"
-        "type"
-    ]
+    # define an error_message_type for each error mode (of ERROR_MODES) (for each validator that supports different error modes)
+    @get_error_message_type: (special_type, error_mode) ->
+        if error_mode is @ERROR_MODES.SIMPLE
+            base_type = special_type.split("_")[0]
+            switch base_type
+                when "integer"
+                    return "integer"
+                when "number"
+                    return "number"
+        return special_type
 
     ########################################################################################################################
     ########################################################################################################################
@@ -86,6 +78,7 @@ class window.FormValidator
         $elem = $(@)
 
         # prevent click in textfields (which also triggers the change event on previously focussed inputs) to trigger validation
+        # TODO: negate selector to be like not(input[type=hidden], ...)
         if (evt.type is "click" or evt.type is "change") and $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length is $elem.length
             return true
 
@@ -105,6 +98,8 @@ class window.FormValidator
     ########################################################################################################################
     # CONSTRUCTORS
     @new: (form, options) ->
+        if DEBUG and form not instanceof jQuery
+            throw new Error("FormValidator::constructor: Invalid form given (must be a jQuery object)!")
         return new @(form, options)
 
     ###*
@@ -114,12 +109,7 @@ class window.FormValidator
     constructor: (form, options = {}) ->
         CLASS = @constructor
 
-        if form instanceof jQuery
-            @form = form
-        else if form?
-            @form = $ form
-        else if DEBUG
-            throw new Error("FormValidator::constructor: Invalid form given!")
+        @form = form
         @fields = null
 
         # default css error classes. can be overridden by data-fv-error-classes on any error target
@@ -140,13 +130,8 @@ class window.FormValidator
         @create_dependency_error_message = options.create_dependency_error_message or null
         @preprocessors          = $.extend CLASS.default_preprocessors, options.preprocessors or {}
         @postprocessors         = options.postprocessors or {}
-
         @group                  = options.group or null
 
-
-    ########################################################################################################################
-    ########################################################################################################################
-    # STATIC METHODS
 
     ########################################################################################################################
     ########################################################################################################################
