@@ -170,7 +170,10 @@ class window.FormValidator
         else
             attribute = prefix + special[key]
 
-        value = element.attr(attribute).trim()
+        value = element.attr(attribute)
+
+        if value?
+            value = value.trim()
 
         if key in boolean
             value = if value is "true" then true else false
@@ -184,11 +187,11 @@ class window.FormValidator
 
     # data is the last validation result + the last validated value
     _set_element_data: (element, data) ->
-        $.data(element, "_fv", data)
+        $.data(element[0], "_fv", data)
         return @
 
     _get_element_data: (element) ->
-        return $.data(element, "_fv")
+        return $.data(element[0], "_fv")
 
 
     _create_error_message: (locale, params) ->
@@ -218,7 +221,7 @@ class window.FormValidator
     _get_required: (fields) ->
         return @required_field_getter?(fields) or fields.not("[data-fv-optional='true']")
 
-    _get_value: (element, data) ->
+    _get_value_info: (element, data) ->
         {type, preprocess} = data
         usedValFunc = true
         value = element.val()
@@ -226,6 +229,12 @@ class window.FormValidator
             usedValFunc = false
             value = element.text()
 
+        original_value = value
+
+        value_has_changed = original_value isnt data.value
+
+        # cache latest element's value
+        data.value = original_value
 
         if @preprocessors[type]? and preprocess isnt false
             value = @preprocessors[type].call(@preprocessors, value, element, @locale)
@@ -233,6 +242,8 @@ class window.FormValidator
         return {
             usedValFunc: usedValFunc
             value: value
+            original_value: original_value
+            value_has_changed: value_has_changed
         }
 
     _find_targets: (targets, element) ->
@@ -258,10 +269,6 @@ class window.FormValidator
     # apply error classes and styles to element if invalid
     _apply_error_styles: (element, error_targets, is_valid) ->
         if error_targets?
-            # split and trim
-            if typeof error_targets is "string"
-                error_targets = error_targets.split /\s+/g
-
             targets = @_find_targets(error_targets, element)
             for target in targets
                 # apply element's or the form's error classes
@@ -278,9 +285,10 @@ class window.FormValidator
             return targets
         return []
 
-    _apply_dependency_error_styles: (error_targets, is_valid) ->
+    _apply_dependency_error_styles: (element, error_targets, is_valid) ->
         if error_targets?
-            for target in error_targets
+            targets = @_find_targets(error_targets, element)
+            for target in targets
                 if (error_classes = target.attr("data-fv-dependency-error-classes"))?
                     if is_valid is false
                         target.addClass error_classes
@@ -291,7 +299,8 @@ class window.FormValidator
                         target.addClass @dependency_error_classes
                     else
                         target.removeClass @dependency_error_classes
-        return @
+            return targets
+        return []
 
     # create list of sets where each set is 1 unit for counting progress
     _group: (fields) ->
@@ -309,7 +318,9 @@ class window.FormValidator
 
     # VALIDATION HELPERS
 
-    _validate_element: (element, type, value, usedValFunc, info) ->
+    _validate_element: (element, data, value_info) ->
+        {type} = data
+        {value} = value_info
         validator = @validators[type]
         if not validator?
             throw new Error("FormValidator::_validate_element: No validator found for type '#{type}'. Make sure the type is correct or define a validator!")
@@ -325,12 +336,6 @@ class window.FormValidator
                 error_message_type: validation
             }
 
-        if info?
-            info.type = type
-            info.usedValFunc = usedValFunc
-            info.validator = validator
-            info.value = value
-
         return validation
 
     # validation - phase 1
@@ -341,21 +346,25 @@ class window.FormValidator
             elements = data.depends_on
             for dependency_elem, i in elements
                 elements.push dependency_elem
-                info = {}
-                # TODO: use cached validation results
+                dependency_data = @_get_element_data(dependency_elem)
                 # FIXME: do not use given elements type and value BUT THE DEPENDENCY FIELD'S
-                dependency_validation = @_validate_element(dependency_elem, type, @_get_value(element, type) info)
+                dependency_validation = @_validate_element(
+                    dependency_elem
+                    dependency_data
+                    @_get_value_info(dependency_elem, dependency_data)
+                )
                 if dependency_validation isnt true
                     errors.push $.extend(dependency_validation, {
                         element: dependency_elem
-                        index:   i
-                        type:    info.type
-                        value:   info.value
+                        index: i
+                        type: type
                     })
 
-        # at least 1 dependency is valid <=> valid
+        # cache dependency mode
         if not data.dependency_mode?
             data.dependency_mode = element.attr("data-fv-dependency-mode")
+
+        # at least 1 dependency is valid <=> valid
         if data.dependency_mode is "any"
             valid = errors.length < elements.length
             mode = "any"
@@ -461,7 +470,7 @@ class window.FormValidator
                     valid: null
                     value: null
                 for key in keys
-                    data[key] = @_get_attribute_value_for_key(key)
+                    data[key] = @_get_attribute_value_for_key(elem, key)
                 # already parse the list of dependencies as list of jquery elements ("" => [], null => [])
                 data.depends_on = @_find_targets(data.depends_on, elem)
 
@@ -510,7 +519,8 @@ class window.FormValidator
             data = @_get_element_data(elem)
             is_required = data.required
             {type, name} = data
-            {value, usedValFunc} = @_get_value(elem, data)
+            value_info = @_get_value_info(elem, data)
+            {value, original_value, value_has_changed, usedValFunc} = value_info
 
             if indices_by_type[type]?
                 index_of_type = ++indices_by_type[type]
@@ -532,8 +542,8 @@ class window.FormValidator
             prev_phase_valid = true
 
             #########################################################
-            # PHASE 1: check if dependencies are fulfilled
-            {dependency_errors, dependency_elements, dependency_mode, valid_dependencies} = @_validate_dependencies(elem, type)
+            # PHASE 1: validate dependencies (no matter if the value has changed because dependencies could have changed)
+            {dependency_errors, dependency_elements, dependency_mode, valid_dependencies} = @_validate_dependencies(elem, data)
             if not valid_dependencies
                 is_valid = false
                 prev_phase_valid = false
@@ -555,18 +565,14 @@ class window.FormValidator
                 # TODO skip remaing loop content until error classes are applied
 
             # validate the current value only if it has changed
-            # TODO: see how to check the above: should it maybe be done in @_validate_element? or here and there?
-            if value isnt data.value
-                data.value = value
+            if value_has_changed
 
                 #########################################################
                 # PHASE 2: validate the value
                 # TODO: go into 2nd + 3rd phase also when a certain option is given ('all errors')
                 if prev_phase_valid
-                    info = {}
                     # TODO: cache validation result (for dependency validation)
-                    validation = @_validate_element(elem, type, value, usedValFunc, info)
-                    {validator} = info
+                    validation = @_validate_element(elem, data, value_info)
                     current_error = null
 
                     # element is invalid
@@ -584,7 +590,6 @@ class window.FormValidator
                             message:    @_create_error_message(@locale, error_message_params)
                             required:   is_required
                             type:       type
-                            validator:  validator
                             value:      value
                         errors.push current_error
 
@@ -632,7 +637,7 @@ class window.FormValidator
                 if current_error?
                     current_error.error_targets = error_targets
 
-                @_apply_dependency_error_styles(dependency_elements, prev_phase_valid)
+                @_apply_dependency_error_styles(elem, dependency_elements, prev_phase_valid)
 
             prev_name = name
 
