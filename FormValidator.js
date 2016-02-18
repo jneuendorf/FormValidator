@@ -602,19 +602,22 @@
     };
 
     FormValidator.prototype._group = function(fields) {
-      var dict, elems, name;
+      var data, dict, elem, elems, i, j, name, ref;
       dict = {};
-      fields.each(function(idx, elem) {
-        var $elem, name;
-        $elem = $(elem);
-        name = $elem.attr("data-fv-group") || $elem.attr("name");
-        if (dict[name] == null) {
-          dict[name] = [$elem];
-        } else {
-          dict[name].push($elem);
+      for (i = j = 0, ref = fields.length; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
+        elem = fields.eq(i);
+        data = this._get_element_data(elem);
+        if (data.group == null) {
+          data.group = elem.attr("data-fv-group");
+          this._set_element_data(elem, data);
         }
-        return true;
-      });
+        name = data.group || elem.attr("name");
+        if (dict[name] == null) {
+          dict[name] = [elem];
+        } else {
+          dict[name].push(elem);
+        }
+      }
       return (function() {
         var results1;
         results1 = [];
@@ -669,6 +672,7 @@
       }
       if (data.dependency_mode == null) {
         data.dependency_mode = element.attr("data-fv-dependency-mode");
+        this._set_element_data(element, data);
       }
       if (data.dependency_mode === "any") {
         valid = errors.length < elements.length;
@@ -900,7 +904,10 @@
           }
         }
         if (prev_phase_valid) {
-          data.valid = true;
+          if (data.valid !== true) {
+            data.valid = true;
+            this._set_element_data(elem, data);
+          }
           if (elem.attr("data-fv-postprocess") === "true") {
             value = (ref3 = this.postprocessors[type]) != null ? ref3.call(this.postprocessors, value, elem, this.locale) : void 0;
             if (usedValFunc) {
@@ -923,7 +930,10 @@
             }
           }
         } else {
-          data.valid = false;
+          if (data.valid !== false) {
+            data.valid = false;
+            this._set_element_data(elem, data);
+          }
         }
         if (options.apply_error_styles === true) {
           error_targets = this._apply_error_styles(elem, (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets") || elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets"), prev_phase_valid);

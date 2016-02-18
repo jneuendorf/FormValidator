@@ -305,14 +305,19 @@ class window.FormValidator
     # create list of sets where each set is 1 unit for counting progress
     _group: (fields) ->
         dict = {}
-        fields.each (idx, elem) ->
-            $elem = $ elem
-            name = $elem.attr("data-fv-group") or $elem.attr("name")
+        for i in [0...fields.length]
+            elem = fields.eq(i)
+            data = @_get_element_data(elem)
+
+            if not data.group?
+                data.group = elem.attr("data-fv-group")
+                @_set_element_data(elem, data)
+
+            name = data.group or elem.attr("name")
             if not dict[name]?
-                dict[name] = [$elem]
+                dict[name] = [elem]
             else
-                dict[name].push $elem
-            return true
+                dict[name].push elem
 
         return (elems for name, elems of dict)
 
@@ -363,6 +368,7 @@ class window.FormValidator
         # cache dependency mode
         if not data.dependency_mode?
             data.dependency_mode = element.attr("data-fv-dependency-mode")
+            @_set_element_data(element, data)
 
         # at least 1 dependency is valid <=> valid
         if data.dependency_mode is "any"
@@ -607,7 +613,9 @@ class window.FormValidator
 
             # no validation phase was invalid => element is valid
             if prev_phase_valid
-                data.valid = true
+                if data.valid isnt true
+                    data.valid = true
+                    @_set_element_data(elem, data)
                 # replace old value with post processed value
                 if elem.attr("data-fv-postprocess") is "true"
                     value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
@@ -625,7 +633,9 @@ class window.FormValidator
                         elem.text value
                     current_error?.value = value
             else
-                data.valid = false
+                if data.valid isnt false
+                    data.valid = false
+                    @_set_element_data(elem, data)
 
             if options.apply_error_styles is true
                 error_targets = @_apply_error_styles(
