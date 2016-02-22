@@ -49,5 +49,12 @@
             </ul>
             * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change automatically if jQuery changes it.
         </p>
+
+        <h4>Cycle detection</h4>
+        <p>
+            <strong>There is none!</strong><br>
+            So you must make sure you do not define cyclic dependencies. Since dependencies are defined as a list of targets you could use a selector to find a dependency's element (or multiple). In that case you should be careful to match only the wanted elements.<br>
+            Using the <code>data-fv-name</code> attribute should be easier and safer to use and is therefore recommended.
+        </p>
     </div>
 </div>

@@ -7,7 +7,7 @@
             </div>
             <div class="modal-body">
                 <p>
-                    A list of targets is defined as space separated <code>String</code>.<br><br>
+                    A list of targets is defined as semicolon separated <code>String</code>.<br><br>
                     Each list element <var class="math">E</var> is parsed like so (for a FormValidator <var class="math">F</var>):<br>
                     <ol>
                         <li>try to find an element in the form of <var class="math">F</var> where the attribute <code>data-fv-name</code> equals <var class="math">E</var></li>
@@ -17,6 +17,9 @@
                         <li>otherwise <var class="math">E</var> is interpreted as selector which will be looked for in <var class="math">F</var></li>
                         <li>otherwise <var class="math">E</var> is interpreted as selector which will be looked for in the entire document</li>
                     </ol>
+                </p>
+                <p>
+                    <strong>Note:</strong> you cannot use the <code>;</code> character in the selector because it's used as the target delimiter.
                 </p>
             </div>
             <div class="modal-footer">

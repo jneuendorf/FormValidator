@@ -928,6 +928,13 @@
             </ul>
             * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change automatically if jQuery changes it.
         </p>
+
+        <h4>Cycle detection</h4>
+        <p>
+            <strong>There is none!</strong><br>
+            So you must make sure you do not define cyclic dependencies. Since dependencies are defined as a list of targets you could use a selector to find a dependency's element (or multiple). In that case you should be careful to match only the wanted elements.<br>
+            Using the <code>data-fv-name</code> attribute should be easier and safer to use and is therefore recommended.
+        </p>
     </div>
 </div>
                     </div>
@@ -1061,7 +1068,7 @@
 
     <dt><code>data-fv-depends-on</code></dt>
     <dd>
-        <code>String</code> (space separated)<br>
+        <code>String</code> (selectors and/or target names, semicolon separated)<br>
         Defines what targets have to be valid for the current element to be valid (additionally to the actual validation). To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
     </dd>
 
@@ -1072,16 +1079,9 @@
         <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).
     </dd>
 
-    <dt><code>data-fv-error-styles</code></dt>
-    <dd>
-        <code>String</code> (CSS styles)
-        <br> Defines what CSS styles will be applied to the error target(s) of an invalid field. Preferably, <code>data-fv-error-classes</code> should be used though.
-        <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).
-    </dd>
-
     <dt><code>data-fv-error-targets</code></dt>
     <dd>
-        <code>String</code> (CSS class names or target names, space separated)<br>
+        <code>String</code> (selectors and/or target names, semicolon separated)<br>
         Defines a list of targets which will get the defined <code>data-fv-error-classes</code> if the current element is invalid. To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
     </dd>
 
@@ -1198,7 +1198,7 @@
             </div>
             <div class="modal-body">
                 <p>
-                    A list of targets is defined as space separated <code>String</code>.<br><br>
+                    A list of targets is defined as semicolon separated <code>String</code>.<br><br>
                     Each list element <var class="math">E</var> is parsed like so (for a FormValidator <var class="math">F</var>):<br>
                     <ol>
                         <li>try to find an element in the form of <var class="math">F</var> where the attribute <code>data-fv-name</code> equals <var class="math">E</var></li>
@@ -1208,6 +1208,9 @@
                         <li>otherwise <var class="math">E</var> is interpreted as selector which will be looked for in <var class="math">F</var></li>
                         <li>otherwise <var class="math">E</var> is interpreted as selector which will be looked for in the entire document</li>
                     </ol>
+                </p>
+                <p>
+                    <strong>Note:</strong> you cannot use the <code>;</code> character in the selector because it's used as the target delimiter.
                 </p>
             </div>
             <div class="modal-footer">
