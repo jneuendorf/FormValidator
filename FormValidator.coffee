@@ -21,6 +21,7 @@ class window.FormValidator
 
     # defined in constraint_validators.coffee
     @constraint_validators = constraint_validators
+    @constraint_validator_options = constraint_validator_options
 
     # defined in validators.coffee
     @validators = validators
@@ -45,7 +46,9 @@ class window.FormValidator
 
     ########################################################################################################################
     ########################################################################################################################
-    # STATIC METHODS
+    # CLASS METHODS
+
+    # NOTE: for @new see CONSTRUCTORS section
 
     # define an error_message_type for each error mode (of ERROR_MODES) (for each validator that supports different error modes)
     @get_error_message_type: (special_type, error_mode) ->
@@ -57,6 +60,16 @@ class window.FormValidator
                 when "number"
                     return "number"
         return special_type
+
+    # from the list of errors generate an error message for a certain element (this combines the error messages of the errors belonging to a certain element)
+    # message = concatenation of each validation-phase-message string if they are errors for that part (generated independently, defined in ERROR_MESSAGE_CONFIG.ORDER)
+    # each part of the message can be generated differently (defined in ERROR_MESSAGE_CONFIG.BUILD_MODE)
+    @get_error_message_for_element: (element, errors) ->
+        # get the errors for each part
+        for part in @ERROR_MESSAGE_CONFIG.ORDER
+            true
+        return
+
 
     ########################################################################################################################
     ########################################################################################################################
@@ -117,6 +130,7 @@ class window.FormValidator
         @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or ""
         @validators             = $.extend {}, CLASS.validators, options.validators
         @validation_options     = options.validation_options or null
+        @constraint_validators  = $.extend {}, CLASS.constraint_validators, options.constraint_validators
         @error_messages         = options.error_messages
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
         @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
@@ -215,7 +229,6 @@ class window.FormValidator
             value = element.text()
 
         original_value = value
-
         value_has_changed = original_value isnt data.value
 
         # cache latest element's value
@@ -231,9 +244,9 @@ class window.FormValidator
             value_has_changed: value_has_changed
         }
 
-    _find_targets: (targets, element) ->
+    _find_targets: (targets, element, delimiter = /\s+/g) ->
         if typeof targets is "string"
-            return (@_find_target(target, element) for target in targets.split(/\s+/g))
+            return (@_find_target(target, element) for target in targets.split(delimiter))
         return targets or []
 
     _find_target: (target, element) ->
@@ -252,7 +265,7 @@ class window.FormValidator
         return result
 
     # apply error classes and styles to element if invalid
-    _apply_error_styles: (element, error_targets, is_valid) ->
+    _apply_error_classes: (element, error_targets, is_valid) ->
         if error_targets?
             targets = @_find_targets(error_targets, element)
             for target in targets
@@ -270,7 +283,7 @@ class window.FormValidator
             return targets
         return []
 
-    _apply_dependency_error_styles: (element, error_targets, is_valid) ->
+    _apply_dependency_error_classes: (element, error_targets, is_valid) ->
         if error_targets?
             targets = @_find_targets(error_targets, element)
             for target in targets
@@ -306,6 +319,24 @@ class window.FormValidator
 
         return (elems for name, elems of dict)
 
+    # group by .element (as list of array tuples)
+    _group_errors: (errors, options) ->
+        CLASS = @constructor
+        result = []
+        fields = @fields.all
+        # traverse fields in the order they appear in the DOM
+        for i in [0...fields.length]
+            elem = fields.eq(i)
+            errors = (error for error in errors when error.element.is(elem))
+            message = if options.messages is true then CLASS.get_error_message_for_element(elem, errors) else ""
+
+            result.push {
+                element: elem
+                errors: errors
+                message: message
+            }
+        return result
+
     # VALIDATION HELPERS
 
     _validate_element: (element, data, value_info) ->
@@ -337,7 +368,6 @@ class window.FormValidator
             for dependency_elem, i in elements
                 elements.push dependency_elem
                 dependency_data = @_get_element_data(dependency_elem)
-                # FIXME: do not use given elements type and value BUT THE DEPENDENCY FIELD'S
                 dependency_validation = @_validate_element(
                     dependency_elem
                     dependency_data
@@ -371,15 +401,34 @@ class window.FormValidator
             dependency_mode: data.dependency_mode
         }
 
-    _validate_constraints: (element, data) ->
-        # prefix = "data-fv-"
-        # special =
-        #     type: "validate"
-        #     required: "optional"
-        CLASS = @constructor
-        results = []
-        for constraint_name, constraint_validator of CLASS.constraint_validators
-            true
+    _validate_constraints: (element, data, value) ->
+        results = {}
+        if data.constraints?
+            constraints = data.constraints
+        else
+            CLASS = @constructor
+            constraints = []
+            for constraint_name, constraint_validator of @constraint_validators
+                if (constraint_value = element.attr("data-fv-#{constraint_name.replace(/\_/g, "-")}"))?
+                    # get options
+                    if (constraint_validator_options = CLASS.constraint_validator_options[constraint_name])?
+                        options = {}
+                        for option in constraint_validator_options
+                            options[option] = element.attr("data-fv-#{option.replace(/\_/g, "-")}")
+                    else
+                        options = null
+                    constraints.push {
+                        name: constraint_name
+                        options: options
+                        validator: constraint_validator
+                        value: constraint_value
+                    }
+            # cache constraints
+            data.constraints = constraints
+            @_set_element_data(element, data)
+
+        for constraint in constraints
+            results[constraint.name] = constraint.validator.call(@constraint_validators, value, constraint.value, constraint.options)
 
         return results
 
@@ -462,11 +511,10 @@ class window.FormValidator
                     value: null
                 for key in keys
                     data[key] = @_get_attribute_value_for_key(elem, key)
-                # already parse the list of dependencies as list of jquery elements ("" => [], null => [])
-                data.depends_on = @_find_targets(data.depends_on, elem)
+                # already parse the list of dependencies as list of jquery elements ("" => [], null => []), delimiter = ';'
+                data.depends_on = @_find_targets(data.depends_on, elem, /^\s*\;\s*$/g)
 
                 @_set_element_data(elem, data)
-
         return @
 
     ###*
@@ -474,17 +522,19 @@ class window.FormValidator
     * @param options {Object}
     * Default is this.validation_option. Otherwise:
     * Valid options are:
-    *  - apply_error_styles:    {Boolean} (default is true)
+    *  - apply_error_classes:   {Boolean} (default is true)
     *  - all:                   {Boolean} (default is false)
     *  - focus_invalid:         {Boolean} (default is true)
     *  - recache:               {Boolean} (default is false)
+    *  - messages:              {Boolean} (default is true)
     *###
-    validate: (options = @validation_options or {apply_error_styles: true, all: false, focus_invalid: true, recache: false}) ->
+    validate: (options = {}) ->
         default_options =
-            apply_error_styles: true
+            apply_error_classes: true
             all: false
             focus_invalid: true
             recache: false
+            messages: true
 
         options = $.extend default_options, @validation_options, options
 
@@ -522,7 +572,7 @@ class window.FormValidator
             # skip empty optional elements
             if options.all is false and not is_required and (value.length is 0 or type is "radio" or type is "checkbox")
                 # NOTE: if an optional value was invalid and was emptied the error target's error classes should be removed
-                @_apply_error_styles(
+                @_apply_error_classes(
                     elem
                     @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
                     true
@@ -590,11 +640,13 @@ class window.FormValidator
                 #########################################################
                 # PHASE 3 - validate constraints
                 if prev_phase_valid
-                    # TODO
-                    for result in @_validate_constraints(elem, data) when result isnt true
-                        errors.push {}
-
-                    true
+                    for constraint_name, result of @_validate_constraints(elem, data, value) when result isnt true
+                        errors.push {
+                            required: is_required
+                            subtype: constraint_name
+                            type: "constraint"
+                            value: value
+                        }
 
             # no validation phase was invalid => element is valid
             if prev_phase_valid
@@ -622,8 +674,9 @@ class window.FormValidator
                     data.valid = false
                     @_set_element_data(elem, data)
 
-            if options.apply_error_styles is true
-                error_targets = @_apply_error_styles(
+            if options.apply_error_classes is true
+                # TODO use cache here!
+                error_targets = @_apply_error_classes(
                     elem
                     @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
                     prev_phase_valid
@@ -632,13 +685,14 @@ class window.FormValidator
                 if current_error?
                     current_error.error_targets = error_targets
 
-                @_apply_dependency_error_styles(elem, dependency_elements, prev_phase_valid)
+                @_apply_dependency_error_classes(elem, dependency_elements, prev_phase_valid)
 
             prev_name = name
 
         if options.focus_invalid is true
             first_invalid_element?.focus()
-        return errors
+
+        return @_group_errors(errors, options)
 
     get_progress: (options = {as_percentage: false, recache: false}) ->
         if not @fields? or options.recache is true
@@ -652,7 +706,7 @@ class window.FormValidator
         count = 0
 
         errors = @validate({
-            apply_error_styles: false
+            apply_error_classes: false
             all: true
         })
 
