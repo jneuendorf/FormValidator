@@ -12,6 +12,10 @@ class window.FormValidator
 
     @ERROR_MODES = ERROR_MODES
     @ERROR_OUTPUT_MODES = ERROR_OUTPUT_MODES
+    @VALIDATION_PHASES = VALIDATION_PHASES
+    @BUILD_MODES = BUILD_MODES
+    @ERROR_MESSAGE_CONFIG = ERROR_MESSAGE_CONFIG
+
     # NOTE: CACHED_FIELD_DATA is already available in the closure
 
 
@@ -28,6 +32,9 @@ class window.FormValidator
 
     # defined in error_messages.coffee
     @error_messages = error_messages
+
+    # defined in error_message_builders.coffee
+    @error_message_builders = error_message_builders
 
     @default_preprocessors =
         number: (str, elem, locale) ->
@@ -61,14 +68,23 @@ class window.FormValidator
                     return "number"
         return special_type
 
-    # from the list of errors generate an error message for a certain element (this combines the error messages of the errors belonging to a certain element)
+    @_build_error_message: (phase, errors, build_mode, locale) ->
+        return @error_message_builders[phase](errors, phase, build_mode, locale)
+
+    # from the list of errors generate an error message for a certain element (this combines the error messages of the errors belonging to the element)
     # message = concatenation of each validation-phase-message string if they are errors for that part (generated independently, defined in ERROR_MESSAGE_CONFIG.ORDER)
     # each part of the message can be generated differently (defined in ERROR_MESSAGE_CONFIG.BUILD_MODE)
-    @get_error_message_for_element: (element, errors) ->
-        # get the errors for each part
-        for part in @ERROR_MESSAGE_CONFIG.ORDER
-            true
-        return
+    @get_error_message_for_element: (element, errors, build_mode, locale, delimiter = " ") ->
+        error_message_parts = []
+        grouped_errors = {}
+        # group by errors by .phase
+        for phase of VALIDATION_PHASES
+            grouped_errors[phase] = (error for error in errors when error.phase is phase)
+
+        for phase in @ERROR_MESSAGE_CONFIG.PHASE_ORDER
+            error_message_parts.push @_build_error_message(phase, grouped_errors[phase], build_mode, locale)
+
+        return error_message_parts.join(delimiter)
 
 
     ########################################################################################################################
@@ -132,6 +148,7 @@ class window.FormValidator
         @validation_options     = options.validation_options or null
         @constraint_validators  = $.extend {}, CLASS.constraint_validators, options.constraint_validators
         @error_messages         = options.error_messages
+        @build_mode             = options.build_mode or BUILD_MODES.DEFAULT
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
         @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
         # TODO: choose how to output the generated errors (i.e. print below element (maybe even getbootstrap.com/javascript/#popovers))
@@ -319,7 +336,7 @@ class window.FormValidator
 
         return (elems for name, elems of dict)
 
-    # group by .element (as list of array tuples)
+    # group by .element (as list of array tuples), create "big" error message
     _group_errors: (errors, options) ->
         CLASS = @constructor
         result = []
@@ -328,7 +345,11 @@ class window.FormValidator
         for i in [0...fields.length]
             elem = fields.eq(i)
             errors = (error for error in errors when error.element.is(elem))
-            message = if options.messages is true then CLASS.get_error_message_for_element(elem, errors) else ""
+
+            if options.messages is true
+                message = CLASS.get_error_message_for_element(elem, errors, @build_mode, @locale)
+            else
+                message = ""
 
             result.push {
                 element: elem
@@ -378,6 +399,7 @@ class window.FormValidator
                         element: dependency_elem
                         index: i
                         type: type
+                        name: dependency_data.name
                     })
 
         # cache dependency mode
@@ -582,6 +604,7 @@ class window.FormValidator
 
             prev_phase_valid = true
 
+
             #########################################################
             # PHASE 1: validate dependencies (no matter if the value has changed because dependencies could have changed)
             {dependency_errors, dependency_elements, dependency_mode, valid_dependencies} = @_validate_dependencies(elem, data)
@@ -599,17 +622,18 @@ class window.FormValidator
                     })
                     required:   is_required
                     type:       "dependency"
+                    phase:      VALIDATION_PHASES.DEPENDENCIES
                     mode:       dependency_mode
                 }
                 if not first_invalid_element?
                     first_invalid_element = elem
                 # TODO skip remaing loop content until error classes are applied
 
+
+            #########################################################
+            # PHASE 2: validate the value
             # validate the current value only if it has changed
             if value_has_changed
-
-                #########################################################
-                # PHASE 2: validate the value
                 # TODO: go into 2nd + 3rd phase also when a certain option is given ('all errors')
                 if prev_phase_valid
                     # TODO: cache validation result (for dependency validation)
@@ -631,11 +655,13 @@ class window.FormValidator
                             message:    @_create_error_message(@locale, error_message_params)
                             required:   is_required
                             type:       type
+                            phase:      VALIDATION_PHASES.VALUE
                             value:      value
                         errors.push current_error
 
                         if not first_invalid_element?
                             first_invalid_element = elem
+
 
                 #########################################################
                 # PHASE 3 - validate constraints
@@ -645,6 +671,7 @@ class window.FormValidator
                             required: is_required
                             subtype: constraint_name
                             type: "constraint"
+                            phase: VALIDATION_PHASES.CONSTRAINTS
                             value: value
                         }
 

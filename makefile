@@ -1,6 +1,11 @@
 PROJECT_NAME = FormValidator
 
-COFFEE_FILES = setup.coffee namespaces.coffee validators.coffee constraint_validators.coffee error_messages.coffee constants.coffee $(PROJECT_NAME).coffee
+COFFEE_FILES = setup.coffee namespaces.coffee \
+				constants.coffee \
+				validators.coffee constraint_validators.coffee \
+				locales.coffee error_messages.coffee \
+				error_message_builders.coffee \
+				$(PROJECT_NAME).coffee
 DEBUG_FILE = debug.coffee
 TEST_FILES = test_validators.coffee test_general_behavior.coffee $(PROJECT_NAME).test.coffee
 

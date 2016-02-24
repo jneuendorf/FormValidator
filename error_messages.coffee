@@ -1,6 +1,7 @@
 # valid variables are: value, index, index_of_type, name, previous_name, element
 # and whatever else is passed from the validator
-# TODO: make all messages function (instead of mustache-like style)
+# TODO: (maybe) make all messages function (instead of mustache-like style)
+# TODO: join this data into 'locales'
 error_messages =
     de:
         # validators
@@ -26,7 +27,9 @@ error_messages =
         radio:              "Die {{index_of_type}}. Auswahlbox wurde nicht ausgewählt"
         checkbox:           "Die {{index_of_type}}. Checkbox wurde nicht ausgewählt"
         select:             "Das {{index_of_type}}. Auswahlmenü wurde nicht ausgewählt"
-        dependency:         "Dieses Feld kann erst ausgefüllt werden, nachdem andere Felder korrekt ausgefüllt wurden"
+        dependency_general: "Dieses Feld kann erst dann korrekt ausgefüllt werden, wenn seine Abhängigkeiten korrekt ausgefüllt wurden"
+        dependency_prefix:  "Die Felder "
+        dependency_suffix:  "sind noch ungültig"
         text: (params) ->
             if params.name?
                 return "Bitte füllen Sie das Feld '#{params.name}' aus"
