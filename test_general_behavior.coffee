@@ -122,7 +122,3 @@ include_general_behavior_tests = () ->
                 expect(@html.find("[name='checkbox']").hasClass("red-color class2")).toBe true
 
                 expect(@html.find("select").hasClass("red-color class2")).toBe true
-
-
-        describe "dependencies among fields", () ->
-            # TODO

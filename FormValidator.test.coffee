@@ -39,6 +39,15 @@ FORM_HTML = """
     </select>
     <br />
 
+    <div class="dependencies">
+        <h4>Dependencies</h4>
+
+        <input type="text" data-fv-validate="number" data-fv-name="master" data-fv-preprocess="false" data-fv-postprocess="false" /><br />
+        <input type="text" data-fv-validate="text" data-fv-name="slave" data-fv-depends-on="master" /><br />
+    </div>
+
+
+    <h4>Constraints</h4>
 
     <span data-fv-name="constraint_blacklist">blacklist:</span>
     <input type="text" data-fv-validate="text" data-fv-regex="\\s+" data-fv-regex-flags="gi" value="\t" /><br />
@@ -83,7 +92,7 @@ describe "Reusables", () ->
 
         include_validator_tests()
         include_general_behavior_tests()
-
+        include_dependency_tests()
 
         describe "progress", () ->
             # TODO

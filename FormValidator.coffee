@@ -4,6 +4,7 @@ class window.FormValidator
     # TODO: add onchange handler to standard elements: check only changed elements (also for real time validation)
     # TODO: add effects for dependencies
     # TODO: define constraint validators for constraints that are independent from type validators
+    # TODO: define all default values of cache properties in a central place
 
 
     ########################################################################################################################
@@ -31,7 +32,7 @@ class window.FormValidator
     @validators = validators
 
     # defined in error_messages.coffee
-    @error_messages = error_messages
+    # @error_messages = error_messages
 
     # defined in error_message_builders.coffee
     @error_message_builders = error_message_builders
@@ -81,7 +82,7 @@ class window.FormValidator
         for phase of VALIDATION_PHASES
             grouped_errors[phase] = (error for error in errors when error.phase is phase)
 
-        for phase in @ERROR_MESSAGE_CONFIG.PHASE_ORDER
+        for phase in @ERROR_MESSAGE_CONFIG.PHASE_ORDER when grouped_errors[phase].length > 0
             error_message_parts.push @_build_error_message(phase, grouped_errors[phase], build_mode, locale)
 
         return error_message_parts.join(delimiter)
@@ -147,7 +148,7 @@ class window.FormValidator
         @validators             = $.extend {}, CLASS.validators, options.validators
         @validation_options     = options.validation_options or null
         @constraint_validators  = $.extend {}, CLASS.constraint_validators, options.constraint_validators
-        @error_messages         = options.error_messages
+        # @error_messages         = options.error_messages
         @build_mode             = options.build_mode or BUILD_MODES.DEFAULT
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
         @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
@@ -190,11 +191,15 @@ class window.FormValidator
 
         if value?
             value = value.trim()
+        # set defaults for undefined attributes
+        else
+            if key is "preprocess"
+                value = true
 
         if key in boolean
-            value = if value is "true" then true else false
+            value = if (value is "true" or value is true) then true else false
 
-        # special because 'required' corresponds to 'optional'
+        # special because 'required' corresponds to 'optional' => must be negated
         if key is "required"
             value = not value
 
@@ -209,13 +214,13 @@ class window.FormValidator
     _get_element_data: (element) ->
         return $.data(element[0], "_fv")
 
-
+    # TODO: check if still needed (since message_builders) and maybe adjust to new locales
     _create_error_message: (locale, params) ->
         CLASS = @constructor
 
         type = params.error_message_type or params.element.attr("data-fv-validate")
         type = CLASS.get_error_message_type(type, @error_mode)
-        message = (@error_messages or @constructor.error_messages)[@locale][type]
+        # message = (@error_messages or @constructor.error_messages)[@locale][type]
         if not message?
             return null
 
@@ -344,16 +349,16 @@ class window.FormValidator
         # traverse fields in the order they appear in the DOM
         for i in [0...fields.length]
             elem = fields.eq(i)
-            errors = (error for error in errors when error.element.is(elem))
+            elem_errors = (error for error in errors when error.element.is(elem))
 
             if options.messages is true
-                message = CLASS.get_error_message_for_element(elem, errors, @build_mode, @locale)
+                message = CLASS.get_error_message_for_element(elem, elem_errors, @build_mode, @locale)
             else
                 message = ""
 
             result.push {
                 element: elem
-                errors: errors
+                errors: elem_errors
                 message: message
             }
         return result
@@ -387,7 +392,6 @@ class window.FormValidator
         if data.depends_on?
             elements = data.depends_on
             for dependency_elem, i in elements
-                elements.push dependency_elem
                 dependency_data = @_get_element_data(dependency_elem)
                 dependency_validation = @_validate_element(
                     dependency_elem
@@ -396,25 +400,25 @@ class window.FormValidator
                 )
                 if dependency_validation isnt true
                     errors.push $.extend(dependency_validation, {
-                        element: dependency_elem
+                        dependency_element: dependency_elem
+                        element: element
                         index: i
-                        type: type
+                        type: dependency_data.type
                         name: dependency_data.name
                     })
 
         # cache dependency mode
         if not data.dependency_mode?
-            data.dependency_mode = element.attr("data-fv-dependency-mode")
+            # TODO: see TODO 'central defaults'
+            data.dependency_mode = element.attr("data-fv-dependency-mode") or "all"
             @_set_element_data(element, data)
 
         # at least 1 dependency is valid <=> valid
         if data.dependency_mode is "any"
             valid = errors.length < elements.length
-            mode = "any"
         # no dependency is invalid <=> valid
         else
             valid = errors.length is 0
-            mode = "all"
 
         return {
             dependency_errors: errors
@@ -642,6 +646,7 @@ class window.FormValidator
 
                     # element is invalid
                     if validation isnt true
+                        prev_phase_valid = false
                         error_message_params = $.extend validation, {
                             element:        elem
                             index:          i
