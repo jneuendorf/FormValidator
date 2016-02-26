@@ -32,7 +32,6 @@ validators =
                 str = str.slice(0, -1)
 
         n = parseFloat(str)
-
         # TODO: this doesnt work for inputs like 10e4 or 1e+5
         if isNaN(n) or not isFinite(n) or str isnt "#{n}"
             return {
@@ -40,52 +39,6 @@ validators =
                 _number: n
                 _string: str
             }
-        # # max
-        # data_max = parseFloat(elem.attr("data-fv-max"))
-        # if not isNaN(data_max)
-        #     max = data_max
-        #     data_include_max = elem.attr("data-fv-include-max")
-        #     if data_include_max?
-        #         include_max = (if data_include_max.toLowerCase() is "false" then false else true)
-        # # min
-        # data_min = parseFloat(elem.attr("data-fv-min"))
-        # if not isNaN(data_min)
-        #     min = data_min
-        #     data_include_min = elem.attr("data-fv-include-min")
-        #     if data_include_min?
-        #         include_min = (if data_include_min.toLowerCase() is "false" then false else true)
-        #
-        # # max is always before min in message type in error_message_type
-        # error_message_type = "number"
-        # valid = true
-        # # MAX
-        # if max? and include_max and n > max
-        #     error_message_type += "_max_included"
-        #     valid = false
-        # else if max? and not include_max and n >= max
-        #     error_message_type += "_max"
-        #     valid = false
-        #
-        # # MIN
-        # if min? and include_min and n < min
-        #     error_message_type += "_min_included"
-        #     valid = false
-        # else if min? and not include_min and n <= min
-        #     error_message_type = "_min"
-        #     valid = false
-        #
-        # if not valid
-        #     res = {
-        #         error_message_type: error_message_type
-        #         _number: n
-        #         _string: str
-        #     }
-        #     if max?
-        #         res.max = max
-        #     if min?
-        #         res.min = min
-        #     return res
-
         # valid
         return {
             valid: true

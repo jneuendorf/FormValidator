@@ -1,3 +1,4 @@
+# TODO: structure this file for better maintainance
 # override build_mode_helpers here if needed (same signature as a build_mode_helper). i.e. enumeration could be different in other languages
 locale_build_mode_helpers =
     de: {}
@@ -84,6 +85,7 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
                     grouped_errors[idx] = [error]
 
 
+    # find combinable locale keys
     key_prefix = "#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_"
     for errors in grouped_errors
         keys = ("#{error.type}" for error in errors)
@@ -99,3 +101,53 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
         locale
         parts
     )
+
+
+
+#####################################################################################################
+# USED FOR CONSTRAINT ERROR MESSAGES
+
+# mapping from group to locale key: Set -> String
+# max_min == min_max
+# ==> the order does not matter because its a set (and all permutations of the set map to the same value)
+
+# intially use permutation to find the actually existing locale key for the given set
+# upon a match cache the key. whenever the match becomes invalid (-> returns null) return to the initial state (so permutation is used)
+# from http://stackoverflow.com/questions/9960908/permutations-in-javascript
+_get_permutations = (input) ->
+    permute = (arr, results, memo = []) ->
+        for i in [0...arr.length]
+            cur = arr.splice(i, 1)
+            if arr.length is 0
+                results.push memo.concat(cur)
+            permute(arr.slice(), memo.concat(cur))
+            arr.splice(i, 0, cur[0])
+
+    results = []
+    permute(input, results)
+    return results
+
+
+# TODO: test caching
+permutation_cache = {}
+
+get_combined_key = (keys, locale, key_prefix = "", key_suffix = "") ->
+    # clone keys
+    keys = keys.slice(0)
+    # sort because cached keys had been sorted and the convention is that locales are sorted lists of constraints (joined with '_')
+    keys.sort()
+
+    while keys.length > 0
+        # check the cache for an entry
+        key = key_prefix + keys.join("_") + key_suffix
+        if permutation_cache[key]?
+            return key
+        # no cache hit => try all permutations
+        for permutation in _get_permutations(keys)
+            key = key_prefix + permutation.join("_") + key_suffix
+            if locales[locale][key]?
+                permutation_cache[key] = true
+                return key
+        keys.pop()
+
+    return null
