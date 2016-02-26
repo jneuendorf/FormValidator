@@ -334,7 +334,7 @@
     checkbox: "Die {{index_of_type}}. Checkbox wurde nicht ausgewählt",
     select: "Das {{index_of_type}}. Auswahlmenü wurde nicht ausgewählt",
     dependency_general: "Dieses Feld kann erst dann korrekt ausgefüllt werden, wenn seine Abhängigkeiten korrekt ausgefüllt wurden",
-    dependency_prefix: "Die Felder ",
+    dependency_prefix: "Die Felder",
     dependency_suffix: "sind noch ungültig",
     text: function(params) {
       if (params.name != null) {
@@ -393,12 +393,18 @@
     return "<ul><li>" + (parts.join("</li><li>")) + "</li></ul>";
   };
 
-  default_message_builder = function(key, build_mode, locale, parts, prefix, suffix) {
+  default_message_builder = function(key, build_mode, locale, parts, prefix, suffix, prefix_delimiter, suffix_delimiter) {
     var base, message;
+    if (prefix_delimiter == null) {
+      prefix_delimiter = " ";
+    }
+    if (suffix_delimiter == null) {
+      suffix_delimiter = " ";
+    }
     prefix = prefix || locales[locale][key + "_prefix"] || "";
     suffix = suffix || locales[locale][key + "_suffix"] || "";
     message = (typeof (base = locale_build_mode_helpers[locale])[build_mode] === "function" ? base[build_mode](parts, locale) : void 0) || build_mode_helpers[build_mode](parts, locale);
-    return prefix + message + suffix;
+    return prefix + prefix_delimiter + message + suffix_delimiter + suffix;
   };
 
   part_evaluator = function(part, values) {

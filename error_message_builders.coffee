@@ -4,6 +4,7 @@ locale_build_mode_helpers =
     en: {}
 
 
+# build-mode helpers (1 for each build mode): they define how parts of an error message are concatenated
 build_mode_helpers = {}
 
 build_mode_helpers[BUILD_MODES.ENUMERATE] = (parts, locale) ->
@@ -18,15 +19,14 @@ build_mode_helpers[BUILD_MODES.LIST] = (parts, locale) ->
     return "<ul><li>#{parts.join("</li><li>")}</li></ul>"
 
 
-# errors = all error objects of an element that have a certain phase (dependency, value validation, or constraint validation errors)
-default_message_builder = (key, build_mode, locale, parts, prefix, suffix) ->
+# this function concatenates the prefix, mid part (== joined parts), and the suffix (used in the error message builders)
+default_message_builder = (key, build_mode, locale, parts, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
     prefix = prefix or locales[locale]["#{key}_prefix"] or ""
     suffix = suffix or locales[locale]["#{key}_suffix"] or ""
     message = locale_build_mode_helpers[locale][build_mode]?(parts, locale) or build_mode_helpers[build_mode](parts, locale)
-    return prefix + message + suffix
+    return prefix + prefix_delimiter + message + suffix_delimiter + suffix
 
-
-# use this function to parse mustache-like strings or evaluate functions
+# use this function to parse mustache-like strings or evaluate functions (used in the error message builders)
 part_evaluator = (part, values) ->
     # string => mustache-like
     if typeof part is "string"
@@ -40,6 +40,8 @@ part_evaluator = (part, values) ->
     return ""
 
 
+# error-message builders (1 for each validation phase): they define how error messages are generated (generally) based on a set of errors
+# param 'errors' = all error objects of a certain phase belonging to the same field
 error_message_builders = {}
 
 error_message_builders[VALIDATION_PHASES.DEPENDENCIES] = (errors, phase, build_mode, locale) ->

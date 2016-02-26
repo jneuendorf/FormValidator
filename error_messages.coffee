@@ -26,7 +26,7 @@ $.extend locales.de, {
     checkbox:           "Die {{index_of_type}}. Checkbox wurde nicht ausgewählt"
     select:             "Das {{index_of_type}}. Auswahlmenü wurde nicht ausgewählt"
     dependency_general: "Dieses Feld kann erst dann korrekt ausgefüllt werden, wenn seine Abhängigkeiten korrekt ausgefüllt wurden"
-    dependency_prefix:  "Die Felder "
+    dependency_prefix:  "Die Felder"
     dependency_suffix:  "sind noch ungültig"
     text: (params) ->
         if params.name?
