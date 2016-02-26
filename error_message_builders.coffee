@@ -1,4 +1,4 @@
-# override build_mode_helpers here if needed (same signature as a build_mode_helper)
+# override build_mode_helpers here if needed (same signature as a build_mode_helper). i.e. enumeration could be different in other languages
 locale_build_mode_helpers =
     de: {}
     en: {}
@@ -20,11 +20,19 @@ build_mode_helpers[BUILD_MODES.LIST] = (parts, locale) ->
 
 
 # this function concatenates the prefix, mid part (== joined parts), and the suffix (used in the error message builders)
+# key = locale key used to find pre- and suffix
 default_message_builder = (key, build_mode, locale, parts, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
     prefix = prefix or locales[locale]["#{key}_prefix"] or ""
     suffix = suffix or locales[locale]["#{key}_suffix"] or ""
-    message = locale_build_mode_helpers[locale][build_mode]?(parts, locale) or build_mode_helpers[build_mode](parts, locale)
-    return prefix + prefix_delimiter + message + suffix_delimiter + suffix
+    if parts instanceof Array
+        message = locale_build_mode_helpers[locale][build_mode]?(parts, locale) or build_mode_helpers[build_mode](parts, locale)
+    else #if typeof parts is "string"
+        message = parts
+    if prefix
+        message = prefix + prefix_delimiter + message
+    if suffix
+        message += suffix_delimiter + suffix
+    return message
 
 # use this function to parse mustache-like strings or evaluate functions (used in the error message builders)
 part_evaluator = (part, values) ->
@@ -53,15 +61,41 @@ error_message_builders[VALIDATION_PHASES.DEPENDENCIES] = (errors, phase, build_m
         if build_mode is BUILD_MODES.SENTENCE
             build_mode = BUILD_MODES.ENUMERATE
         parts = ("'#{name}'" for name in names)
-        return default_message_builder("dependency", build_mode, locale, parts)
-    return locales[locale]["dependency_general"]
+        return default_message_builder(VALIDATION_PHASES_SINGULAR[phase].toLowerCase(), build_mode, locale, parts)
+    return locales[locale]["#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_general"]
 
 error_message_builders[VALIDATION_PHASES.VALUE] = (errors, phase, build_mode, locale) ->
     error = errors[0]
     type = error.type
     # here only 1 error is in the 'errors' list => therefore we just use the simplest build mode
     part = part_evaluator(locales[locale][type], error)
-    return default_message_builder(type, BUILD_MODES.ENUMERATE, locale, [part])
+    return default_message_builder("#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_#{type}", BUILD_MODES.ENUMERATE, locale, [part])
 
 error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mode, locale) ->
-    return ""
+    parts = []
+    grouped_errors = []
+    for group in constraint_validator_groups
+        for error in errors
+            idx = group.indexOf(error.type)
+            if idx >= 0
+                if grouped_errors[idx]?
+                    grouped_errors[idx].push(error)
+                else
+                    grouped_errors[idx] = [error]
+
+
+    key_prefix = "#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_"
+    for errors in grouped_errors
+        keys = ("#{error.type}" for error in errors)
+        key = get_combined_key(keys, locale, key_prefix)
+        if key?
+            parts.push locales[locale][key]
+        else if DEBUG
+            throw new Error("Could not find a translation for key while trying to create an error message during the constraint validation phase. Those keys were retrieved from the generated errors: #{JSON.stringify(keys)}. Define an according key in the 'locales' variable!")
+
+    return default_message_builder(
+        "#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_#{build_mode.toLowerCase()}"
+        build_mode
+        locale
+        parts
+    )

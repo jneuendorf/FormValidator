@@ -46,11 +46,12 @@ FORM_HTML = """
         <input type="text" data-fv-validate="text" data-fv-name="slave" data-fv-depends-on="master" /><br />
     </div>
 
+    <div class="constraints">
+        <h4>Constraints</h4>
 
-    <h4>Constraints</h4>
-
-    <span data-fv-name="constraint_blacklist">blacklist:</span>
-    <input type="text" data-fv-validate="text" data-fv-regex="\\s+" data-fv-regex-flags="gi" value="\t" /><br />
+        <span data-fv-name="max_min">min and max:</span>
+        <input type="text" data-fv-validate="number" data-fv-min="1" data-fv-max="4" data-fv-include-max="false" value="4" /><br />
+    </div>
 
     <hr />
     <div data-fv-name="error1" data-fv-error-classes="red-color bold">
@@ -93,6 +94,7 @@ describe "Reusables", () ->
         include_validator_tests()
         include_general_behavior_tests()
         include_dependency_tests()
+        include_constraint_tests()
 
         describe "progress", () ->
             # TODO

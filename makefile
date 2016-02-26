@@ -7,7 +7,7 @@ COFFEE_FILES = setup.coffee namespaces.coffee \
 				error_message_builders.coffee \
 				$(PROJECT_NAME).coffee
 DEBUG_FILE = debug.coffee
-TEST_FILES = test_validators.coffee test_general_behavior.coffee test_dependencies.coffee $(PROJECT_NAME).test.coffee
+TEST_FILES = test_validators.coffee test_general_behavior.coffee test_dependencies.coffee test_constraints.coffee $(PROJECT_NAME).test.coffee
 
 
 make:

@@ -446,6 +446,7 @@ class window.FormValidator
                     constraints.push {
                         name: constraint_name
                         options: options
+                        # type: constraint_name
                         validator: constraint_validator
                         value: constraint_value
                     }
@@ -640,7 +641,6 @@ class window.FormValidator
             if value_has_changed
                 # TODO: go into 2nd + 3rd phase also when a certain option is given ('all errors')
                 if prev_phase_valid
-                    # TODO: cache validation result (for dependency validation)
                     validation = @_validate_element(elem, data, value_info)
                     current_error = null
 
@@ -673,9 +673,9 @@ class window.FormValidator
                 if prev_phase_valid
                     for constraint_name, result of @_validate_constraints(elem, data, value) when result isnt true
                         errors.push {
+                            element: elem
                             required: is_required
-                            subtype: constraint_name
-                            type: "constraint"
+                            type: constraint_name
                             phase: VALIDATION_PHASES.CONSTRAINTS
                             value: value
                         }
