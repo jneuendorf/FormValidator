@@ -22,6 +22,8 @@ build_mode_helpers[BUILD_MODES.LIST] = (parts, locale) ->
 
 # this function concatenates the prefix, mid part (== joined parts), and the suffix (used in the error message builders)
 # key = locale key used to find pre- and suffix
+# prefix, suffix = either a (ready) string (which won't be modified) or a function that generates the prefix or suffix respectively
+#   signature: (String locale_key, String locale, ) -> String
 default_message_builder = (key, build_mode, locale, parts, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
     prefix = prefix or locales[locale]["#{key}_prefix"] or ""
     suffix = suffix or locales[locale]["#{key}_suffix"] or ""
@@ -29,7 +31,10 @@ default_message_builder = (key, build_mode, locale, parts, prefix, suffix, prefi
         message = locale_build_mode_helpers[locale][build_mode]?(parts, locale) or build_mode_helpers[build_mode](parts, locale)
     else #if typeof parts is "string"
         message = parts
+
     if prefix
+        if prefix instanceof Function
+            prefix = prefix()
         message = prefix + prefix_delimiter + message
     if suffix
         message += suffix_delimiter + suffix
@@ -84,22 +89,28 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
                 else
                     grouped_errors[idx] = [error]
 
+    phase_singular = VALIDATION_PHASES_SINGULAR[phase].toLowerCase()
 
     # find combinable locale keys
-    key_prefix = "#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_"
+    key_prefix = "#{phase_singular}_"
     for errors in grouped_errors
         keys = ("#{error.type}" for error in errors)
         key = get_combined_key(keys, locale, key_prefix)
         if key?
-            parts.push locales[locale][key]
+            parts.push part_evaluator(locales[locale][key], error)
         else if DEBUG
             throw new Error("Could not find a translation for key while trying to create an error message during the constraint validation phase. Those keys were retrieved from the generated errors: #{JSON.stringify(keys)}. Define an according key in the 'locales' variable!")
 
+    key = "#{phase_singular}_#{build_mode.toLowerCase()}"
+    # replace {{value}} with the actual value
+    prefix = part_evaluator("#{locales[locale]["#{key}_prefix"]}", errors[0])
+
     return default_message_builder(
-        "#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_#{build_mode.toLowerCase()}"
+        key
         build_mode
         locale
         parts
+        prefix
     )
 
 
@@ -113,19 +124,6 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
 
 # intially use permutation to find the actually existing locale key for the given set
 # upon a match cache the key. whenever the match becomes invalid (-> returns null) return to the initial state (so permutation is used)
-# from http://stackoverflow.com/questions/9960908/permutations-in-javascript
-_get_permutations = (input) ->
-    permute = (arr, results, memo = []) ->
-        for i in [0...arr.length]
-            cur = arr.splice(i, 1)
-            if arr.length is 0
-                results.push memo.concat(cur)
-            permute(arr.slice(), memo.concat(cur))
-            arr.splice(i, 0, cur[0])
-
-    results = []
-    permute(input, results)
-    return results
 
 
 # TODO: test caching
@@ -134,20 +132,42 @@ permutation_cache = {}
 get_combined_key = (keys, locale, key_prefix = "", key_suffix = "") ->
     # clone keys
     keys = keys.slice(0)
-    # sort because cached keys had been sorted and the convention is that locales are sorted lists of constraints (joined with '_')
+    # sort because cached keys had been sorted and the convention is that locales are alphabetically sorted (joined with '_')
     keys.sort()
+    cache_key = keys.join("_")
 
-    while keys.length > 0
-        # check the cache for an entry
-        key = key_prefix + keys.join("_") + key_suffix
-        if permutation_cache[key]?
-            return key
-        # no cache hit => try all permutations
-        for permutation in _get_permutations(keys)
-            key = key_prefix + permutation.join("_") + key_suffix
-            if locales[locale][key]?
-                permutation_cache[key] = true
-                return key
-        keys.pop()
+    # try to get the key from the cache
+    if permutation_cache[cache_key]?
+        return permutation_cache[cache_key]
+
+    # no cache hit => try to find a key
+    # get all subsets (by size, from big to small), permute each subset
+    for k in [keys.length...0] by -1
+        for subset in get_subsets(keys, k)
+            for permutation in get_permutations(subset)
+                key = key_prefix + permutation.join("_") + key_suffix
+                if locales[locale][key]?
+                    permutation_cache[cache_key] = key
+                    return key
 
     return null
+# get_combined_key = (keys, locale, key_prefix = "", key_suffix = "") ->
+#     # clone keys
+#     keys = keys.slice(0)
+#     # sort because cached keys had been sorted and the convention is that locales are alphabetically sorted (joined with '_')
+#     keys.sort()
+#
+#     while keys.length > 0
+#         # check the cache for an entry
+#         key = key_prefix + keys.join("_") + key_suffix
+#         if permutation_cache[key]?
+#             return key
+#         # no cache hit => try all permutations
+#         for permutation in _get_permutations(keys)
+#             key = key_prefix + permutation.join("_") + key_suffix
+#             if locales[locale][key]?
+#                 permutation_cache[key] = true
+#                 return key
+#         keys.pop()
+#
+#     return null

@@ -19,7 +19,3 @@ include_dependency_tests = () ->
 
         afterEach () ->
             @html.remove()
-
-
-        it "return value", () ->
-            expect(@errors.length).toBe(10)

@@ -31,8 +31,8 @@ class window.FormValidator
     # defined in validators.coffee
     @validators = validators
 
-    # defined in error_messages.coffee
-    # @error_messages = error_messages
+    # defined in locales.coffee and error_messages.coffee
+    @locales = locales
 
     # defined in error_message_builders.coffee
     @error_message_builders = error_message_builders
@@ -215,25 +215,25 @@ class window.FormValidator
         return $.data(element[0], "_fv")
 
     # TODO: check if still needed (since message_builders) and maybe adjust to new locales
-    _create_error_message: (locale, params) ->
-        CLASS = @constructor
-
-        type = params.error_message_type or params.element.attr("data-fv-validate")
-        type = CLASS.get_error_message_type(type, @error_mode)
-        # message = (@error_messages or @constructor.error_messages)[@locale][type]
-        if not message?
-            return null
-
-        # string => insert variables (mustache-like)
-        # TODO: just use mustache!?
-        if typeof message is "string"
-            for key, val of params when message.indexOf("{{#{key}}}") >= 0
-                message = message.replace("{{#{key}}}", val)
-            res = message
-        else if message instanceof Function
-            res = message(params)
-
-        return res
+    # _create_error_message: (locale, params) ->
+    #     CLASS = @constructor
+    #
+    #     type = params.error_message_type or params.element.attr("data-fv-validate")
+    #     type = CLASS.get_error_message_type(type, @error_mode)
+    #     # message = (@error_messages or @constructor.error_messages)[@locale][type]
+    #     if not message?
+    #         return null
+    #
+    #     # string => insert variables (mustache-like)
+    #     # TODO: just use mustache!?
+    #     if typeof message is "string"
+    #         for key, val of params when message.indexOf("{{#{key}}}") >= 0
+    #             message = message.replace("{{#{key}}}", val)
+    #         res = message
+    #     else if message instanceof Function
+    #         res = message(params)
+    #
+    #     return res
 
     _get_fields: (form) ->
         return @field_getter?(form) or form.find("[data-fv-validate]").filter (idx, elem) ->
@@ -351,16 +351,17 @@ class window.FormValidator
             elem = fields.eq(i)
             elem_errors = (error for error in errors when error.element.is(elem))
 
-            if options.messages is true
-                message = CLASS.get_error_message_for_element(elem, elem_errors, @build_mode, @locale)
-            else
-                message = ""
+            if elem_errors.length > 0
+                if options.messages is true
+                    message = CLASS.get_error_message_for_element(elem, elem_errors, @build_mode, @locale)
+                else
+                    message = ""
 
-            result.push {
-                element: elem
-                errors: elem_errors
-                message: message
-            }
+                result.push {
+                    element: elem
+                    errors: elem_errors
+                    message: message
+                }
         return result
 
     # VALIDATION HELPERS
@@ -455,7 +456,12 @@ class window.FormValidator
             @_set_element_data(element, data)
 
         for constraint in constraints
-            results[constraint.name] = constraint.validator.call(@constraint_validators, value, constraint.value, constraint.options)
+            if constraint.validator.call(@constraint_validators, value, constraint.value, constraint.options) is true
+                results[constraint.name] = true
+            else
+                # create object with details about what's wrong
+                results[constraint.name] = constraint.options
+                results[constraint.name][constraint.name] = constraint.value
 
         return results
 
@@ -619,12 +625,12 @@ class window.FormValidator
                 # create error if the element has unfulfilled dependencies
                 errors.push {
                     element:    elem
-                    message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {
-                        element: elem
-                        error_message_type: "dependency"
-                        dependency_mode: dependency_mode
-                        dependency_errors: dependency_errors
-                    })
+                    # message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {
+                    #     element: elem
+                    #     error_message_type: "dependency"
+                    #     dependency_mode: dependency_mode
+                    #     dependency_errors: dependency_errors
+                    # })
                     required:   is_required
                     type:       "dependency"
                     phase:      VALIDATION_PHASES.DEPENDENCIES
@@ -657,7 +663,7 @@ class window.FormValidator
                         }
                         current_error =
                             element:    elem
-                            message:    @_create_error_message(@locale, error_message_params)
+                            # message:    @_create_error_message(@locale, error_message_params)
                             required:   is_required
                             type:       type
                             phase:      VALIDATION_PHASES.VALUE
@@ -672,7 +678,7 @@ class window.FormValidator
                 # PHASE 3 - validate constraints
                 if prev_phase_valid
                     for constraint_name, result of @_validate_constraints(elem, data, value) when result isnt true
-                        errors.push {
+                        errors.push $.extend result, {
                             element: elem
                             required: is_required
                             type: constraint_name

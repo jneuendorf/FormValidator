@@ -28,5 +28,8 @@
     },
     "ensure_comprehensions": {
         "level": "ignore"
+    },
+    "no_nested_string_interpolation": {
+        "level": "ignore"
     }
 }

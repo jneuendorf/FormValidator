@@ -23,6 +23,8 @@ include_general_behavior_tests = () ->
                     html.find("[name='#{name}']").val(val)
 
                 form_validator = FormValidator.new(html.first(), {
+                    field_getter: (form) ->
+                        return form.find(".general [data-fv-validate]")
                     preprocessors: {
                         integer: (val, elem) ->
                             return val.replace(/\,\-/g, "")
@@ -46,68 +48,80 @@ include_general_behavior_tests = () ->
             it "return value", () ->
                 expect(@errors.length).toBe(10)
 
-                # remove jquery elements and validators for easier checking
-                for error in @errors
-                    delete error.element
-                    delete error.validator
-
-                # TODO: replace hard coded messages with FormValidator.error_messages
-                expect(@errors).toEqual [
-                    {
-                        # "message": "Bitte füllen Sie das 1. Textfeld aus",
-                        "message": FormValidator.error_messages.de.text({index_of_type: 1}),
-                        "required": true,
-                        "type": "text",
-                        "value": ""
-                    }, {
-                        "message": FormValidator.error_messages.de.number.replace("{{value}}", @values_by_name.en_number),
-                        "required": true,
-                        "type": "number",
-                        "value": @values_by_name.en_number
-                    }, {
-                        "message": FormValidator.error_messages.de.number.replace("{{value}}", @values_by_name.de_number),
-                        "required": true,
-                        "type": "number",
-                        "value": @values_by_name.de_number
-                    }, {
-                        "message": FormValidator.error_messages.de.phone.replace("{{value}}", @values_by_name.phone),
-                        "required": false,
-                        "type": "phone",
-                        "value": @values_by_name.phone
-                    }, {
-                        "message": FormValidator.error_messages.de.email_dot.replace("{{value}}", @values_by_name.email),
-                        "required": true,
-                        "type": "email",
-                        "value": @values_by_name.email
-                    }, {
-                        # "message": "Die 1. Checkbox wurde nicht ausgewählt",
-                        "message": FormValidator.error_messages.de.checkbox.replace("{{index_of_type}}", 1),
-                        "required": true,
-                        "type": "checkbox",
-                        "value": ""
-                    }, {
-                        "message": FormValidator.error_messages.de.checkbox.replace("{{index_of_type}}", 2),
-                        "required": true,
-                        "type": "checkbox",
-                        "value": ""
-                    }, {
-                        # "message": "Die 1. Auswahlbox wurde nicht ausgewählt",
-                        "message": FormValidator.error_messages.de.radio.replace("{{index_of_type}}", 1),
-                        "required": true,
-                        "type": "radio",
-                        "value": ""
-                    }, {
-                        "message": FormValidator.error_messages.de.radio.replace("{{index_of_type}}", 2),
-                        "required": true,
-                        "type": "radio",
-                        "value": ""
-                    }, {
-                        "message": FormValidator.error_messages.de.select.replace("{{index_of_type}}", 1),
-                        "required": true,
-                        "type": "select",
-                        "value": ""
-                    }
+                data_for_invalid_elements = [
+                    {required: true, type: "text", value: ""}
+                    {required: true, type: "number", value: @values_by_name.en_number}
+                    {required: true, type: "number", value: @values_by_name.de_number}
+                    {required: false, type: "phone", value: @values_by_name.phone}
+                    {required: true, type: "email", value: @values_by_name.email}
+                    {required: true, type: "checkbox", value: ""}
+                    {required: true, type: "checkbox", value: ""}
+                    {required: true, type: "radio", value: ""}
+                    {required: true, type: "radio", value: ""}
+                    {required: true, type: "select", value: ""}
                 ]
+
+                for error, i in @errors
+                    datum = data_for_invalid_elements[i]
+                    expect(error.errors.length).toBe 1
+                    error = error.errors[0]
+                    expect(error.type).toBe datum.type
+                    expect(error.required).toBe(datum.required)
+                    expect(error.value).toBe datum.value
+
+                # expect(@errors).toEqual [
+                    # {
+                    #     "message": FormValidator.error_messages.de.text({index_of_type: 1}),
+                    #     "required": true,
+                    #     "type": "text",
+                    #     "value": ""
+                    # }, {
+                    #     "message": FormValidator.error_messages.de.number.replace("{{value}}", @values_by_name.en_number),
+                    #     "required": true,
+                    #     "type": "number",
+                    #     "value": @values_by_name.en_number
+                    # }, {
+                    #     "message": FormValidator.error_messages.de.number.replace("{{value}}", @values_by_name.de_number),
+                    #     "required": true,
+                    #     "type": "number",
+                    #     "value": @values_by_name.de_number
+                    # }, {
+                    #     "message": FormValidator.error_messages.de.phone.replace("{{value}}", @values_by_name.phone),
+                    #     "required": false,
+                    #     "type": "phone",
+                    #     "value": @values_by_name.phone
+                    # }, {
+                    #     "message": FormValidator.error_messages.de.email_dot.replace("{{value}}", @values_by_name.email),
+                    #     "required": true,
+                    #     "type": "email",
+                    #     "value": @values_by_name.email
+                    # }, {
+                    #     "message": FormValidator.error_messages.de.checkbox.replace("{{index_of_type}}", 1),
+                    #     "required": true,
+                    #     "type": "checkbox",
+                    #     "value": ""
+                    # }, {
+                    #     "message": FormValidator.error_messages.de.checkbox.replace("{{index_of_type}}", 2),
+                    #     "required": true,
+                    #     "type": "checkbox",
+                    #     "value": ""
+                    # }, {
+                    #     "message": FormValidator.error_messages.de.radio.replace("{{index_of_type}}", 1),
+                    #     "required": true,
+                    #     "type": "radio",
+                    #     "value": ""
+                    # }, {
+                    #     "message": FormValidator.error_messages.de.radio.replace("{{index_of_type}}", 2),
+                    #     "required": true,
+                    #     "type": "radio",
+                    #     "value": ""
+                    # }, {
+                    #     "message": FormValidator.error_messages.de.select.replace("{{index_of_type}}", 1),
+                    #     "required": true,
+                    #     "type": "select",
+                    #     "value": ""
+                    # }
+                # ]
 
             it "side fx", () ->
                 console.log @html

@@ -1,6 +1,7 @@
 PROJECT_NAME = FormValidator
 
 COFFEE_FILES = setup.coffee namespaces.coffee \
+				algorithms.coffee \
 				constants.coffee \
 				validators.coffee constraint_validators.coffee \
 				locales.coffee error_messages.coffee \

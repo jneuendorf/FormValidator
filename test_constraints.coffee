@@ -22,4 +22,10 @@ include_constraint_tests = () ->
 
 
         it "return value", () ->
-            expect(@errors.length).toBe(10)
+            expect(@errors.length).toBe(1)
+
+            message = FormValidator.locales.de.constraint_enumerate_prefix + " " + FormValidator.locales.de.constraint_max
+            message = message
+                .replace("{{value}}", @errors[0].element.val())
+                .replace("{{max}}", @errors[0].element.attr("data-fv-max"))
+            expect(@errors[0].message).toBe(message)

@@ -68,214 +68,6 @@
           error_message_type: "integer"
         });
       });
-      it("positive integer", function() {
-        var $elem, validator;
-        log("positive integer");
-        validator = function(str, elem) {
-          var key, res, val;
-          res = validators.integer.call(validators, str, elem);
-          if (res === true) {
-            return true;
-          }
-          for (key in res) {
-            val = res[key];
-            if (key[0] === "_") {
-              delete res[key];
-            }
-          }
-          return res;
-        };
-        $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='0' />");
-        expect(validator("0", $elem)).toBe(true);
-        expect(validator("1", $elem)).toBe(true);
-        expect(validator("100", $elem)).toBe(true);
-        expect(validator("+5", $elem)).toBe(true);
-        expect(validator("+ 5", $elem)).toBe(true);
-        expect(validator("+ 5 ", $elem)).toBe(true);
-        expect(validator(" + 5 ", $elem)).toBe(true);
-        expect(validator("-5", $elem)).toEqual({
-          error_message_type: 'integer_min_included',
-          min: 0
-        });
-        expect(validator("- 5", $elem)).toEqual({
-          error_message_type: 'integer_min_included',
-          min: 0
-        });
-        expect(validator(" - 5", $elem)).toEqual({
-          error_message_type: 'integer_min_included',
-          min: 0
-        });
-        expect(validator("- 5 ", $elem)).toEqual({
-          error_message_type: 'integer_min_included',
-          min: 0
-        });
-        expect(validator("1e7", $elem)).toEqual({
-          error_message_type: 'integer'
-        });
-        expect(validator("Infinity", $elem)).toEqual({
-          error_message_type: 'integer'
-        });
-        expect(validator("1.25", $elem)).toEqual({
-          error_message_type: 'integer_float'
-        });
-        expect(validator("0.1", $elem)).toEqual({
-          error_message_type: 'integer_float'
-        });
-        expect(validator(" - 0.1", $elem)).toEqual({
-          error_message_type: 'integer'
-        });
-        return expect(validator(" - 0.1 ", $elem)).toEqual({
-          error_message_type: 'integer'
-        });
-      });
-      it("negative integer", function() {
-        var $elem, validator;
-        log("negative integer");
-        validator = function(str, elem) {
-          var key, res, val;
-          res = validators.integer.call(validators, str, elem);
-          if (res === true) {
-            return true;
-          }
-          for (key in res) {
-            val = res[key];
-            if (key[0] === "_") {
-              delete res[key];
-            }
-          }
-          return res;
-        };
-        $elem = $("<input type='text' data-fv-validate='integer' data-fv-max='0' data-fv-include-max='false' />");
-        expect(validator("-5", $elem)).toBe(true);
-        expect(validator("- 5", $elem)).toBe(true);
-        expect(validator(" - 5", $elem)).toBe(true);
-        expect(validator("- 5 ", $elem)).toBe(true);
-        expect(validator("0", $elem)).toEqual({
-          error_message_type: 'integer_max',
-          max: 0
-        });
-        expect(validator("1", $elem)).toEqual({
-          error_message_type: 'integer_max',
-          max: 0
-        });
-        expect(validator("100", $elem)).toEqual({
-          error_message_type: 'integer_max',
-          max: 0
-        });
-        expect(validator("+5", $elem)).toEqual({
-          error_message_type: 'integer_max',
-          max: 0
-        });
-        expect(validator("+ 5", $elem)).toEqual({
-          error_message_type: 'integer_max',
-          max: 0
-        });
-        expect(validator("+ 5 ", $elem)).toEqual({
-          error_message_type: 'integer_max',
-          max: 0
-        });
-        expect(validator(" + 5 ", $elem)).toEqual({
-          error_message_type: 'integer_max',
-          max: 0
-        });
-        expect(validator("1e7", $elem)).toEqual({
-          error_message_type: 'integer'
-        });
-        expect(validator("-Infinity", $elem)).toEqual({
-          error_message_type: 'integer'
-        });
-        expect(validator("1.25", $elem)).toEqual({
-          error_message_type: 'integer'
-        });
-        expect(validator("0.1", $elem)).toEqual({
-          error_message_type: 'integer'
-        });
-        expect(validator(" - 0.1", $elem)).toEqual({
-          error_message_type: 'integer_float'
-        });
-        return expect(validator(" - 0.1 ", $elem)).toEqual({
-          error_message_type: 'integer_float'
-        });
-      });
-      it("positive integer with max", function() {
-        var $elem, validator;
-        log("positive integer with max");
-        validator = function(str, elem) {
-          var key, res, val;
-          res = validators.integer.call(validators, str, elem);
-          if (res === true) {
-            return true;
-          }
-          for (key in res) {
-            val = res[key];
-            if (key[0] === "_") {
-              delete res[key];
-            }
-          }
-          return res;
-        };
-        $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='0' data-fv-max='10' />");
-        expect(validator("0", $elem)).toBe(true);
-        expect(validator("1", $elem)).toBe(true);
-        expect(validator("2", $elem)).toBe(true);
-        expect(validator("3", $elem)).toBe(true);
-        expect(validator("4", $elem)).toBe(true);
-        expect(validator("5", $elem)).toBe(true);
-        expect(validator("6", $elem)).toBe(true);
-        expect(validator("7", $elem)).toBe(true);
-        expect(validator("8", $elem)).toBe(true);
-        expect(validator("9", $elem)).toBe(true);
-        expect(validator("10", $elem)).toBe(true);
-        expect(validator("-1", $elem)).toEqual({
-          error_message_type: 'integer_min_included',
-          max: 10,
-          min: 0
-        });
-        return expect(validator("11", $elem)).toEqual({
-          error_message_type: 'integer_max_included',
-          max: 10,
-          min: 0
-        });
-      });
-      it("negative integer with min", function() {
-        var $elem, validator;
-        log("negative integer with min");
-        validator = function(str, elem) {
-          var key, res, val;
-          res = validators.integer.call(validators, str, elem);
-          if (res === true) {
-            return true;
-          }
-          for (key in res) {
-            val = res[key];
-            if (key[0] === "_") {
-              delete res[key];
-            }
-          }
-          return res;
-        };
-        $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='-10' data-fv-max='0' data-fv-include-max='false' />");
-        expect(validator("-1", $elem)).toBe(true);
-        expect(validator("-2", $elem)).toBe(true);
-        expect(validator("-3", $elem)).toBe(true);
-        expect(validator("-4", $elem)).toBe(true);
-        expect(validator("-5", $elem)).toBe(true);
-        expect(validator("-6", $elem)).toBe(true);
-        expect(validator("-7", $elem)).toBe(true);
-        expect(validator("-8", $elem)).toBe(true);
-        expect(validator("-9", $elem)).toBe(true);
-        expect(validator("-10", $elem)).toBe(true);
-        expect(validator("-11", $elem)).toEqual({
-          error_message_type: 'integer_min_included',
-          max: 0,
-          min: -10
-        });
-        return expect(validator("0", $elem)).toEqual({
-          error_message_type: 'integer_max',
-          max: 0,
-          min: -10
-        });
-      });
       it("number", function() {
         var $elem, validator;
         log("number");
@@ -325,205 +117,6 @@
         });
         return expect(validator("asdf", $elem)).toEqual({
           error_message_type: "number"
-        });
-      });
-      it("positive number", function() {
-        var $elem, validator;
-        log("positive number");
-        validator = function(str, elem) {
-          var key, res, val;
-          res = validators.number.call(validators, str, elem);
-          if (res === true) {
-            return true;
-          }
-          for (key in res) {
-            val = res[key];
-            if (key[0] === "_") {
-              delete res[key];
-            }
-          }
-          return res;
-        };
-        $elem = $("<input type='text' data-fv-validate='number' data-fv-min='0' />");
-        expect(validator("0", $elem)).toBe(true);
-        expect(validator("1", $elem)).toBe(true);
-        expect(validator("100", $elem)).toBe(true);
-        expect(validator("+5", $elem)).toBe(true);
-        expect(validator("+ 5", $elem)).toBe(true);
-        expect(validator("+ 5 ", $elem)).toBe(true);
-        expect(validator(" + 5 ", $elem)).toBe(true);
-        expect(validator("1.25", $elem)).toBe(true);
-        expect(validator("0.1", $elem)).toBe(true);
-        expect(validator("-5", $elem)).toEqual({
-          error_message_type: 'number_min_included',
-          min: 0
-        });
-        expect(validator("- 5.2", $elem)).toEqual({
-          error_message_type: 'number_min_included',
-          min: 0
-        });
-        expect(validator(" - 5", $elem)).toEqual({
-          error_message_type: 'number_min_included',
-          min: 0
-        });
-        expect(validator("- 5 ", $elem)).toEqual({
-          error_message_type: 'number_min_included',
-          min: 0
-        });
-        expect(validator("1e7", $elem)).toEqual({
-          error_message_type: 'number'
-        });
-        expect(validator(" - 0.1", $elem)).toEqual({
-          error_message_type: 'number_min_included',
-          min: 0
-        });
-        return expect(validator(" - 0.1 ", $elem)).toEqual({
-          error_message_type: 'number_min_included',
-          min: 0
-        });
-      });
-      it("negative number", function() {
-        var $elem, validator;
-        log("negative number");
-        validator = function(str, elem) {
-          var key, res, val;
-          res = validators.number.call(validators, str, elem);
-          if (res === true) {
-            return true;
-          }
-          for (key in res) {
-            val = res[key];
-            if (key[0] === "_") {
-              delete res[key];
-            }
-          }
-          return res;
-        };
-        $elem = $("<input type='text' data-fv-validate='number' data-fv-max='0' data-fv-include-max='false' />");
-        expect(validator("-5", $elem)).toBe(true);
-        expect(validator("- 5.1", $elem)).toBe(true);
-        expect(validator(" - 5", $elem)).toBe(true);
-        expect(validator("- 5.3 ", $elem)).toBe(true);
-        expect(validator("0", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0
-        });
-        expect(validator("1", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0
-        });
-        expect(validator("100", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0
-        });
-        expect(validator("+5", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0
-        });
-        expect(validator("+ 5", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0
-        });
-        expect(validator("+ 5 ", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0
-        });
-        expect(validator(" + 5 ", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0
-        });
-        expect(validator("1e7", $elem)).toEqual({
-          error_message_type: 'number'
-        });
-        expect(validator("-Infinity", $elem)).toEqual({
-          error_message_type: 'number'
-        });
-        expect(validator("1.25", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0
-        });
-        return expect(validator("0.1", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0
-        });
-      });
-      it("positive number with max", function() {
-        var $elem, validator;
-        log("positive number with max");
-        validator = function(str, elem) {
-          var key, res, val;
-          res = validators.number.call(validators, str, elem);
-          if (res === true) {
-            return true;
-          }
-          for (key in res) {
-            val = res[key];
-            if (key[0] === "_") {
-              delete res[key];
-            }
-          }
-          return res;
-        };
-        $elem = $("<input type='text' data-fv-validate='number' data-fv-min='0' data-fv-max='10.5' />");
-        expect(validator("0", $elem)).toBe(true);
-        expect(validator("1.1", $elem)).toBe(true);
-        expect(validator("2.2", $elem)).toBe(true);
-        expect(validator("3.3", $elem)).toBe(true);
-        expect(validator("4.4", $elem)).toBe(true);
-        expect(validator("5.5", $elem)).toBe(true);
-        expect(validator("6.6", $elem)).toBe(true);
-        expect(validator("7.7", $elem)).toBe(true);
-        expect(validator("8.8", $elem)).toBe(true);
-        expect(validator("9.9", $elem)).toBe(true);
-        expect(validator("10.10", $elem)).toBe(true);
-        expect(validator("-.1", $elem)).toEqual({
-          error_message_type: 'number_min_included',
-          max: 10.5,
-          min: 0
-        });
-        return expect(validator("10.6", $elem)).toEqual({
-          error_message_type: 'number_max_included',
-          max: 10.5,
-          min: 0
-        });
-      });
-      it("negative number with min", function() {
-        var $elem, validator;
-        log("negative number with min");
-        validator = function(str, elem) {
-          var key, res, val;
-          res = validators.number.call(validators, str, elem);
-          if (res === true) {
-            return true;
-          }
-          for (key in res) {
-            val = res[key];
-            if (key[0] === "_") {
-              delete res[key];
-            }
-          }
-          return res;
-        };
-        $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='-10.1' data-fv-max='0' data-fv-include-max='false' />");
-        expect(validator("-1.1", $elem)).toBe(true);
-        expect(validator("-2.2", $elem)).toBe(true);
-        expect(validator("-3.3", $elem)).toBe(true);
-        expect(validator("-4.4", $elem)).toBe(true);
-        expect(validator("-5.5", $elem)).toBe(true);
-        expect(validator("-6.6", $elem)).toBe(true);
-        expect(validator("-7.7", $elem)).toBe(true);
-        expect(validator("-8.8", $elem)).toBe(true);
-        expect(validator("-9.9", $elem)).toBe(true);
-        expect(validator("-10.10", $elem)).toBe(true);
-        expect(validator("-10.2", $elem)).toEqual({
-          error_message_type: 'number_min_included',
-          max: 0,
-          min: -10.1
-        });
-        return expect(validator("0.01", $elem)).toEqual({
-          error_message_type: 'number_max',
-          max: 0,
-          min: -10.1
         });
       });
       it("phone", function() {
@@ -634,6 +227,9 @@
             html.find("[name='" + name + "']").val(val);
           }
           form_validator = FormValidator["new"](html.first(), {
+            field_getter: function(form) {
+              return form.find(".general [data-fv-validate]");
+            },
             preprocessors: {
               integer: function(val, elem) {
                 return val.replace(/\,\-/g, "");
@@ -655,69 +251,63 @@
           return this.html.remove();
         });
         it("return value", function() {
-          var error, j, len, ref;
+          var data_for_invalid_elements, datum, error, i, j, len, ref, results;
           expect(this.errors.length).toBe(10);
-          ref = this.errors;
-          for (j = 0, len = ref.length; j < len; j++) {
-            error = ref[j];
-            delete error.element;
-            delete error.validator;
-          }
-          return expect(this.errors).toEqual([
+          data_for_invalid_elements = [
             {
-              "message": FormValidator.error_messages.de.text({
-                index_of_type: 1
-              }),
-              "required": true,
-              "type": "text",
-              "value": ""
+              required: true,
+              type: "text",
+              value: ""
             }, {
-              "message": FormValidator.error_messages.de.number.replace("{{value}}", this.values_by_name.en_number),
-              "required": true,
-              "type": "number",
-              "value": this.values_by_name.en_number
+              required: true,
+              type: "number",
+              value: this.values_by_name.en_number
             }, {
-              "message": FormValidator.error_messages.de.number.replace("{{value}}", this.values_by_name.de_number),
-              "required": true,
-              "type": "number",
-              "value": this.values_by_name.de_number
+              required: true,
+              type: "number",
+              value: this.values_by_name.de_number
             }, {
-              "message": FormValidator.error_messages.de.phone.replace("{{value}}", this.values_by_name.phone),
-              "required": false,
-              "type": "phone",
-              "value": this.values_by_name.phone
+              required: false,
+              type: "phone",
+              value: this.values_by_name.phone
             }, {
-              "message": FormValidator.error_messages.de.email_dot.replace("{{value}}", this.values_by_name.email),
-              "required": true,
-              "type": "email",
-              "value": this.values_by_name.email
+              required: true,
+              type: "email",
+              value: this.values_by_name.email
             }, {
-              "message": FormValidator.error_messages.de.checkbox.replace("{{index_of_type}}", 1),
-              "required": true,
-              "type": "checkbox",
-              "value": ""
+              required: true,
+              type: "checkbox",
+              value: ""
             }, {
-              "message": FormValidator.error_messages.de.checkbox.replace("{{index_of_type}}", 2),
-              "required": true,
-              "type": "checkbox",
-              "value": ""
+              required: true,
+              type: "checkbox",
+              value: ""
             }, {
-              "message": FormValidator.error_messages.de.radio.replace("{{index_of_type}}", 1),
-              "required": true,
-              "type": "radio",
-              "value": ""
+              required: true,
+              type: "radio",
+              value: ""
             }, {
-              "message": FormValidator.error_messages.de.radio.replace("{{index_of_type}}", 2),
-              "required": true,
-              "type": "radio",
-              "value": ""
+              required: true,
+              type: "radio",
+              value: ""
             }, {
-              "message": FormValidator.error_messages.de.select.replace("{{index_of_type}}", 1),
-              "required": true,
-              "type": "select",
-              "value": ""
+              required: true,
+              type: "select",
+              value: ""
             }
-          ]);
+          ];
+          ref = this.errors;
+          results = [];
+          for (i = j = 0, len = ref.length; j < len; i = ++j) {
+            error = ref[i];
+            datum = data_for_invalid_elements[i];
+            expect(error.errors.length).toBe(1);
+            error = error.errors[0];
+            expect(error.type).toBe(datum.type);
+            expect(error.required).toBe(datum.required);
+            results.push(expect(error.value).toBe(datum.value));
+          }
+          return results;
         });
         return it("side fx", function() {
           console.log(this.html);
@@ -752,11 +342,8 @@
         this.html = html;
         return this.errors = errors;
       });
-      afterEach(function() {
+      return afterEach(function() {
         return this.html.remove();
-      });
-      return it("return value", function() {
-        return expect(this.errors.length).toBe(10);
       });
     });
   };
@@ -783,12 +370,16 @@
         return this.html.remove();
       });
       return it("return value", function() {
-        return expect(this.errors.length).toBe(10);
+        var message;
+        expect(this.errors.length).toBe(1);
+        message = FormValidator.locales.de.constraint_enumerate_prefix + " " + FormValidator.locales.de.constraint_max;
+        message = message.replace("{{value}}", this.errors[0].element.val()).replace("{{max}}", this.errors[0].element.attr("data-fv-max"));
+        return expect(this.errors[0].message).toBe(message);
       });
     });
   };
 
-  FORM_HTML = "<form action=\"\" method=\"get\" data-fv-error-classes=\"red-color class2\">\n\n    <span class=\"textlabel\">text:</span>\n    <input type=\"text\" name=\"text\" value=\"\" data-fv-validate=\"text\" data-fv-error-targets=\".textlabel\" /><br />\n\n    <span data-fv-name=\"numberlabel-en\">english format number:</span>\n    <input type=\"text\" name=\"en_number\" value=\"\" data-fv-validate=\"number\" data-fv-preprocess=\"false\" data-fv-postprocess=\"false\" data-fv-error-targets=\"numberlabel-en\" /><br />\n\n    <span data-fv-name=\"numberlabel-de\">german format number:</span>\n    <input type=\"text\" name=\"de_number\" value=\"\" data-fv-validate=\"number\" data-fv-error-targets=\"numberlabel-de\" /><br />\n\n    <span data-fv-name=\"integerlabel\">optional integer:</span>\n    <input type=\"text\" name=\"optional_integer\" value=\"\" data-fv-validate=\"integer\" data-fv-optional=\"true\" data-fv-error-targets=\"self\" /><br />\n\n    <span data-fv-name=\"integerlabel\">integer:</span>\n    <input type=\"text\" name=\"integer\" value=\"\" data-fv-validate=\"integer\" /><br />\n\n    <span data-fv-name=\"phonelabel\">optional phone:</span>\n    <input type=\"text\" name=\"phone\" value=\"\" data-fv-validate=\"phone\" data-fv-optional=\"true\" /><br />\n\n    <span data-fv-name=\"emaillabel\">email:</span>\n    <input type=\"text\" name=\"email\" value=\"\" data-fv-validate=\"email\" data-fv-error-targets=\"self error1 .outsider\" /><br />\n\n    <span data-fv-name=\"checkboxlabel\">checkbox:</span>\n    <input type=\"checkbox\" name=\"checkbox\" value=\"v1\" data-fv-validate=\"checkbox\" data-fv-error-targets=\"self checkboxlabel\" />\n    <input type=\"checkbox\" name=\"checkbox\" value=\"v2\" data-fv-validate=\"checkbox\" />\n    <br />\n\n    <span data-fv-name=\"radiolabel\">radio button:</span>\n    <input type=\"radio\" name=\"radio\" value=\"v1\" data-fv-validate=\"radio\" />\n    <input type=\"radio\" name=\"radio\" value=\"v2\" data-fv-validate=\"radio\" />\n    <br />\n\n    <select data-fv-validate=\"select\" data-fv-error-targets=\"self\">\n        <option value=\"\">Bitte wählen</option>\n        <option value=\"mr\">Herr</option>\n        <option value=\"mrs\">Frau</option>\n    </select>\n    <br />\n\n    <div class=\"dependencies\">\n        <h4>Dependencies</h4>\n\n        <input type=\"text\" data-fv-validate=\"number\" data-fv-name=\"master\" data-fv-preprocess=\"false\" data-fv-postprocess=\"false\" /><br />\n        <input type=\"text\" data-fv-validate=\"text\" data-fv-name=\"slave\" data-fv-depends-on=\"master\" /><br />\n    </div>\n\n    <div class=\"constraints\">\n        <h4>Constraints</h4>\n\n        <span data-fv-name=\"max_min\">min and max:</span>\n        <input type=\"text\" data-fv-validate=\"number\" data-fv-min=\"1\" data-fv-max=\"4\" data-fv-include-max=\"false\" value=\"4\" /><br />\n    </div>\n\n    <hr />\n    <div data-fv-name=\"error1\" data-fv-error-classes=\"red-color bold\">\n        text in some div (INSIDE THE FORM TAG, USING data-fv-name) that should become red and bold for any form field with 'error1' as error target\n    </div>\n</form>\n\n<div class=\"outsider\">\n    text in some div (OUTSIDE THE FORM TAG, USING class) that should become red and bold for any form field with '.outsider' as error target\n</div>";
+  FORM_HTML = "<form action=\"\" method=\"get\" data-fv-error-classes=\"red-color class2\">\n\n    <div class=\"general\">\n        <h4>General behavior</h4>\n\n        <span class=\"textlabel\">text:</span>\n        <input type=\"text\" name=\"text\" value=\"\" data-fv-validate=\"text\" data-fv-error-targets=\".textlabel\" /><br />\n\n        <span data-fv-name=\"numberlabel-en\">english format number:</span>\n        <input type=\"text\" name=\"en_number\" value=\"\" data-fv-validate=\"number\" data-fv-preprocess=\"false\" data-fv-postprocess=\"false\" data-fv-error-targets=\"numberlabel-en\" /><br />\n\n        <span data-fv-name=\"numberlabel-de\">german format number:</span>\n        <input type=\"text\" name=\"de_number\" value=\"\" data-fv-validate=\"number\" data-fv-error-targets=\"numberlabel-de\" /><br />\n\n        <span data-fv-name=\"integerlabel\">optional integer:</span>\n        <input type=\"text\" name=\"optional_integer\" value=\"\" data-fv-validate=\"integer\" data-fv-optional=\"true\" data-fv-error-targets=\"self\" /><br />\n\n        <span data-fv-name=\"integerlabel\">integer:</span>\n        <input type=\"text\" name=\"integer\" value=\"\" data-fv-validate=\"integer\" /><br />\n\n        <span data-fv-name=\"phonelabel\">optional phone:</span>\n        <input type=\"text\" name=\"phone\" value=\"\" data-fv-validate=\"phone\" data-fv-optional=\"true\" /><br />\n\n        <span data-fv-name=\"emaillabel\">email:</span>\n        <input type=\"text\" name=\"email\" value=\"\" data-fv-validate=\"email\" data-fv-error-targets=\"self error1 .outsider\" /><br />\n\n        <span data-fv-name=\"checkboxlabel\">checkbox:</span>\n        <input type=\"checkbox\" name=\"checkbox\" value=\"v1\" data-fv-validate=\"checkbox\" data-fv-error-targets=\"self checkboxlabel\" />\n        <input type=\"checkbox\" name=\"checkbox\" value=\"v2\" data-fv-validate=\"checkbox\" />\n        <br />\n\n        <span data-fv-name=\"radiolabel\">radio button:</span>\n        <input type=\"radio\" name=\"radio\" value=\"v1\" data-fv-validate=\"radio\" />\n        <input type=\"radio\" name=\"radio\" value=\"v2\" data-fv-validate=\"radio\" />\n        <br />\n\n        <select data-fv-validate=\"select\" data-fv-error-targets=\"self\">\n        <option value=\"\">Bitte wählen</option>\n        <option value=\"mr\">Herr</option>\n        <option value=\"mrs\">Frau</option>\n        </select>\n    </div>\n\n    <div class=\"dependencies\">\n        <h4>Dependencies</h4>\n\n        <input type=\"text\" data-fv-validate=\"number\" data-fv-name=\"master\" data-fv-preprocess=\"false\" data-fv-postprocess=\"false\" /><br />\n        <input type=\"text\" data-fv-validate=\"text\" data-fv-name=\"slave\" data-fv-depends-on=\"master\" /><br />\n    </div>\n\n    <div class=\"constraints\">\n        <h4>Constraints</h4>\n\n        <span data-fv-name=\"max_min\">min and max:</span>\n        <input type=\"text\" data-fv-validate=\"number\" data-fv-min=\"1\" data-fv-max=\"4\" data-fv-include-max=\"false\" value=\"4\" /><br />\n    </div>\n\n    <hr />\n    <div data-fv-name=\"error1\" data-fv-error-classes=\"red-color bold\">\n        text in some div (INSIDE THE FORM TAG, USING data-fv-name) that should become red and bold for any form field with 'error1' as error target\n    </div>\n</form>\n\n<div class=\"outsider\">\n    text in some div (OUTSIDE THE FORM TAG, USING class) that should become red and bold for any form field with '.outsider' as error target\n</div>";
 
   log = function(name) {
     var i, j, k, padStr, ref, ref1, ref2, ref3, rem, s, str;
@@ -821,15 +412,11 @@
       include_general_behavior_tests();
       include_dependency_tests();
       include_constraint_tests();
-      return describe("progress", function() {});
+      describe("progress", function() {});
+      return window.setTimeout(function() {
+        return $(document.body).append(FORM_HTML);
+      }, 1500);
     });
-  });
-
-  $(document).ready(function() {
-    window.setTimeout(function() {
-      return $(document.body).append(FORM_HTML);
-    }, 1500);
-    return true;
   });
 
 }).call(this);

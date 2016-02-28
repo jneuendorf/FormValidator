@@ -41,9 +41,9 @@ $.extend locales.de, {
     # constraint_enumerate_suffix: ""
     constraint_list_prefix: "'{{value}}' ist nicht"
     # constraint validators
-    constraint_max: "kleiner als {{max}}"
-    constraint_min: "größer als {{max}}"
-    constraint_max_min: "zwischen {{min}} und {{max}}"
+    constraint_max: "kleiner als '{{max}}'"
+    constraint_min: "größer als '{{max}}'"
+    constraint_max_min: "zwischen '{{min}}' und '{{max}}'"
 
 }
 

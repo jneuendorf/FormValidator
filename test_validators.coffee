@@ -65,194 +65,194 @@ include_validator_tests = () ->
             expect(validator("asdf", $elem)).toEqual({
                 error_message_type: "integer"
             })
-
-        it "positive integer", () ->
-            log "positive integer"
-            validator = (str, elem) ->
-                res = validators.integer.call(validators, str, elem)
-                if res is true
-                    return true
-                # remove helper items for easier testing
-                for key, val of res when key[0] is "_"
-                    delete res[key]
-                return res
-            $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='0' />")
-            # valid
-            expect(validator("0", $elem)).toBe(true)
-            expect(validator("1", $elem)).toBe(true)
-            expect(validator("100", $elem)).toBe(true)
-            expect(validator("+5", $elem)).toBe(true)
-            expect(validator("+ 5", $elem)).toBe(true)
-            expect(validator("+ 5 ", $elem)).toBe(true)
-            expect(validator(" + 5 ", $elem)).toBe(true)
-            # invalid
-            expect(validator("-5", $elem)).toEqual({
-                error_message_type: 'integer_min_included'
-                min: 0
-            })
-            expect(validator("- 5", $elem)).toEqual({
-                error_message_type: 'integer_min_included'
-                min: 0
-            })
-            expect(validator(" - 5", $elem)).toEqual({
-                error_message_type: 'integer_min_included'
-                min: 0
-            })
-            expect(validator("- 5 ", $elem)).toEqual({
-                error_message_type: 'integer_min_included'
-                min: 0
-            })
-            expect(validator("1e7", $elem)).toEqual({
-                error_message_type: 'integer'
-            })
-            expect(validator("Infinity", $elem)).toEqual({
-                error_message_type: 'integer'
-            })
-            expect(validator("1.25", $elem)).toEqual({
-                error_message_type: 'integer_float'
-            })
-            expect(validator("0.1", $elem)).toEqual({
-                error_message_type: 'integer_float'
-            })
-            expect(validator(" - 0.1", $elem)).toEqual({
-                error_message_type: 'integer'
-            })
-            expect(validator(" - 0.1 ", $elem)).toEqual({
-                error_message_type: 'integer'
-            })
-
-        it "negative integer", () ->
-            log "negative integer"
-            validator = (str, elem) ->
-                res = validators.integer.call(validators, str, elem)
-                if res is true
-                    return true
-                # remove helper items for easier testing
-                for key, val of res when key[0] is "_"
-                    delete res[key]
-                return res
-            $elem = $("<input type='text' data-fv-validate='integer' data-fv-max='0' data-fv-include-max='false' />")
-            # valid
-            expect(validator("-5", $elem)).toBe(true)
-            expect(validator("- 5", $elem)).toBe(true)
-            expect(validator(" - 5", $elem)).toBe(true)
-            expect(validator("- 5 ", $elem)).toBe(true)
-            # invalid
-            expect(validator("0", $elem)).toEqual({
-                error_message_type: 'integer_max'
-                max: 0
-            })
-            expect(validator("1", $elem)).toEqual({
-                error_message_type: 'integer_max'
-                max: 0
-            })
-            expect(validator("100", $elem)).toEqual({
-                error_message_type: 'integer_max'
-                max: 0
-            })
-            expect(validator("+5", $elem)).toEqual({
-                error_message_type: 'integer_max'
-                max: 0
-            })
-            expect(validator("+ 5", $elem)).toEqual({
-                error_message_type: 'integer_max'
-                max: 0
-            })
-            expect(validator("+ 5 ", $elem)).toEqual({
-                error_message_type: 'integer_max'
-                max: 0
-            })
-            expect(validator(" + 5 ", $elem)).toEqual({
-                error_message_type: 'integer_max'
-                max: 0
-            })
-            expect(validator("1e7", $elem)).toEqual({
-                error_message_type: 'integer'
-            })
-            expect(validator("-Infinity", $elem)).toEqual({
-                error_message_type: 'integer'
-            })
-            expect(validator("1.25", $elem)).toEqual({
-                error_message_type: 'integer'
-            })
-            expect(validator("0.1", $elem)).toEqual({
-                error_message_type: 'integer'
-            })
-            expect(validator(" - 0.1", $elem)).toEqual({
-                error_message_type: 'integer_float'
-            })
-            expect(validator(" - 0.1 ", $elem)).toEqual({
-                error_message_type: 'integer_float'
-            })
-
-        it "positive integer with max", () ->
-            log "positive integer with max"
-            validator = (str, elem) ->
-                res = validators.integer.call(validators, str, elem)
-                if res is true
-                    return true
-                # remove helper items for easier testing
-                for key, val of res when key[0] is "_"
-                    delete res[key]
-                return res
-            $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='0' data-fv-max='10' />")
-            # valid
-            expect(validator("0", $elem)).toBe(true)
-            expect(validator("1", $elem)).toBe(true)
-            expect(validator("2", $elem)).toBe(true)
-            expect(validator("3", $elem)).toBe(true)
-            expect(validator("4", $elem)).toBe(true)
-            expect(validator("5", $elem)).toBe(true)
-            expect(validator("6", $elem)).toBe(true)
-            expect(validator("7", $elem)).toBe(true)
-            expect(validator("8", $elem)).toBe(true)
-            expect(validator("9", $elem)).toBe(true)
-            expect(validator("10", $elem)).toBe(true)
-            # invalid
-            expect(validator("-1", $elem)).toEqual({
-                error_message_type: 'integer_min_included'
-                max: 10
-                min: 0
-            })
-            expect(validator("11", $elem)).toEqual({
-                error_message_type: 'integer_max_included'
-                max: 10
-                min: 0
-            })
-
-        it "negative integer with min", () ->
-            log "negative integer with min"
-            validator = (str, elem) ->
-                res = validators.integer.call(validators, str, elem)
-                if res is true
-                    return true
-                # remove helper items for easier testing
-                for key, val of res when key[0] is "_"
-                    delete res[key]
-                return res
-            $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='-10' data-fv-max='0' data-fv-include-max='false' />")
-            # valid
-            expect(validator("-1", $elem)).toBe(true)
-            expect(validator("-2", $elem)).toBe(true)
-            expect(validator("-3", $elem)).toBe(true)
-            expect(validator("-4", $elem)).toBe(true)
-            expect(validator("-5", $elem)).toBe(true)
-            expect(validator("-6", $elem)).toBe(true)
-            expect(validator("-7", $elem)).toBe(true)
-            expect(validator("-8", $elem)).toBe(true)
-            expect(validator("-9", $elem)).toBe(true)
-            expect(validator("-10", $elem)).toBe(true)
-            # invalid
-            expect(validator("-11", $elem)).toEqual({
-                error_message_type: 'integer_min_included'
-                max: 0
-                min: -10
-            })
-            expect(validator("0", $elem)).toEqual({
-                error_message_type: 'integer_max'
-                max: 0
-                min: -10
-            })
+        #
+        # it "positive integer", () ->
+        #     log "positive integer"
+        #     validator = (str, elem) ->
+        #         res = validators.integer.call(validators, str, elem)
+        #         if res is true
+        #             return true
+        #         # remove helper items for easier testing
+        #         for key, val of res when key[0] is "_"
+        #             delete res[key]
+        #         return res
+        #     $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='0' />")
+        #     # valid
+        #     expect(validator("0", $elem)).toBe(true)
+        #     expect(validator("1", $elem)).toBe(true)
+        #     expect(validator("100", $elem)).toBe(true)
+        #     expect(validator("+5", $elem)).toBe(true)
+        #     expect(validator("+ 5", $elem)).toBe(true)
+        #     expect(validator("+ 5 ", $elem)).toBe(true)
+        #     expect(validator(" + 5 ", $elem)).toBe(true)
+        #     # invalid
+        #     expect(validator("-5", $elem)).toEqual({
+        #         error_message_type: 'integer_min_included'
+        #         min: 0
+        #     })
+        #     expect(validator("- 5", $elem)).toEqual({
+        #         error_message_type: 'integer_min_included'
+        #         min: 0
+        #     })
+        #     expect(validator(" - 5", $elem)).toEqual({
+        #         error_message_type: 'integer_min_included'
+        #         min: 0
+        #     })
+        #     expect(validator("- 5 ", $elem)).toEqual({
+        #         error_message_type: 'integer_min_included'
+        #         min: 0
+        #     })
+        #     expect(validator("1e7", $elem)).toEqual({
+        #         error_message_type: 'integer'
+        #     })
+        #     expect(validator("Infinity", $elem)).toEqual({
+        #         error_message_type: 'integer'
+        #     })
+        #     expect(validator("1.25", $elem)).toEqual({
+        #         error_message_type: 'integer_float'
+        #     })
+        #     expect(validator("0.1", $elem)).toEqual({
+        #         error_message_type: 'integer_float'
+        #     })
+        #     expect(validator(" - 0.1", $elem)).toEqual({
+        #         error_message_type: 'integer'
+        #     })
+        #     expect(validator(" - 0.1 ", $elem)).toEqual({
+        #         error_message_type: 'integer'
+        #     })
+        #
+        # it "negative integer", () ->
+        #     log "negative integer"
+        #     validator = (str, elem) ->
+        #         res = validators.integer.call(validators, str, elem)
+        #         if res is true
+        #             return true
+        #         # remove helper items for easier testing
+        #         for key, val of res when key[0] is "_"
+        #             delete res[key]
+        #         return res
+        #     $elem = $("<input type='text' data-fv-validate='integer' data-fv-max='0' data-fv-include-max='false' />")
+        #     # valid
+        #     expect(validator("-5", $elem)).toBe(true)
+        #     expect(validator("- 5", $elem)).toBe(true)
+        #     expect(validator(" - 5", $elem)).toBe(true)
+        #     expect(validator("- 5 ", $elem)).toBe(true)
+        #     # invalid
+        #     expect(validator("0", $elem)).toEqual({
+        #         error_message_type: 'integer_max'
+        #         max: 0
+        #     })
+        #     expect(validator("1", $elem)).toEqual({
+        #         error_message_type: 'integer_max'
+        #         max: 0
+        #     })
+        #     expect(validator("100", $elem)).toEqual({
+        #         error_message_type: 'integer_max'
+        #         max: 0
+        #     })
+        #     expect(validator("+5", $elem)).toEqual({
+        #         error_message_type: 'integer_max'
+        #         max: 0
+        #     })
+        #     expect(validator("+ 5", $elem)).toEqual({
+        #         error_message_type: 'integer_max'
+        #         max: 0
+        #     })
+        #     expect(validator("+ 5 ", $elem)).toEqual({
+        #         error_message_type: 'integer_max'
+        #         max: 0
+        #     })
+        #     expect(validator(" + 5 ", $elem)).toEqual({
+        #         error_message_type: 'integer_max'
+        #         max: 0
+        #     })
+        #     expect(validator("1e7", $elem)).toEqual({
+        #         error_message_type: 'integer'
+        #     })
+        #     expect(validator("-Infinity", $elem)).toEqual({
+        #         error_message_type: 'integer'
+        #     })
+        #     expect(validator("1.25", $elem)).toEqual({
+        #         error_message_type: 'integer'
+        #     })
+        #     expect(validator("0.1", $elem)).toEqual({
+        #         error_message_type: 'integer'
+        #     })
+        #     expect(validator(" - 0.1", $elem)).toEqual({
+        #         error_message_type: 'integer_float'
+        #     })
+        #     expect(validator(" - 0.1 ", $elem)).toEqual({
+        #         error_message_type: 'integer_float'
+        #     })
+        #
+        # it "positive integer with max", () ->
+        #     log "positive integer with max"
+        #     validator = (str, elem) ->
+        #         res = validators.integer.call(validators, str, elem)
+        #         if res is true
+        #             return true
+        #         # remove helper items for easier testing
+        #         for key, val of res when key[0] is "_"
+        #             delete res[key]
+        #         return res
+        #     $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='0' data-fv-max='10' />")
+        #     # valid
+        #     expect(validator("0", $elem)).toBe(true)
+        #     expect(validator("1", $elem)).toBe(true)
+        #     expect(validator("2", $elem)).toBe(true)
+        #     expect(validator("3", $elem)).toBe(true)
+        #     expect(validator("4", $elem)).toBe(true)
+        #     expect(validator("5", $elem)).toBe(true)
+        #     expect(validator("6", $elem)).toBe(true)
+        #     expect(validator("7", $elem)).toBe(true)
+        #     expect(validator("8", $elem)).toBe(true)
+        #     expect(validator("9", $elem)).toBe(true)
+        #     expect(validator("10", $elem)).toBe(true)
+        #     # invalid
+        #     expect(validator("-1", $elem)).toEqual({
+        #         error_message_type: 'integer_min_included'
+        #         max: 10
+        #         min: 0
+        #     })
+        #     expect(validator("11", $elem)).toEqual({
+        #         error_message_type: 'integer_max_included'
+        #         max: 10
+        #         min: 0
+        #     })
+        #
+        # it "negative integer with min", () ->
+        #     log "negative integer with min"
+        #     validator = (str, elem) ->
+        #         res = validators.integer.call(validators, str, elem)
+        #         if res is true
+        #             return true
+        #         # remove helper items for easier testing
+        #         for key, val of res when key[0] is "_"
+        #             delete res[key]
+        #         return res
+        #     $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='-10' data-fv-max='0' data-fv-include-max='false' />")
+        #     # valid
+        #     expect(validator("-1", $elem)).toBe(true)
+        #     expect(validator("-2", $elem)).toBe(true)
+        #     expect(validator("-3", $elem)).toBe(true)
+        #     expect(validator("-4", $elem)).toBe(true)
+        #     expect(validator("-5", $elem)).toBe(true)
+        #     expect(validator("-6", $elem)).toBe(true)
+        #     expect(validator("-7", $elem)).toBe(true)
+        #     expect(validator("-8", $elem)).toBe(true)
+        #     expect(validator("-9", $elem)).toBe(true)
+        #     expect(validator("-10", $elem)).toBe(true)
+        #     # invalid
+        #     expect(validator("-11", $elem)).toEqual({
+        #         error_message_type: 'integer_min_included'
+        #         max: 0
+        #         min: -10
+        #     })
+        #     expect(validator("0", $elem)).toEqual({
+        #         error_message_type: 'integer_max'
+        #         max: 0
+        #         min: -10
+        #     })
 
         ############################################################################################################
         # NUMBER
@@ -304,184 +304,184 @@ include_validator_tests = () ->
             })
 
 
-        it "positive number", () ->
-            log "positive number"
-            validator = (str, elem) ->
-                res = validators.number.call(validators, str, elem)
-                if res is true
-                    return true
-                # remove helper items for easier testing
-                for key, val of res when key[0] is "_"
-                    delete res[key]
-                return res
-            $elem = $("<input type='text' data-fv-validate='number' data-fv-min='0' />")
-            # valid
-            expect(validator("0", $elem)).toBe(true)
-            expect(validator("1", $elem)).toBe(true)
-            expect(validator("100", $elem)).toBe(true)
-            expect(validator("+5", $elem)).toBe(true)
-            expect(validator("+ 5", $elem)).toBe(true)
-            expect(validator("+ 5 ", $elem)).toBe(true)
-            expect(validator(" + 5 ", $elem)).toBe(true)
-            expect(validator("1.25", $elem)).toBe(true)
-            expect(validator("0.1", $elem)).toBe(true)
-            # invalid
-            expect(validator("-5", $elem)).toEqual({
-                error_message_type: 'number_min_included'
-                min: 0
-            })
-            expect(validator("- 5.2", $elem)).toEqual({
-                error_message_type: 'number_min_included'
-                min: 0
-            })
-            expect(validator(" - 5", $elem)).toEqual({
-                error_message_type: 'number_min_included'
-                min: 0
-            })
-            expect(validator("- 5 ", $elem)).toEqual({
-                error_message_type: 'number_min_included'
-                min: 0
-            })
-            expect(validator("1e7", $elem)).toEqual({
-                error_message_type: 'number'
-            })
-            expect(validator(" - 0.1", $elem)).toEqual({
-                error_message_type: 'number_min_included'
-                min: 0
-            })
-            expect(validator(" - 0.1 ", $elem)).toEqual({
-                error_message_type: 'number_min_included'
-                min: 0
-            })
-
-        it "negative number", () ->
-            log "negative number"
-            validator = (str, elem) ->
-                res = validators.number.call(validators, str, elem)
-                if res is true
-                    return true
-                # remove helper items for easier testing
-                for key, val of res when key[0] is "_"
-                    delete res[key]
-                return res
-            $elem = $("<input type='text' data-fv-validate='number' data-fv-max='0' data-fv-include-max='false' />")
-            # valid
-            expect(validator("-5", $elem)).toBe(true)
-            expect(validator("- 5.1", $elem)).toBe(true)
-            expect(validator(" - 5", $elem)).toBe(true)
-            expect(validator("- 5.3 ", $elem)).toBe(true)
-            # invalid
-            expect(validator("0", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-            })
-            expect(validator("1", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-            })
-            expect(validator("100", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-            })
-            expect(validator("+5", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-            })
-            expect(validator("+ 5", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-            })
-            expect(validator("+ 5 ", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-            })
-            expect(validator(" + 5 ", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-            })
-            expect(validator("1e7", $elem)).toEqual({
-                error_message_type: 'number'
-            })
-            expect(validator("-Infinity", $elem)).toEqual({
-                error_message_type: 'number'
-            })
-            expect(validator("1.25", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-            })
-            expect(validator("0.1", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-            })
-
-        it "positive number with max", () ->
-            log "positive number with max"
-            validator = (str, elem) ->
-                res = validators.number.call(validators, str, elem)
-                if res is true
-                    return true
-                # remove helper items for easier testing
-                for key, val of res when key[0] is "_"
-                    delete res[key]
-                return res
-            $elem = $("<input type='text' data-fv-validate='number' data-fv-min='0' data-fv-max='10.5' />")
-            # valid
-            expect(validator("0", $elem)).toBe(true)
-            expect(validator("1.1", $elem)).toBe(true)
-            expect(validator("2.2", $elem)).toBe(true)
-            expect(validator("3.3", $elem)).toBe(true)
-            expect(validator("4.4", $elem)).toBe(true)
-            expect(validator("5.5", $elem)).toBe(true)
-            expect(validator("6.6", $elem)).toBe(true)
-            expect(validator("7.7", $elem)).toBe(true)
-            expect(validator("8.8", $elem)).toBe(true)
-            expect(validator("9.9", $elem)).toBe(true)
-            expect(validator("10.10", $elem)).toBe(true)
-            # invalid
-            expect(validator("-.1", $elem)).toEqual({
-                error_message_type: 'number_min_included'
-                max: 10.5
-                min: 0
-            })
-            expect(validator("10.6", $elem)).toEqual({
-                error_message_type: 'number_max_included'
-                max: 10.5
-                min: 0
-            })
-
-        it "negative number with min", () ->
-            log "negative number with min"
-            validator = (str, elem) ->
-                res = validators.number.call(validators, str, elem)
-                if res is true
-                    return true
-                # remove helper items for easier testing
-                for key, val of res when key[0] is "_"
-                    delete res[key]
-                return res
-            $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='-10.1' data-fv-max='0' data-fv-include-max='false' />")
-            # valid
-            expect(validator("-1.1", $elem)).toBe(true)
-            expect(validator("-2.2", $elem)).toBe(true)
-            expect(validator("-3.3", $elem)).toBe(true)
-            expect(validator("-4.4", $elem)).toBe(true)
-            expect(validator("-5.5", $elem)).toBe(true)
-            expect(validator("-6.6", $elem)).toBe(true)
-            expect(validator("-7.7", $elem)).toBe(true)
-            expect(validator("-8.8", $elem)).toBe(true)
-            expect(validator("-9.9", $elem)).toBe(true)
-            expect(validator("-10.10", $elem)).toBe(true)
-            # invalid
-            expect(validator("-10.2", $elem)).toEqual({
-                error_message_type: 'number_min_included'
-                max: 0
-                min: -10.1
-            })
-            expect(validator("0.01", $elem)).toEqual({
-                error_message_type: 'number_max'
-                max: 0
-                min: -10.1
-            })
+        # it "positive number", () ->
+        #     log "positive number"
+        #     validator = (str, elem) ->
+        #         res = validators.number.call(validators, str, elem)
+        #         if res is true
+        #             return true
+        #         # remove helper items for easier testing
+        #         for key, val of res when key[0] is "_"
+        #             delete res[key]
+        #         return res
+        #     $elem = $("<input type='text' data-fv-validate='number' data-fv-min='0' />")
+        #     # valid
+        #     expect(validator("0", $elem)).toBe(true)
+        #     expect(validator("1", $elem)).toBe(true)
+        #     expect(validator("100", $elem)).toBe(true)
+        #     expect(validator("+5", $elem)).toBe(true)
+        #     expect(validator("+ 5", $elem)).toBe(true)
+        #     expect(validator("+ 5 ", $elem)).toBe(true)
+        #     expect(validator(" + 5 ", $elem)).toBe(true)
+        #     expect(validator("1.25", $elem)).toBe(true)
+        #     expect(validator("0.1", $elem)).toBe(true)
+        #     # invalid
+        #     expect(validator("-5", $elem)).toEqual({
+        #         error_message_type: 'number_min_included'
+        #         min: 0
+        #     })
+        #     expect(validator("- 5.2", $elem)).toEqual({
+        #         error_message_type: 'number_min_included'
+        #         min: 0
+        #     })
+        #     expect(validator(" - 5", $elem)).toEqual({
+        #         error_message_type: 'number_min_included'
+        #         min: 0
+        #     })
+        #     expect(validator("- 5 ", $elem)).toEqual({
+        #         error_message_type: 'number_min_included'
+        #         min: 0
+        #     })
+        #     expect(validator("1e7", $elem)).toEqual({
+        #         error_message_type: 'number'
+        #     })
+        #     expect(validator(" - 0.1", $elem)).toEqual({
+        #         error_message_type: 'number_min_included'
+        #         min: 0
+        #     })
+        #     expect(validator(" - 0.1 ", $elem)).toEqual({
+        #         error_message_type: 'number_min_included'
+        #         min: 0
+        #     })
+        #
+        # it "negative number", () ->
+        #     log "negative number"
+        #     validator = (str, elem) ->
+        #         res = validators.number.call(validators, str, elem)
+        #         if res is true
+        #             return true
+        #         # remove helper items for easier testing
+        #         for key, val of res when key[0] is "_"
+        #             delete res[key]
+        #         return res
+        #     $elem = $("<input type='text' data-fv-validate='number' data-fv-max='0' data-fv-include-max='false' />")
+        #     # valid
+        #     expect(validator("-5", $elem)).toBe(true)
+        #     expect(validator("- 5.1", $elem)).toBe(true)
+        #     expect(validator(" - 5", $elem)).toBe(true)
+        #     expect(validator("- 5.3 ", $elem)).toBe(true)
+        #     # invalid
+        #     expect(validator("0", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #     })
+        #     expect(validator("1", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #     })
+        #     expect(validator("100", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #     })
+        #     expect(validator("+5", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #     })
+        #     expect(validator("+ 5", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #     })
+        #     expect(validator("+ 5 ", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #     })
+        #     expect(validator(" + 5 ", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #     })
+        #     expect(validator("1e7", $elem)).toEqual({
+        #         error_message_type: 'number'
+        #     })
+        #     expect(validator("-Infinity", $elem)).toEqual({
+        #         error_message_type: 'number'
+        #     })
+        #     expect(validator("1.25", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #     })
+        #     expect(validator("0.1", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #     })
+        #
+        # it "positive number with max", () ->
+        #     log "positive number with max"
+        #     validator = (str, elem) ->
+        #         res = validators.number.call(validators, str, elem)
+        #         if res is true
+        #             return true
+        #         # remove helper items for easier testing
+        #         for key, val of res when key[0] is "_"
+        #             delete res[key]
+        #         return res
+        #     $elem = $("<input type='text' data-fv-validate='number' data-fv-min='0' data-fv-max='10.5' />")
+        #     # valid
+        #     expect(validator("0", $elem)).toBe(true)
+        #     expect(validator("1.1", $elem)).toBe(true)
+        #     expect(validator("2.2", $elem)).toBe(true)
+        #     expect(validator("3.3", $elem)).toBe(true)
+        #     expect(validator("4.4", $elem)).toBe(true)
+        #     expect(validator("5.5", $elem)).toBe(true)
+        #     expect(validator("6.6", $elem)).toBe(true)
+        #     expect(validator("7.7", $elem)).toBe(true)
+        #     expect(validator("8.8", $elem)).toBe(true)
+        #     expect(validator("9.9", $elem)).toBe(true)
+        #     expect(validator("10.10", $elem)).toBe(true)
+        #     # invalid
+        #     expect(validator("-.1", $elem)).toEqual({
+        #         error_message_type: 'number_min_included'
+        #         max: 10.5
+        #         min: 0
+        #     })
+        #     expect(validator("10.6", $elem)).toEqual({
+        #         error_message_type: 'number_max_included'
+        #         max: 10.5
+        #         min: 0
+        #     })
+        #
+        # it "negative number with min", () ->
+        #     log "negative number with min"
+        #     validator = (str, elem) ->
+        #         res = validators.number.call(validators, str, elem)
+        #         if res is true
+        #             return true
+        #         # remove helper items for easier testing
+        #         for key, val of res when key[0] is "_"
+        #             delete res[key]
+        #         return res
+        #     $elem = $("<input type='text' data-fv-validate='integer' data-fv-min='-10.1' data-fv-max='0' data-fv-include-max='false' />")
+        #     # valid
+        #     expect(validator("-1.1", $elem)).toBe(true)
+        #     expect(validator("-2.2", $elem)).toBe(true)
+        #     expect(validator("-3.3", $elem)).toBe(true)
+        #     expect(validator("-4.4", $elem)).toBe(true)
+        #     expect(validator("-5.5", $elem)).toBe(true)
+        #     expect(validator("-6.6", $elem)).toBe(true)
+        #     expect(validator("-7.7", $elem)).toBe(true)
+        #     expect(validator("-8.8", $elem)).toBe(true)
+        #     expect(validator("-9.9", $elem)).toBe(true)
+        #     expect(validator("-10.10", $elem)).toBe(true)
+        #     # invalid
+        #     expect(validator("-10.2", $elem)).toEqual({
+        #         error_message_type: 'number_min_included'
+        #         max: 0
+        #         min: -10.1
+        #     })
+        #     expect(validator("0.01", $elem)).toEqual({
+        #         error_message_type: 'number_max'
+        #         max: 0
+        #         min: -10.1
+        #     })
 
         it "phone", () ->
             log "phone"
