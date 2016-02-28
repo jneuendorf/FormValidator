@@ -79,15 +79,25 @@ error_message_builders[VALIDATION_PHASES.VALUE] = (errors, phase, build_mode, lo
 
 error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mode, locale) ->
     parts = []
+    # group by error.type as defined in constraint_validator_groups (if an error is in no group it implicitely creates an own group)
     grouped_errors = []
-    for group in constraint_validator_groups
-        for error in errors
-            idx = group.indexOf(error.type)
-            if idx >= 0
-                if grouped_errors[idx]?
-                    grouped_errors[idx].push(error)
+    ungrouped_errors = []
+    for error in errors
+        error_in_group = false
+        # TODO: make constraint_validator_groups accessible from class and use this ref here
+        for group, i in constraint_validator_groups
+            if error.type in group
+                error_in_group = true
+                if grouped_errors[i]?
+                    grouped_errors[i].push(error)
                 else
-                    grouped_errors[idx] = [error]
+                    grouped_errors[i] = [error]
+
+        if not error_in_group
+            ungrouped_errors.push error
+
+    for error in ungrouped_errors
+        grouped_errors.push [error]
 
     phase_singular = VALIDATION_PHASES_SINGULAR[phase].toLowerCase()
 
@@ -99,7 +109,7 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
         if key?
             parts.push part_evaluator(locales[locale][key], error)
         else if DEBUG
-            throw new Error("Could not find a translation for key while trying to create an error message during the constraint validation phase. Those keys were retrieved from the generated errors: #{JSON.stringify(keys)}. Define an according key in the 'locales' variable!")
+            throw new Error("Could not find a translation for key while trying to create an error message during the constraint validation phase. The keys that were retrieved from the generated errors are: #{JSON.stringify(keys)}. Define an according key in the 'locales' variable!")
 
     key = "#{phase_singular}_#{build_mode.toLowerCase()}"
     # replace {{value}} with the actual value
@@ -151,23 +161,3 @@ get_combined_key = (keys, locale, key_prefix = "", key_suffix = "") ->
                     return key
 
     return null
-# get_combined_key = (keys, locale, key_prefix = "", key_suffix = "") ->
-#     # clone keys
-#     keys = keys.slice(0)
-#     # sort because cached keys had been sorted and the convention is that locales are alphabetically sorted (joined with '_')
-#     keys.sort()
-#
-#     while keys.length > 0
-#         # check the cache for an entry
-#         key = key_prefix + keys.join("_") + key_suffix
-#         if permutation_cache[key]?
-#             return key
-#         # no cache hit => try all permutations
-#         for permutation in _get_permutations(keys)
-#             key = key_prefix + permutation.join("_") + key_suffix
-#             if locales[locale][key]?
-#                 permutation_cache[key] = true
-#                 return key
-#         keys.pop()
-#
-#     return null

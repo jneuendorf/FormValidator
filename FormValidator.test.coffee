@@ -52,8 +52,11 @@ FORM_HTML = """
     <div class="constraints">
         <h4>Constraints</h4>
 
-        <span data-fv-name="max_min">min and max:</span>
+        <span data-fv-name="max_min">min + max:</span>
         <input type="text" data-fv-validate="number" data-fv-min="1" data-fv-max="4" data-fv-include-max="false" value="4" /><br />
+
+        <span data-fv-name="max_min">regex + blacklist:</span>
+        <input type="text" data-fv-validate="text" data-fv-regex="^a\\.*z$" data-fv-regex-flags="gi" data-fv-blacklist="bcdef" value="b" /><br />
     </div>
 
     <hr />
@@ -101,6 +104,7 @@ describe "Reusables", () ->
         describe "progress", () ->
             # TODO
 
+        # this is just for making the test html visible
         window.setTimeout(
             () ->
                 $(document.body).append FORM_HTML

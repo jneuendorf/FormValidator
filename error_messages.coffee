@@ -37,13 +37,15 @@ $.extend locales.de, {
         return "Bitte füllen Sie das #{params.index_of_type}. Textfeld aus"
     # constraint validators (VALIDATION_PHASES_SINGULAR.CONSTRAINTS = 'constraint')
     # pre-, suffixes
-    constraint_enumerate_prefix: "'{{value}}' ist nicht"
+    constraint_enumerate_prefix: "'{{value}}'"
     # constraint_enumerate_suffix: ""
-    constraint_list_prefix: "'{{value}}' ist nicht"
-    # constraint validators
-    constraint_max: "kleiner als '{{max}}'"
-    constraint_min: "größer als '{{max}}'"
-    constraint_max_min: "zwischen '{{min}}' und '{{max}}'"
+    constraint_list_prefix: "'{{value}}'"
+    # constraint validators (negated formulation because prefix is negated itself)
+    constraint_blacklist: "enthält ein Zeichen in '{{blacklist}}'"
+    constraint_max: "ist nicht kleiner als '{{max}}'"
+    constraint_min: "ist nicht größer als '{{max}}'"
+    constraint_max_min: "liegt nicht zwischen '{{min}}' und '{{max}}'"
+    constraint_regex: "entspricht nicht dem regulären Ausdruck '{{regex}}'"
 
 }
 

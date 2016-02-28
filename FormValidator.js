@@ -312,7 +312,7 @@
       var char, l, len;
       for (l = 0, len = value.length; l < len; l++) {
         char = value[l];
-        if (blacklist.indexOf(char) < 0) {
+        if (whitelist.indexOf(char) < 0) {
           return false;
         }
       }
@@ -380,11 +380,13 @@
       }
       return "Bitte füllen Sie das " + params.index_of_type + ". Textfeld aus";
     },
-    constraint_enumerate_prefix: "'{{value}}' ist nicht",
-    constraint_list_prefix: "'{{value}}' ist nicht",
-    constraint_max: "kleiner als '{{max}}'",
-    constraint_min: "größer als '{{max}}'",
-    constraint_max_min: "zwischen '{{min}}' und '{{max}}'"
+    constraint_enumerate_prefix: "'{{value}}'",
+    constraint_list_prefix: "'{{value}}'",
+    constraint_blacklist: "enthält ein Zeichen in '{{blacklist}}'",
+    constraint_max: "ist nicht kleiner als '{{max}}'",
+    constraint_min: "ist nicht größer als '{{max}}'",
+    constraint_max_min: "liegt nicht zwischen '{{min}}' und '{{max}}'",
+    constraint_regex: "entspricht nicht dem regulären Ausdruck '{{regex}}'"
   });
 
   $.extend(locales.en, {
@@ -519,32 +521,41 @@
   };
 
   error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = function(errors, phase, build_mode, locale) {
-    var error, group, grouped_errors, idx, key, key_prefix, keys, l, len, len1, len2, m, o, parts, phase_singular, prefix;
+    var error, error_in_group, group, grouped_errors, i, key, key_prefix, keys, l, len, len1, len2, len3, m, o, parts, phase_singular, prefix, q, ref, ungrouped_errors;
     parts = [];
     grouped_errors = [];
-    for (l = 0, len = constraint_validator_groups.length; l < len; l++) {
-      group = constraint_validator_groups[l];
-      for (m = 0, len1 = errors.length; m < len1; m++) {
-        error = errors[m];
-        idx = group.indexOf(error.type);
-        if (idx >= 0) {
-          if (grouped_errors[idx] != null) {
-            grouped_errors[idx].push(error);
+    ungrouped_errors = [];
+    for (l = 0, len = errors.length; l < len; l++) {
+      error = errors[l];
+      error_in_group = false;
+      for (i = m = 0, len1 = constraint_validator_groups.length; m < len1; i = ++m) {
+        group = constraint_validator_groups[i];
+        if (ref = error.type, indexOf.call(group, ref) >= 0) {
+          error_in_group = true;
+          if (grouped_errors[i] != null) {
+            grouped_errors[i].push(error);
           } else {
-            grouped_errors[idx] = [error];
+            grouped_errors[i] = [error];
           }
         }
       }
+      if (!error_in_group) {
+        ungrouped_errors.push(error);
+      }
+    }
+    for (o = 0, len2 = ungrouped_errors.length; o < len2; o++) {
+      error = ungrouped_errors[o];
+      grouped_errors.push([error]);
     }
     phase_singular = VALIDATION_PHASES_SINGULAR[phase].toLowerCase();
     key_prefix = phase_singular + "_";
-    for (o = 0, len2 = grouped_errors.length; o < len2; o++) {
-      errors = grouped_errors[o];
+    for (q = 0, len3 = grouped_errors.length; q < len3; q++) {
+      errors = grouped_errors[q];
       keys = (function() {
-        var len3, q, results1;
+        var len4, results1, s;
         results1 = [];
-        for (q = 0, len3 = errors.length; q < len3; q++) {
-          error = errors[q];
+        for (s = 0, len4 = errors.length; s < len4; s++) {
+          error = errors[s];
           results1.push("" + error.type);
         }
         return results1;
@@ -553,7 +564,7 @@
       if (key != null) {
         parts.push(part_evaluator(locales[locale][key], error));
       } else if (DEBUG) {
-        throw new Error("Could not find a translation for key while trying to create an error message during the constraint validation phase. Those keys were retrieved from the generated errors: " + (JSON.stringify(keys)) + ". Define an according key in the 'locales' variable!");
+        throw new Error("Could not find a translation for key while trying to create an error message during the constraint validation phase. The keys that were retrieved from the generated errors are: " + (JSON.stringify(keys)) + ". Define an according key in the 'locales' variable!");
       }
     }
     key = phase_singular + "_" + (build_mode.toLowerCase());
@@ -1077,7 +1088,7 @@
         if (constraint.validator.call(this.constraint_validators, value, constraint.value, constraint.options) === true) {
           results[constraint.name] = true;
         } else {
-          results[constraint.name] = constraint.options;
+          results[constraint.name] = constraint.options || {};
           results[constraint.name][constraint.name] = constraint.value;
         }
       }

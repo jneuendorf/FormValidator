@@ -21,11 +21,18 @@ include_constraint_tests = () ->
             @html.remove()
 
 
-        it "return value", () ->
-            expect(@errors.length).toBe(1)
+        it "error messages", () ->
+            expect(@errors.length).toBe(2)
 
             message = FormValidator.locales.de.constraint_enumerate_prefix + " " + FormValidator.locales.de.constraint_max
             message = message
                 .replace("{{value}}", @errors[0].element.val())
                 .replace("{{max}}", @errors[0].element.attr("data-fv-max"))
             expect(@errors[0].message).toBe(message)
+
+            message = FormValidator.locales.de.constraint_enumerate_prefix + " " + FormValidator.locales.de.constraint_blacklist + " #{FormValidator.locales.de.and} " + FormValidator.locales.de.constraint_regex
+            message = message
+                .replace("{{value}}", @errors[1].element.val())
+                .replace("{{blacklist}}", @errors[1].element.attr("data-fv-blacklist"))
+                .replace("{{regex}}", @errors[1].element.attr("data-fv-regex"))
+            expect(@errors[1].message).toBe(message)

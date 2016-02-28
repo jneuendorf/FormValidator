@@ -460,7 +460,7 @@ class window.FormValidator
                 results[constraint.name] = true
             else
                 # create object with details about what's wrong
-                results[constraint.name] = constraint.options
+                results[constraint.name] = constraint.options or {}
                 results[constraint.name][constraint.name] = constraint.value
 
         return results

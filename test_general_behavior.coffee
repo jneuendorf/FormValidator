@@ -69,60 +69,6 @@ include_general_behavior_tests = () ->
                     expect(error.required).toBe(datum.required)
                     expect(error.value).toBe datum.value
 
-                # expect(@errors).toEqual [
-                    # {
-                    #     "message": FormValidator.error_messages.de.text({index_of_type: 1}),
-                    #     "required": true,
-                    #     "type": "text",
-                    #     "value": ""
-                    # }, {
-                    #     "message": FormValidator.error_messages.de.number.replace("{{value}}", @values_by_name.en_number),
-                    #     "required": true,
-                    #     "type": "number",
-                    #     "value": @values_by_name.en_number
-                    # }, {
-                    #     "message": FormValidator.error_messages.de.number.replace("{{value}}", @values_by_name.de_number),
-                    #     "required": true,
-                    #     "type": "number",
-                    #     "value": @values_by_name.de_number
-                    # }, {
-                    #     "message": FormValidator.error_messages.de.phone.replace("{{value}}", @values_by_name.phone),
-                    #     "required": false,
-                    #     "type": "phone",
-                    #     "value": @values_by_name.phone
-                    # }, {
-                    #     "message": FormValidator.error_messages.de.email_dot.replace("{{value}}", @values_by_name.email),
-                    #     "required": true,
-                    #     "type": "email",
-                    #     "value": @values_by_name.email
-                    # }, {
-                    #     "message": FormValidator.error_messages.de.checkbox.replace("{{index_of_type}}", 1),
-                    #     "required": true,
-                    #     "type": "checkbox",
-                    #     "value": ""
-                    # }, {
-                    #     "message": FormValidator.error_messages.de.checkbox.replace("{{index_of_type}}", 2),
-                    #     "required": true,
-                    #     "type": "checkbox",
-                    #     "value": ""
-                    # }, {
-                    #     "message": FormValidator.error_messages.de.radio.replace("{{index_of_type}}", 1),
-                    #     "required": true,
-                    #     "type": "radio",
-                    #     "value": ""
-                    # }, {
-                    #     "message": FormValidator.error_messages.de.radio.replace("{{index_of_type}}", 2),
-                    #     "required": true,
-                    #     "type": "radio",
-                    #     "value": ""
-                    # }, {
-                    #     "message": FormValidator.error_messages.de.select.replace("{{index_of_type}}", 1),
-                    #     "required": true,
-                    #     "type": "select",
-                    #     "value": ""
-                    # }
-                # ]
-
             it "side fx", () ->
                 console.log @html
                 expect(@html.find(".textlabel").hasClass("red-color class2")).toBe true

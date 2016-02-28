@@ -19,7 +19,7 @@ constraint_validators =
     regex: (value, regex, options) ->
         return (new RegExp(regex, options.flags)).test(value)
     whitelist: (value, whitelist) ->
-        for char in value when blacklist.indexOf(char) < 0
+        for char in value when whitelist.indexOf(char) < 0
             return false
         return true
 
