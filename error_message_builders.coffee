@@ -104,7 +104,14 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
     # find combinable locale keys
     key_prefix = "#{phase_singular}_"
     for errors in grouped_errors
-        keys = ("#{error.type}" for error in errors)
+        keys = []
+        for error in errors
+            keys.push error.type
+            if error.options?
+                for option, val of error.options when include_constraint_option_in_locale_key(option, val)
+                    keys.push option
+        # keys = ("#{error.type}" for error in errors)
+
         key = get_combined_key(keys, locale, key_prefix)
         if key?
             parts.push part_evaluator(locales[locale][key], error)

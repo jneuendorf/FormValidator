@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style media="screen">
+        body {
+            font-family: Arial;
+        }
+        div.col-left {
+            display: inline-block;
+            padding: 0 10px 0 0;
+            text-align: right;
+            width: 15%;
+        }
+        div.col-right {
+            display: inline-block;
+            width: 84%;
+        }
+        div.cell {
+            height: 30px;
+            width: 100%;
+        }
+        div.cell input[type='text'] {
+            border-radius: 6px;
+            border: 1px solid rgb(199, 199, 199);
+            height: 18px;
+            padding: 4px;
+            width: 90%;
+        }
+        .red-color {
+            color: red;
+        }
+    </style>
+
+    <script src="js/jquery-1.12.0.min.js" type="text/javascript"></script>
+    <script src="FormValidator.js" type="text/javascript"></script>
+</head>
+<body>
+    <form id="my_form" data-fv-error-classes="red-color class2" style="width: 100%;">
+
+        <div class="col-left">
+            <div class="cell">
+                <span class="textlabel">text:</span>
+            </div>
+            <div class="cell">
+                <span data-fv-name="numberlabel">number:</span>
+            </div>
+            <div class="cell">
+                <span data-fv-name="integerlabel">optional integer:</span>
+            </div>
+            <div class="cell">
+                <span data-fv-name="integerlabel">integer:</span>
+            </div>
+            <div class="cell">
+                <span data-fv-name="phonelabel">optional phone:</span>
+            </div>
+            <div class="cell">
+                <span data-fv-name="emaillabel">email:</span>
+            </div>
+            <div class="cell">
+                <span data-fv-name="checkboxlabel">checkbox:</span>
+            </div>
+            <div class="cell">
+                <span data-fv-name="radiolabel">radio button:</span>
+            </div>
+            <div class="cell">
+                drop down:
+            </div>
+            <div class="cell">
+                dependencies:
+            </div>
+            <div class="cell">
+                <!-- dependencies: --> &nbsp;
+            </div>
+            <div class="cell">
+                <span data-fv-name="max_min">constraints (min + max):</span>
+            </div>
+            <div class="cell">
+                <span data-fv-name="regex_blacklist">constraints (regex + blacklist):</span>
+            </div>
+        </div>
+
+
+        <div class="col-right">
+            <div class="cell">
+                <input type="text" name="text" data-fv-validate="text" data-fv-error-targets=".textlabel" />
+            </div>
+            <div class="cell">
+                <input type="text" name="en_number" data-fv-validate="number" data-fv-preprocess="false" data-fv-postprocess="false" data-fv-error-targets="numberlabel" />
+            </div>
+            <div class="cell">
+                <input type="text" name="optional_integer" data-fv-validate="integer" data-fv-optional="true" data-fv-error-targets="self" />
+            </div>
+            <div class="cell">
+                <input type="text" name="integer" data-fv-validate="integer" />
+            </div>
+            <div class="cell">
+                <input type="text" name="phone" data-fv-validate="phone" data-fv-optional="true" />
+            </div>
+            <div class="cell">
+                <input type="text" name="email" data-fv-validate="email" data-fv-error-targets="self error1 .outsider" />
+            </div>
+            <div class="cell">
+                <input type="checkbox" name="checkbox" value="v1" data-fv-validate="checkbox" data-fv-error-targets="self checkboxlabel" />
+                <input type="checkbox" name="checkbox" value="v2" data-fv-validate="checkbox" />
+            </div>
+            <div class="cell">
+                <input type="radio" name="radio" value="v1" data-fv-validate="radio" />
+                <input type="radio" name="radio" value="v2" data-fv-validate="radio" />
+            </div>
+            <div class="cell">
+                <select data-fv-validate="select" data-fv-error-targets="self">
+                    <option value="">choose</option>
+                    <option value="mr">Mr.</option>
+                    <option value="mrs">Mrs.</option>
+                </select>
+            </div>
+            <div class="cell">
+                <input type="text" data-fv-validate="number" data-fv-name="master" data-fv-preprocess="false" data-fv-postprocess="false" placeholder="enter something here to see another field" />
+            </div>
+            <div class="cell">
+                <input type="text" data-fv-validate="text" data-fv-name="slave" data-fv-depends-on="master" />
+            </div>
+            <div class="cell">
+                <input type="text" data-fv-validate="number" data-fv-min="1" data-fv-max="4" data-fv-include-max="true" value="4.1" />
+            </div>
+            <div class="cell">
+                <input type="text" data-fv-validate="text" data-fv-regex="^a\\.*z$" data-fv-regex-flags="gi" data-fv-blacklist="bcdef" value="b" />
+            </div>
+        </div>
+
+
+        <hr />
+        <div data-fv-name="error1" data-fv-error-classes="red-color bold">
+            <h4>I am an error target (INSIDE the form tag, using data-fv-name) for the email field</h4>
+        </div>
+    </form>
+
+    <div class="outsider">
+        <h5>I'm another error target for the email field (OUTSIDE the form tag, using class)</h5>
+
+    </div>
+
+    <div class="">
+        <button type="button" data-fv-start="#my_form" data-fv-start-options='{"locale": "de"}'>Hit me</button>
+
+    </div>
+</body>
+</html>

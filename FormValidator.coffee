@@ -88,15 +88,25 @@ class window.FormValidator
     # INIT
 
     # enable autobound buttons
-    $(document).on "click", "[data-fv-start!='']", () ->
+    $(document).on "click", "[data-fv-start]", () ->
         $elem = $(@)
-        container = $elem.closest($elem.attr("data-fv-start"))
-        if container.length is 1
-            if not (form_validator = container.data("_form_validator"))?
-                form_validator = new FormValidator(container)
-                container.data("_form_validator", form_validator)
-            form_validator.validate()
-        return true
+        if not (container = $elem.data("_form_validator_container"))?
+            container = $elem.closest($elem.attr("data-fv-start"))
+            if container.length is 0
+                container = $($elem.attr("data-fv-start"))
+            $elem.data("_form_validator_container", container)
+
+        if DEBUG and container.length is 0
+            throw new Error("FormValidator (in validation on click triggered by 'data-fv-start'): No container found. Check the value of the 'data-fv-start' attribute (so it matches a closest element or any element in the document)!")
+
+        if not (form_validator = container.data("_form_validator"))?
+            options = $elem.attr("data-fv-start-options")
+            if options?
+                options = JSON.parse(options)
+            form_validator = FormValidator.new(container, options)
+            container.data("_form_validator", form_validator)
+        form_validator.validate()
+        return false
 
     # enable real-time validation
     $(document).on "change click keyup", "[data-fv-real-time] [data-fv-validate]", (evt) ->
@@ -110,14 +120,14 @@ class window.FormValidator
         container = $elem.closest("[data-fv-real-time]")
         if container.length is 1
             if not (form_validator = container.data("_form_validator"))?
-                form_validator = new FormValidator(container)
+                form_validator = FormValidator.new(container)
                 container.data("_form_validator", form_validator)
             errors = form_validator.validate()
             # if there are errors, keep the focus on the current element because it would otherwise move elsewhere
             #  without errors we just keep the focus because the form validator would not change it
             if errors.length > 0
                 $elem.focus()
-        return true
+        return false
 
     ########################################################################################################################
     ########################################################################################################################
@@ -456,8 +466,11 @@ class window.FormValidator
                 results[constraint.name] = true
             else
                 # create object with details about what's wrong
-                results[constraint.name] = constraint.options or {}
-                results[constraint.name][constraint.name] = constraint.value
+                result = {}
+                result.options = constraint.options
+                result[constraint.name] = constraint.value
+
+                results[constraint.name] = result
 
         return results
 

@@ -1,6 +1,6 @@
 # from http://stackoverflow.com/questions/9960908/permutations-in-javascript
 get_permutations = (arr) ->
-    permute = (arr, results, memo = []) ->
+    permute = (arr, memo = []) ->
         for i in [0...arr.length]
             cur = arr.splice(i, 1)
             if arr.length is 0
@@ -9,7 +9,7 @@ get_permutations = (arr) ->
             arr.splice(i, 0, cur[0])
 
     results = []
-    permute(arr, results)
+    permute(arr)
     return results
 
 
