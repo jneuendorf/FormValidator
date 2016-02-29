@@ -184,20 +184,21 @@ class window.FormValidator
             attribute = prefix + special[key]
 
         value = element.attr(attribute)
+        has_attr = (value?)
 
-        if value?
+        if has_attr
             value = value.trim()
         # set defaults for undefined attributes
         else
-            if key.toUpperCase() in Object.keys(DEFAULT_ATTR_VALUES)
-                value = DEFAULT_ATTR_VALUES.PREPROCESS
+            if (k = key.toUpperCase()) in Object.keys(DEFAULT_ATTR_VALUES)
+                value = DEFAULT_ATTR_VALUES[k]
 
         # "cast" to Boolean
         if key in boolean
             value = if (value is "true" or value is true) then true else false
 
-        # special because 'required' corresponds to 'optional' => must be negated
-        if key is "required"
+        # special because 'required' corresponds to 'optional' => must be negated (but only if it was defined by the data-fv-optional attribute - otherwise the default value is already correct)
+        if key is "required" and has_attr
             value = not value
 
         return value
@@ -274,10 +275,10 @@ class window.FormValidator
 
     # how to find the correct data-fv-error-targets attribute for an element
     _get_error_targets: (element, type, index) ->
-        return @error_target_getter?(type, elem, i) or
-            elem.attr("data-fv-error-targets") or
-            elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets") or
-            ""
+        return @error_target_getter?(element, type, index) or
+            element.attr("data-fv-error-targets") or
+            element.closest("[data-fv-error-targets]").attr("data-fv-error-targets") or
+            DEFAULT_ATTR_VALUES.ERROR_TARGETS
 
     # apply error classes and styles to element if invalid
     _apply_error_classes: (element, error_targets, is_valid) ->
@@ -401,6 +402,8 @@ class window.FormValidator
                         type: dependency_data.type
                         name: dependency_data.name
                     })
+        else if DEBUG
+            throw new Error("FormValidator::_validate_dependencies: For some reason the dependencies were not cached before validation! This should never happen so this is probably a bug.")
 
         # cache dependency mode
         if not data.dependency_mode?
@@ -467,18 +470,6 @@ class window.FormValidator
 
     # GETTERS + SETTERS
 
-    set_error_target_getter: (error_target_getter) ->
-        @error_target_getter = error_target_getter
-        return @
-
-    set_field_getter: (field_getter) ->
-        @field_getter = field_getter
-        return @
-
-    set_required_field_getter: (required_field_getter) ->
-        @required_field_getter = required_field_getter
-        return @
-
     register_validator: (type, validator, error_message_types) ->
         # check validator in dev mode
         if DEBUG
@@ -515,27 +506,24 @@ class window.FormValidator
     # can be used to eagerly load all data
     cache: () ->
         fields = @_get_fields(@form)
-
         @fields =
             all: fields
             required: @_get_required(fields)
 
         for i in [0...fields.length]
             elem = fields.eq(i)
-            data = @_get_element_data(elem)
-            if not data?
-                data = {}
+            data = {}
 
-                for key in REQUIRED_CACHE
-                    data[key] = @_get_attribute_value_for_key(elem, key)
-                # already parse the list of dependencies as list of jquery elements ("" => [], null => []), delimiter = ';'
-                data.depends_on = @_find_targets(data.depends_on, elem, /^\s*\;\s*$/g)
+            for key in REQUIRED_CACHE
+                data[key] = @_get_attribute_value_for_key(elem, key)
+            # already parse the list of dependencies as list of jquery elements ("" => [], null => []), delimiter = ';'
+            data.depends_on = @_find_targets(data.depends_on, elem, /^\s*\;\s*$/g)
 
-                # set keys that are cached later (lazily) to null (which means unknow)
-                for key in OPTIONAL_CACHE
-                    data[key] = null
+            # set keys that are cached later (lazily) to null (which means unknow)
+            for key in OPTIONAL_CACHE
+                data[key] = null
 
-                @_set_element_data(elem, data)
+            @_set_element_data(elem, data)
         return @
 
     ###*
@@ -567,7 +555,6 @@ class window.FormValidator
         CLASS           = @constructor
         errors          = []
         prev_name       = null
-        indices_by_type = {}
         usedValFunc     = false
 
         # NOTE: remerge required and optional fields in order to:
@@ -585,12 +572,6 @@ class window.FormValidator
             {type, name} = data
             value_info = @_get_value_info(elem, data)
             {value, original_value, value_has_changed, usedValFunc} = value_info
-
-            if indices_by_type[type]?
-                index_of_type = ++indices_by_type[type]
-            else
-                indices_by_type[type] = 1
-                index_of_type = 1
 
             # skip empty optional elements
             if options.all is false and not is_required and (value.length is 0 or type is "radio" or type is "checkbox")
@@ -635,14 +616,6 @@ class window.FormValidator
                     # element is invalid
                     if validation isnt true
                         prev_phase_valid = false
-                        error_message_params = $.extend validation, {
-                            element:        elem
-                            index:          i
-                            index_of_type:  index_of_type
-                            name:           name
-                            previous_name:  prev_name
-                            value:          value
-                        }
                         current_error =
                             element:    elem
                             required:   is_required
@@ -745,7 +718,6 @@ class window.FormValidator
                 if required.index(elem) >= 0
                     all_optional = false
                     break
-
 
             found_error = false
             # NOTE: elem is either a jQuery object or a DOM element (but $.fn.is() can handle both!)

@@ -782,7 +782,7 @@
     }
 
     FormValidator.prototype._get_attribute_value_for_key = function(element, key) {
-      var attribute, boolean, prefix, ref, special, value;
+      var attribute, boolean, has_attr, k, prefix, ref, special, value;
       prefix = "data-fv-";
       special = {
         type: "validate",
@@ -795,17 +795,18 @@
         attribute = prefix + special[key];
       }
       value = element.attr(attribute);
-      if (value != null) {
+      has_attr = (value != null);
+      if (has_attr) {
         value = value.trim();
       } else {
-        if (ref = key.toUpperCase(), indexOf.call(Object.keys(DEFAULT_ATTR_VALUES), ref) >= 0) {
-          value = DEFAULT_ATTR_VALUES.PREPROCESS;
+        if (ref = (k = key.toUpperCase()), indexOf.call(Object.keys(DEFAULT_ATTR_VALUES), ref) >= 0) {
+          value = DEFAULT_ATTR_VALUES[k];
         }
       }
       if (indexOf.call(boolean, key) >= 0) {
         value = value === "true" || value === true ? true : false;
       }
-      if (key === "required") {
+      if (key === "required" && has_attr) {
         value = !value;
       }
       return value;
@@ -902,7 +903,7 @@
     };
 
     FormValidator.prototype._get_error_targets = function(element, type, index) {
-      return (typeof this.error_target_getter === "function" ? this.error_target_getter(type, elem, i) : void 0) || elem.attr("data-fv-error-targets") || elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets") || "";
+      return (typeof this.error_target_getter === "function" ? this.error_target_getter(element, type, index) : void 0) || element.attr("data-fv-error-targets") || element.closest("[data-fv-error-targets]").attr("data-fv-error-targets") || DEFAULT_ATTR_VALUES.ERROR_TARGETS;
     };
 
     FormValidator.prototype._apply_error_classes = function(element, error_targets, is_valid) {
@@ -1058,6 +1059,8 @@
             }));
           }
         }
+      } else if (DEBUG) {
+        throw new Error("FormValidator::_validate_dependencies: For some reason the dependencies were not cached before validation! This should never happen so this is probably a bug.");
       }
       if (data.dependency_mode == null) {
         data.dependency_mode = element.attr("data-fv-dependency-mode") || DEFAULT_ATTR_VALUES.DEPENDENCY_MODE;
@@ -1120,21 +1123,6 @@
       return results;
     };
 
-    FormValidator.prototype.set_error_target_getter = function(error_target_getter) {
-      this.error_target_getter = error_target_getter;
-      return this;
-    };
-
-    FormValidator.prototype.set_field_getter = function(field_getter) {
-      this.field_getter = field_getter;
-      return this;
-    };
-
-    FormValidator.prototype.set_required_field_getter = function(required_field_getter) {
-      this.required_field_getter = required_field_getter;
-      return this;
-    };
-
     FormValidator.prototype.register_validator = function(type, validator, error_message_types) {
       if (DEBUG) {
         if (validator.call instanceof Function && typeof (validator.call(this.validators, "", $())) === "boolean" && validator.error_message_types instanceof Array) {
@@ -1182,20 +1170,17 @@
       };
       for (i = l = 0, ref = fields.length; 0 <= ref ? l < ref : l > ref; i = 0 <= ref ? ++l : --l) {
         elem = fields.eq(i);
-        data = this._get_element_data(elem);
-        if (data == null) {
-          data = {};
-          for (m = 0, len = REQUIRED_CACHE.length; m < len; m++) {
-            key = REQUIRED_CACHE[m];
-            data[key] = this._get_attribute_value_for_key(elem, key);
-          }
-          data.depends_on = this._find_targets(data.depends_on, elem, /^\s*\;\s*$/g);
-          for (o = 0, len1 = OPTIONAL_CACHE.length; o < len1; o++) {
-            key = OPTIONAL_CACHE[o];
-            data[key] = null;
-          }
-          this._set_element_data(elem, data);
+        data = {};
+        for (m = 0, len = REQUIRED_CACHE.length; m < len; m++) {
+          key = REQUIRED_CACHE[m];
+          data[key] = this._get_attribute_value_for_key(elem, key);
         }
+        data.depends_on = this._find_targets(data.depends_on, elem, /^\s*\;\s*$/g);
+        for (o = 0, len1 = OPTIONAL_CACHE.length; o < len1; o++) {
+          key = OPTIONAL_CACHE[o];
+          data[key] = null;
+        }
+        this._set_element_data(elem, data);
       }
       return this;
     };
@@ -1217,7 +1202,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_errors, dependency_mode, elem, error_message_params, error_targets, errors, fields, first_invalid_element, i, index_of_type, indices_by_type, is_required, is_valid, l, name, original_value, prev_name, prev_phase_valid, ref, ref1, ref2, ref3, ref4, required, result, type, usedValFunc, valid_dependencies, validation, value, value_has_changed, value_info;
+      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_errors, dependency_mode, elem, error_targets, errors, fields, first_invalid_element, i, is_required, is_valid, l, name, original_value, prev_name, prev_phase_valid, ref, ref1, ref2, ref3, ref4, required, result, type, usedValFunc, valid_dependencies, validation, value, value_has_changed, value_info;
       if (options == null) {
         options = {};
       }
@@ -1236,7 +1221,6 @@
       CLASS = this.constructor;
       errors = [];
       prev_name = null;
-      indices_by_type = {};
       usedValFunc = false;
       required = this.fields.required;
       fields = this.fields.all;
@@ -1248,12 +1232,6 @@
         type = data.type, name = data.name;
         value_info = this._get_value_info(elem, data);
         value = value_info.value, original_value = value_info.original_value, value_has_changed = value_info.value_has_changed, usedValFunc = value_info.usedValFunc;
-        if (indices_by_type[type] != null) {
-          index_of_type = ++indices_by_type[type];
-        } else {
-          indices_by_type[type] = 1;
-          index_of_type = 1;
-        }
         if (options.all === false && !is_required && (value.length === 0 || type === "radio" || type === "checkbox")) {
           if (data.error_targets == null) {
             data = this._cache_attribute(elem, data, "error_targets", function() {
@@ -1287,14 +1265,6 @@
             current_error = null;
             if (validation !== true) {
               prev_phase_valid = false;
-              error_message_params = $.extend(validation, {
-                element: elem,
-                index: i,
-                index_of_type: index_of_type,
-                name: name,
-                previous_name: prev_name,
-                value: value
-              });
               current_error = {
                 element: elem,
                 required: is_required,
