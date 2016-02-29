@@ -1,10 +1,5 @@
 class window.FormValidator
-    # TODO: performance: be lazy: whenever a form field is analyzed cache that information in that element (because the validation is very likely to be done several times before submitting actually happens)
-    # TODO: create graph with meta data so single elements can be validated (even if they have dependencies)
-    # TODO: add onchange handler to standard elements: check only changed elements (also for real time validation)
     # TODO: add effects for dependencies
-    # TODO: define constraint validators for constraints that are independent from type validators
-    # TODO: define all default values of cache properties in a central place
 
 
     ########################################################################################################################
@@ -17,7 +12,7 @@ class window.FormValidator
     @BUILD_MODES = BUILD_MODES
     @ERROR_MESSAGE_CONFIG = ERROR_MESSAGE_CONFIG
 
-    # NOTE: CACHED_FIELD_DATA is already available in the closure
+    # NOTE: REQUIRED_CACHE is already available in the closure
 
 
     ########################################################################################################################
@@ -169,6 +164,7 @@ class window.FormValidator
     ########################################################################################################################
     # PRIVATE
 
+    ########################################################################################################################
     # CACHING
 
     # used to get the element's attribute's value for a given part of the cache
@@ -193,9 +189,10 @@ class window.FormValidator
             value = value.trim()
         # set defaults for undefined attributes
         else
-            if key is "preprocess"
-                value = true
+            if key.toUpperCase() in Object.keys(DEFAULT_ATTR_VALUES)
+                value = DEFAULT_ATTR_VALUES.PREPROCESS
 
+        # "cast" to Boolean
         if key in boolean
             value = if (value is "true" or value is true) then true else false
 
@@ -205,7 +202,6 @@ class window.FormValidator
 
         return value
 
-
     # data is the last validation result + the last validated value
     _set_element_data: (element, data) ->
         $.data(element[0], "_fv", data)
@@ -214,26 +210,16 @@ class window.FormValidator
     _get_element_data: (element) ->
         return $.data(element[0], "_fv")
 
-    # TODO: check if still needed (since message_builders) and maybe adjust to new locales
-    # _create_error_message: (locale, params) ->
-    #     CLASS = @constructor
-    #
-    #     type = params.error_message_type or params.element.attr("data-fv-validate")
-    #     type = CLASS.get_error_message_type(type, @error_mode)
-    #     # message = (@error_messages or @constructor.error_messages)[@locale][type]
-    #     if not message?
-    #         return null
-    #
-    #     # string => insert variables (mustache-like)
-    #     # TODO: just use mustache!?
-    #     if typeof message is "string"
-    #         for key, val of params when message.indexOf("{{#{key}}}") >= 0
-    #             message = message.replace("{{#{key}}}", val)
-    #         res = message
-    #     else if message instanceof Function
-    #         res = message(params)
-    #
-    #     return res
+    _cache_attribute: (element, data, key, value) ->
+        if not value?
+            value = element.attr("data-fv-#{key.replace(/\_/g, "-")}")
+        else if value instanceof Function
+            value = value.call(@)
+
+        data[key] = value
+        return data
+
+    # END - CACHING
 
     _get_fields: (form) ->
         return @field_getter?(form) or form.find("[data-fv-validate]").filter (idx, elem) ->
@@ -286,6 +272,13 @@ class window.FormValidator
             result = $(target)
         return result
 
+    # how to find the correct data-fv-error-targets attribute for an element
+    _get_error_targets: (element, type, index) ->
+        return @error_target_getter?(type, elem, i) or
+            elem.attr("data-fv-error-targets") or
+            elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets") or
+            ""
+
     # apply error classes and styles to element if invalid
     _apply_error_classes: (element, error_targets, is_valid) ->
         if error_targets?
@@ -330,14 +323,14 @@ class window.FormValidator
             data = @_get_element_data(elem)
 
             if not data.group?
-                data.group = elem.attr("data-fv-group")
+                data.group = elem.attr("data-fv-group") or data.name
                 @_set_element_data(elem, data)
 
-            name = data.group or elem.attr("name")
-            if not dict[name]?
-                dict[name] = [elem]
+            group_name = data.group
+            if not dict[group_name]?
+                dict[group_name] = [elem]
             else
-                dict[name].push elem
+                dict[group_name].push elem
 
         return (elems for name, elems of dict)
 
@@ -364,6 +357,7 @@ class window.FormValidator
                 }
         return result
 
+    ########################################################################################################################
     # VALIDATION HELPERS
 
     _validate_element: (element, data, value_info) ->
@@ -410,8 +404,7 @@ class window.FormValidator
 
         # cache dependency mode
         if not data.dependency_mode?
-            # TODO: see TODO 'central defaults'
-            data.dependency_mode = element.attr("data-fv-dependency-mode") or "all"
+            data.dependency_mode = element.attr("data-fv-dependency-mode") or DEFAULT_ATTR_VALUES.DEPENDENCY_MODE
             @_set_element_data(element, data)
 
         # at least 1 dependency is valid <=> valid
@@ -464,6 +457,8 @@ class window.FormValidator
                 results[constraint.name][constraint.name] = constraint.value
 
         return results
+
+    # END - VALIDATION HELPERS
 
 
     ########################################################################################################################
@@ -529,23 +524,16 @@ class window.FormValidator
             elem = fields.eq(i)
             data = @_get_element_data(elem)
             if not data?
-                keys = CACHED_FIELD_DATA
-                # set keys that are cached later to null (which means unknow)
-                data =
-                    # field data
-                    dependency_mode: null
-                    error_targets: null
-                    group: null
-                    output_preprocessed: null
-                    postprocess: null
-                    # validation (meta) data
-                    constraints: null
-                    valid: null
-                    value: null
-                for key in keys
+                data = {}
+
+                for key in REQUIRED_CACHE
                     data[key] = @_get_attribute_value_for_key(elem, key)
                 # already parse the list of dependencies as list of jquery elements ("" => [], null => []), delimiter = ';'
                 data.depends_on = @_find_targets(data.depends_on, elem, /^\s*\;\s*$/g)
+
+                # set keys that are cached later (lazily) to null (which means unknow)
+                for key in OPTIONAL_CACHE
+                    data[key] = null
 
                 @_set_element_data(elem, data)
         return @
@@ -555,20 +543,22 @@ class window.FormValidator
     * @param options {Object}
     * Default is this.validation_option. Otherwise:
     * Valid options are:
-    *  - apply_error_classes:   {Boolean} (default is true)
     *  - all:                   {Boolean} (default is false)
+    *  - apply_error_classes:   {Boolean} (default is true)
     *  - focus_invalid:         {Boolean} (default is true)
-    *  - recache:               {Boolean} (default is false)
     *  - messages:              {Boolean} (default is true)
+    *  - stop_on_error:         {Boolean} (default is true)
+    *    -> stop the current validation after an error has been found (otherwise all errors will be collected)
+    *  - recache:               {Boolean} (default is false)
     *###
     validate: (options = {}) ->
         default_options =
-            apply_error_classes: true
             all: false
+            apply_error_classes: true
             focus_invalid: true
-            recache: false
             messages: true
-
+            stop_on_error: true
+            recache: false
         options = $.extend default_options, @validation_options, options
 
         if not @fields? or options.recache is true
@@ -605,12 +595,12 @@ class window.FormValidator
             # skip empty optional elements
             if options.all is false and not is_required and (value.length is 0 or type is "radio" or type is "checkbox")
                 # NOTE: if an optional value was invalid and was emptied the error target's error classes should be removed
-                @_apply_error_classes(
-                    elem
-                    @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
-                    true
-                )
-                # TODO also reset dependency styles
+                if not data.error_targets?
+                    data = @_cache_attribute elem, data, "error_targets", () ->
+                        return @_get_error_targets(elem, type, i)
+                    @_set_element_data(elem, data)
+                @_apply_error_classes(elem, data.error_targets, true)
+                @_apply_dependency_error_classes(elem, data.depends_on, true)
                 continue
 
             prev_phase_valid = true
@@ -625,12 +615,6 @@ class window.FormValidator
                 # create error if the element has unfulfilled dependencies
                 errors.push {
                     element:    elem
-                    # message:    @create_dependency_error_message?(@locale, dependency_errors) or @_create_error_message(@locale, {
-                    #     element: elem
-                    #     error_message_type: "dependency"
-                    #     dependency_mode: dependency_mode
-                    #     dependency_errors: dependency_errors
-                    # })
                     required:   is_required
                     type:       "dependency"
                     phase:      VALIDATION_PHASES.DEPENDENCIES
@@ -638,15 +622,13 @@ class window.FormValidator
                 }
                 if not first_invalid_element?
                     first_invalid_element = elem
-                # TODO skip remaing loop content until error classes are applied
 
 
             #########################################################
             # PHASE 2: validate the value
             # validate the current value only if it has changed
             if value_has_changed
-                # TODO: go into 2nd + 3rd phase also when a certain option is given ('all errors')
-                if prev_phase_valid
+                if prev_phase_valid or not options.stop_on_error
                     validation = @_validate_element(elem, data, value_info)
                     current_error = null
 
@@ -663,7 +645,6 @@ class window.FormValidator
                         }
                         current_error =
                             element:    elem
-                            # message:    @_create_error_message(@locale, error_message_params)
                             required:   is_required
                             type:       type
                             phase:      VALIDATION_PHASES.VALUE
@@ -676,8 +657,9 @@ class window.FormValidator
 
                 #########################################################
                 # PHASE 3 - validate constraints
-                if prev_phase_valid
+                if prev_phase_valid or not options.stop_on_error
                     for constraint_name, result of @_validate_constraints(elem, data, value) when result isnt true
+                        prev_phase_valid = false
                         errors.push $.extend result, {
                             element: elem
                             required: is_required
@@ -688,11 +670,15 @@ class window.FormValidator
 
             # no validation phase was invalid => element is valid
             if prev_phase_valid
-                if data.valid isnt true
+                # cache uncached data
+                if data.valid isnt true or not data.postprocess? or not data.output_preprocessed?
                     data.valid = true
+                    @_cache_attribute(elem, data, "postprocess")
+                    @_cache_attribute(elem, data, "output_preprocessed")
                     @_set_element_data(elem, data)
+
                 # replace old value with post processed value
-                if elem.attr("data-fv-postprocess") is "true"
+                if data.postprocess is true
                     value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
                     if usedValFunc
                         elem.val value
@@ -700,7 +686,7 @@ class window.FormValidator
                         elem.text value
                     current_error?.value = value
                 # replace old value with pre processed value
-                else if elem.attr("data-fv-output-preprocessed") is "true"
+                else if data.output_preprocessed is true
                     value = @preprocessors[type]?.call(@preprocessors, value, elem, @locale)
                     if usedValFunc
                         elem.val value
@@ -713,10 +699,13 @@ class window.FormValidator
                     @_set_element_data(elem, data)
 
             if options.apply_error_classes is true
-                # TODO use cache here!
+                if not data.error_targets?
+                    @_cache_attribute elem, data, "error_targets", () ->
+                        return @_get_error_targets(elem, type, i)
+                    @_set_element_data(elem, data)
                 error_targets = @_apply_error_classes(
                     elem
-                    @error_target_getter?(type, elem, i) or elem.attr("data-fv-error-targets") or elem.closest("[data-fv-error-targets]").attr("data-fv-error-targets")
+                    data.error_targets
                     prev_phase_valid
                 )
 

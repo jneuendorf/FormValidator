@@ -32,10 +32,30 @@ ERROR_MESSAGE_CONFIG =
 # PRIVATE (CLOSURE) PROPERTIES
 # list of meta data that can be cached right away because each item is needed for a basic validation (all other data will be cached when it is needed)
 # => this is the list of data that is always cached
-CACHED_FIELD_DATA = [
+REQUIRED_CACHE = [
     "depends_on"
     "name"
     "preprocess"
     "required"
     "type"
 ]
+OPTIONAL_CACHE = [
+    # field data
+    "dependency_mode"
+    "error_targets"
+    "group"
+    "output_preprocessed"
+    "postprocess"
+    # validation (meta) data
+    "constraints"
+    "valid"
+    "value"
+]
+# NOTE: those are not the values with which the cache is initialized! the following values are set when the field data is cached and an attribute is missing
+DEFAULT_ATTR_VALUES =
+    PREPROCESS: true
+    POSTPROCESS: false
+    REQUIRED: true
+    OUTPUT_PREPROCESSED: true
+    DEPENDENCY_MODE: "all"
+    ERROR_TARGETS: ""
