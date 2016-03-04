@@ -35,15 +35,21 @@ constraint_validator_options =
     max: [
         "include_max"
     ]
-    mix: [
-        "include_mix"
+    max_length: [
+        "enforce_max_length"
+    ]
+    min: [
+        "include_min"
+    ]
+    min_length: [
+        "enforce_min_length"
     ]
     regex: [
         "regex_flags"
     ]
 
 # define which constraint validators are logically connected (and thus can potentially be combined to a new error message i.e. max + min => ...is not between... (instead of ...is not greater than or not less than...))
-# the groups must be disjoint
+# the groups must be disjoint (-> equivalence classes)
 constraint_validator_groups = [
     ["max", "min"]
     ["max_length", "min_length"]

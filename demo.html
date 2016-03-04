@@ -4,146 +4,308 @@
     <meta charset="utf-8">
     <style media="screen">
         body {
-            font-family: Arial;
+            font-family: Avenir Next, Arial, sans-serif;;
         }
-        div.col-left {
-            display: inline-block;
-            padding: 0 10px 0 0;
-            text-align: right;
-            width: 15%;
+        #my_form {
+
         }
-        div.col-right {
-            display: inline-block;
-            width: 84%;
+        .row {
+            margin-bottom: 4px;
         }
-        div.cell {
-            height: 30px;
-            width: 100%;
+        .invalid_field {
+            color: red !important;
         }
-        div.cell input[type='text'] {
-            border-radius: 6px;
-            border: 1px solid rgb(199, 199, 199);
-            height: 18px;
-            padding: 4px;
-            width: 90%;
+        input.invalid_field {
+            border-color: rgba(210, 0, 0, 0.9);
+            outline: 0;
         }
-        .red-color {
-            color: red;
+        input.invalid_field:focus {
+            border-color: rgba(210, 0, 0, 0.9);
+            -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(210, 0, 0,.6);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(210, 0, 0,.6);
         }
     </style>
-
     <script src="js/jquery-1.12.0.min.js" type="text/javascript"></script>
+    <script src="js/bootstrap.min.js" type="text/javascript"></script>
+
     <script src="FormValidator.js" type="text/javascript"></script>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css" media="screen" title="no title" charset="utf-8">
 </head>
 <body>
-    <form id="my_form" data-fv-error-classes="red-color class2" style="width: 100%;">
+    <form id="my_form" class="container" data-fv-error-classes="invalid_field">
+        <h2>Demo</h2><br>
 
-        <div class="col-left">
-            <div class="cell">
-                <span class="textlabel">text:</span>
+        <div class="row field">
+            <div class="col-xs-3">
+                <strong><u>LABEL</u></strong>
             </div>
-            <div class="cell">
-                <span data-fv-name="numberlabel">number:</span>
+            <div class="col-xs-3">
+                <strong><u>FORM FIELD</u></strong>
             </div>
-            <div class="cell">
-                <span data-fv-name="integerlabel">optional integer:</span>
+            <div class="col-xs-6 validation_options">
+                <strong><u>VALIDATION OPTIONS</u></strong>
             </div>
-            <div class="cell">
-                <span data-fv-name="integerlabel">integer:</span>
-            </div>
-            <div class="cell">
-                <span data-fv-name="phonelabel">optional phone:</span>
-            </div>
-            <div class="cell">
-                <span data-fv-name="emaillabel">email:</span>
-            </div>
-            <div class="cell">
-                <span data-fv-name="checkboxlabel">checkbox:</span>
-            </div>
-            <div class="cell">
-                <span data-fv-name="radiolabel">radio button:</span>
-            </div>
-            <div class="cell">
-                drop down:
-            </div>
-            <div class="cell">
-                dependencies:
-            </div>
-            <div class="cell">
-                <!-- dependencies: --> &nbsp;
-            </div>
-            <div class="cell">
-                <span data-fv-name="max_min">constraints (min + max):</span>
-            </div>
-            <div class="cell">
-                <span data-fv-name="regex_blacklist">constraints (regex + blacklist):</span>
-            </div>
+            <br><br>
         </div>
 
+        <div class="row field">
+            <div class="col-xs-3">
+                <span class="textlabel">text:</span>
+            </div>
+            <div class="col-xs-3">
+                <input id="0" class="form-control" type="text" name="text" data-fv-validate="text" data-fv-error-targets=".textlabel" />
+            </div>
+            <div class="col-xs-6 validation_options">
 
-        <div class="col-right">
-            <div class="cell">
-                <input type="text" name="text" data-fv-validate="text" data-fv-error-targets=".textlabel" />
             </div>
-            <div class="cell">
-                <input type="text" name="en_number" data-fv-validate="number" data-fv-preprocess="false" data-fv-postprocess="false" data-fv-error-targets="numberlabel" />
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                <span data-fv-name="numberlabel">number:</span>
             </div>
-            <div class="cell">
-                <input type="text" name="optional_integer" data-fv-validate="integer" data-fv-optional="true" data-fv-error-targets="self" />
+            <div class="col-xs-3">
+                <input id="1" class="form-control" type="text" name="en_number" data-fv-validate="number" data-fv-preprocess="false" data-fv-postprocess="false" data-fv-error-targets="numberlabel" />
             </div>
-            <div class="cell">
-                <input type="text" name="integer" data-fv-validate="integer" />
+            <div class="col-xs-6 validation_options">
+
             </div>
-            <div class="cell">
-                <input type="text" name="phone" data-fv-validate="phone" data-fv-optional="true" />
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                <span data-fv-name="integerlabel">optional integer:</span>
             </div>
-            <div class="cell">
-                <input type="text" name="email" data-fv-validate="email" data-fv-error-targets="self error1 .outsider" />
+            <div class="col-xs-3">
+                <input id="2" class="form-control" type="text" name="optional_integer" data-fv-validate="integer" data-fv-optional="true" data-fv-error-targets="self" />
             </div>
-            <div class="cell">
-                <input type="checkbox" name="checkbox" value="v1" data-fv-validate="checkbox" data-fv-error-targets="self checkboxlabel" />
-                <input type="checkbox" name="checkbox" value="v2" data-fv-validate="checkbox" />
+            <div class="col-xs-6 validation_options">
+
             </div>
-            <div class="cell">
-                <input type="radio" name="radio" value="v1" data-fv-validate="radio" />
-                <input type="radio" name="radio" value="v2" data-fv-validate="radio" />
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                <span data-fv-name="integerlabel">integer:</span>
             </div>
-            <div class="cell">
-                <select data-fv-validate="select" data-fv-error-targets="self">
+            <div class="col-xs-3">
+                <input id="3" class="form-control" type="text" name="integer" data-fv-validate="integer" />
+            </div>
+            <div class="col-xs-6 validation_options">
+
+            </div>
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                <span data-fv-name="phonelabel">optional phone:</span>
+            </div>
+            <div class="col-xs-3">
+                <input id="4" class="form-control" type="text" name="phone" data-fv-validate="phone" data-fv-optional="true" />
+            </div>
+            <div class="col-xs-6 validation_options">
+
+            </div>
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                <span data-fv-name="emaillabel">email:</span>
+            </div>
+            <div class="col-xs-3">
+                <input id="5" class="form-control" type="text" name="email" data-fv-validate="email" data-fv-error-targets="self error1 .outsider" />
+            </div>
+            <div class="col-xs-6 validation_options">
+
+            </div>
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                <span data-fv-name="checkboxlabel">checkbox:</span>
+            </div>
+            <div class="col-xs-3">
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="checkbox" value="v1" data-fv-validate="checkbox" data-fv-error-targets="self checkboxlabel" />
+                    c1
+                </label>
+                <label class="checkbox-inline">
+                    <input type="checkbox" name="checkbox" value="v2" data-fv-validate="checkbox" />
+                    c2
+                </label>
+            </div>
+            <div class="col-xs-6 validation_options">
+
+            </div>
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                <span data-fv-name="radiolabel">radio button:</span>
+            </div>
+            <div class="col-xs-3">
+                <label class="radio-inline">
+                    <input type="radio" name="radio" value="v1" data-fv-validate="radio" />
+                    r1
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="radio" value="v2" data-fv-validate="radio" />
+                    r2
+                </label>
+            </div>
+            <div class="col-xs-6 validation_options">
+
+            </div>
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                drop down:
+            </div>
+            <div class="col-xs-3">
+                <select class="form-control" data-fv-validate="select" data-fv-error-targets="self">
                     <option value="">choose</option>
                     <option value="mr">Mr.</option>
                     <option value="mrs">Mrs.</option>
                 </select>
             </div>
-            <div class="cell">
-                <input type="text" data-fv-validate="number" data-fv-name="master" data-fv-preprocess="false" data-fv-postprocess="false" placeholder="enter something here to see another field" />
+            <div class="col-xs-6 validation_options">
+
             </div>
-            <div class="cell">
-                <input type="text" data-fv-validate="text" data-fv-name="slave" data-fv-depends-on="master" />
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                dependencies:
             </div>
-            <div class="cell">
-                <input type="text" data-fv-validate="number" data-fv-min="1" data-fv-max="4" data-fv-include-max="true" value="4.1" />
+            <div class="col-xs-3">
+                <input id="6" class="form-control" type="text" data-fv-validate="number" data-fv-name="master" data-fv-preprocess="false" data-fv-postprocess="false" placeholder="enter something here to see another field" />
+                <br>
+                <input id="7" class="form-control" type="text" data-fv-validate="text" data-fv-name="slave" data-fv-depends-on="master" />
             </div>
-            <div class="cell">
-                <input type="text" data-fv-validate="text" data-fv-regex="^a\\.*z$" data-fv-regex-flags="gi" data-fv-blacklist="bcdef" value="b" />
+            <div class="col-xs-6 validation_options">
+
+            </div>
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                <span data-fv-name="max_min">constraints (min + max):</span>
+            </div>
+            <div class="col-xs-3">
+                <input id="8" class="form-control" type="text" data-fv-validate="number" data-fv-min="1" data-fv-max="4" data-fv-include-max="true" value="4.1" />
+            </div>
+            <div class="col-xs-6 validation_options">
+
+            </div>
+        </div>
+        <div class="row field">
+            <div class="col-xs-3">
+                <span data-fv-name="regex_blacklist">constraints (regex + blacklist):</span>
+            </div>
+            <div class="col-xs-3">
+                <input id="9" class="form-control" type="text" data-fv-validate="text" data-fv-regex="^a\\.*z$" data-fv-regex-flags="gi" data-fv-blacklist="bcdef" value="b" />
+            </div>
+            <div class="col-xs-6 validation_options">
+
             </div>
         </div>
 
-
-        <hr />
         <div data-fv-name="error1" data-fv-error-classes="red-color bold">
             <h4>I am an error target (INSIDE the form tag, using data-fv-name) for the email field</h4>
         </div>
     </form>
 
+    <hr />
+
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12" style="text-align: center;">
+                <script type="text/javascript">
+                    window.get_fv_options = function() {
+                        return {
+                            locale: "de",
+                            error_target_getter: function(e, t, i) {
+                                return e;
+                            }
+                        }
+                    };
+                </script>
+                <button class="btn btn-lg btn-primary" type="button" data-fv-start="#my_form" data-fv-start-options="get_fv_options">
+                    Hit me
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="outsider">
         <h5>I'm another error target for the email field (OUTSIDE the form tag, using class)</h5>
-
     </div>
 
-    <div class="">
-        <button type="button" data-fv-start="#my_form" data-fv-start-options='{"locale": "de"}'>Hit me</button>
+    <script type="text/javascript">
+        var my_form = $("#my_form");
+        var get_constraints = function(prefix, elem) {
+            var res = "", options;
+            for (var name in FormValidator.constraint_validators) {
+                if (FormValidator.constraint_validators.hasOwnProperty(name)) {
+                    options = "";
+                    if (FormValidator.constraint_validator_options.hasOwnProperty(name)) {
+                        for (var i = 0; i < FormValidator.constraint_validator_options[name].length; i++) {
+                            options += '<div class="row option" data-constraint="' + name + '">' +
+                                '<div class="col-xs-1">' +
+                                '</div>' +
+                                '<div class="col-xs-4">' +
+                                    FormValidator.constraint_validator_options[name][i] + ": " +
+                                '</div>' +
+                                '<div class="col-xs-3">' +
+                                    '<input type="text" class="form-control mod_input" data-target-id="' + elem.attr("id") + '" data-constraint="' + name + '" disabled>' +
+                                '</div>' +
+                            '</div>';
+                        }
+                    }
 
-    </div>
+                    res += '<div class="row">' +
+                        '<div class="col-xs-3">' +
+                            '<label class="checkbox-inline">' +
+                                '<input type="checkbox" name="' + prefix + name + '" class="mod_checkbox" value="v1" data-target-id="' + elem.attr("id") + '" />' +
+                                name + " = " +
+                            '</label>' +
+                        '</div>' +
+                        '<div class="col-xs-5">' +
+                            '<input type="text" class="form-control mod_input" data-target-id="' + elem.attr("id") + '" data-constraint="' + name + '" disabled>' +
+                        '</div>' +
+                    '</div>';
+                    res += options;
+                }
+            }
+            return res;
+        };
+        my_form.find(" .validation_options").each(function(idx, elem) {
+            var $elem = $(elem);
+            var $input;
+            if (($input = $elem.prev().find("input[type='text']")).length == 1) {
+                $elem.append(get_constraints($input.attr("id") + "_", $input));
+            }
+            return true;
+        });
+        // checkbox toggle
+        my_form.on("change", ".mod_checkbox", function(evt) {
+            var $elem = $(this);
+            var $mod_input = $elem.closest(".row").find("input[type='text']");
+            var $input = $("#" + $elem.attr("data-target-id"));
+            var constraint = $mod_input.attr("data-constraint");
+            var attribute = "data-fv-" + $mod_input.attr("data-constraint").replace(/\_/g, "-");
+
+            if ($elem.prop("checked") === true) {
+                $mod_input.prop("disabled", false).focus().change();
+                $mod_input.closest(".row").siblings(".row.option[data-constraint='" + constraint + "']").find("input[type='text']").prop("disabled", false);
+            }
+            else {
+                $mod_input.prop("disabled", true);
+                $mod_input.closest(".row").siblings(".row.option[data-constraint='" + constraint + "']").find("input[type='text']").prop("disabled", true);
+                $input.attr(attribute, null);
+            }
+        });
+        // constraint input
+        my_form.on("change", ".mod_input", function(evt) {
+            var $elem = $(this);
+            var attribute = "data-fv-" + $elem.attr("data-constraint").replace(/\_/g, "-");
+            var val = $elem.val() || null;
+            $("#" + $elem.attr("data-target-id")).attr(attribute, val);
+        });
+
+    </script>
+
 </body>
 </html>

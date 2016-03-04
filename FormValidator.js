@@ -333,7 +333,9 @@
 
   constraint_validator_options = {
     max: ["include_max"],
-    mix: ["include_mix"],
+    max_length: ["enforce_max_length"],
+    min: ["include_min"],
+    min_length: ["enforce_min_length"],
     regex: ["regex_flags"]
   };
 
@@ -648,6 +650,8 @@
 
     FormValidator.constraint_validator_options = constraint_validator_options;
 
+    FormValidator.constraint_validator_groups = constraint_validator_groups;
+
     FormValidator.validators = validators;
 
     FormValidator.locales = locales;
@@ -724,7 +728,7 @@
     };
 
     $(document).on("click", "[data-fv-start]", function() {
-      var $elem, container, form_validator, options;
+      var $elem, container, error, error1, form_validator, options;
       $elem = $(this);
       if ((container = $elem.data("_form_validator_container")) == null) {
         container = $elem.closest($elem.attr("data-fv-start"));
@@ -739,7 +743,12 @@
       if ((form_validator = container.data("_form_validator")) == null) {
         options = $elem.attr("data-fv-start-options");
         if (options != null) {
-          options = JSON.parse(options);
+          try {
+            options = JSON.parse(options);
+          } catch (error1) {
+            error = error1;
+            options = window[options]();
+          }
         }
         form_validator = FormValidator["new"](container, options);
         container.data("_form_validator", form_validator);
@@ -934,11 +943,14 @@
     };
 
     FormValidator.prototype._apply_error_classes = function(element, error_targets, is_valid) {
-      var error_classes, l, len, target, targets;
+      var error_classes, i, l, len, target, targets;
       if (error_targets != null) {
         targets = this._find_targets(error_targets, element);
-        for (l = 0, len = targets.length; l < len; l++) {
-          target = targets[l];
+        for (i = l = 0, len = targets.length; l < len; i = ++l) {
+          target = targets[i];
+          if (!(target instanceof jQuery)) {
+            target = targets.eq(i);
+          }
           if ((error_classes = target.attr("data-fv-error-classes")) != null) {
             if (is_valid === false) {
               target.addClass(error_classes);
@@ -1231,7 +1243,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_errors, dependency_mode, elem, error_targets, errors, fields, first_invalid_element, i, is_required, is_valid, l, name, original_value, prev_name, prev_phase_valid, ref, ref1, ref2, ref3, ref4, required, result, type, usedValFunc, valid_dependencies, validation, value, value_has_changed, value_info;
+      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_errors, dependency_mode, elem, errors, fields, first_invalid_element, i, is_required, is_valid, l, name, original_value, prev_name, prev_phase_valid, ref, ref1, ref2, ref3, ref4, required, result, type, usedValFunc, valid_dependencies, validation, value, value_has_changed, value_info;
       if (options == null) {
         options = {};
       }
@@ -1366,9 +1378,9 @@
             });
             this._set_element_data(elem, data);
           }
-          error_targets = this._apply_error_classes(elem, data.error_targets, prev_phase_valid);
+          this._apply_error_classes(elem, data.error_targets, prev_phase_valid);
           if (current_error != null) {
-            current_error.error_targets = error_targets;
+            current_error.error_targets = data.error_targets;
           }
           this._apply_dependency_error_classes(elem, dependency_elements, prev_phase_valid);
         }

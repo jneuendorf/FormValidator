@@ -22,6 +22,7 @@ class window.FormValidator
     # defined in constraint_validators.coffee
     @constraint_validators = constraint_validators
     @constraint_validator_options = constraint_validator_options
+    @constraint_validator_groups = constraint_validator_groups
 
     # defined in validators.coffee
     @validators = validators
@@ -90,6 +91,7 @@ class window.FormValidator
     # enable autobound buttons
     $(document).on "click", "[data-fv-start]", () ->
         $elem = $(@)
+        # find container element
         if not (container = $elem.data("_form_validator_container"))?
             container = $elem.closest($elem.attr("data-fv-start"))
             if container.length is 0
@@ -99,10 +101,15 @@ class window.FormValidator
         if DEBUG and container.length is 0
             throw new Error("FormValidator (in validation on click triggered by 'data-fv-start'): No container found. Check the value of the 'data-fv-start' attribute (so it matches a closest element or any element in the document)!")
 
+        # get form validator
         if not (form_validator = container.data("_form_validator"))?
             options = $elem.attr("data-fv-start-options")
             if options?
-                options = JSON.parse(options)
+                try
+                    options = JSON.parse(options)
+                catch error
+                    options = window[options]()
+
             form_validator = FormValidator.new(container, options)
             container.data("_form_validator", form_validator)
         form_validator.validate()
@@ -294,7 +301,9 @@ class window.FormValidator
     _apply_error_classes: (element, error_targets, is_valid) ->
         if error_targets?
             targets = @_find_targets(error_targets, element)
-            for target in targets
+            for target, i in targets
+                if target not instanceof jQuery
+                    target = targets.eq(i)
                 # apply element's or the form's error classes
                 if (error_classes = target.attr("data-fv-error-classes"))?
                     if is_valid is false
@@ -689,14 +698,14 @@ class window.FormValidator
                     @_cache_attribute elem, data, "error_targets", () ->
                         return @_get_error_targets(elem, type, i)
                     @_set_element_data(elem, data)
-                error_targets = @_apply_error_classes(
+                @_apply_error_classes(
                     elem
                     data.error_targets
                     prev_phase_valid
                 )
 
                 if current_error?
-                    current_error.error_targets = error_targets
+                    current_error.error_targets = data.error_targets
 
                 @_apply_dependency_error_classes(elem, dependency_elements, prev_phase_valid)
 
