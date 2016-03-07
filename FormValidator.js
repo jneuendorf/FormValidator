@@ -147,7 +147,7 @@
 
   REQUIRED_CACHE = ["depends_on", "name", "preprocess", "required", "type"];
 
-  OPTIONAL_CACHE = ["dependency_mode", "error_targets", "group", "output_preprocessed", "postprocess", "constraints", "valid", "value"];
+  OPTIONAL_CACHE = ["dependency_mode", "error_targets", "group", "output_preprocessed", "postprocess", "constraints", "errors", "valid_constraints", "valid_dependencies", "valid_value", "value"];
 
   DEFAULT_ATTR_VALUES = {
     PREPROCESS: true,
@@ -1221,6 +1221,10 @@
           key = OPTIONAL_CACHE[o];
           data[key] = null;
         }
+        data.errors = {};
+        data.errors[VALIDATION_PHASES.DEPENDENCIES] = [];
+        data.errors[VALIDATION_PHASES.VALUE] = [];
+        data.errors[VALIDATION_PHASES.CONSTRAINTS] = [];
         this._set_element_data(elem, data);
       }
       return this;
@@ -1243,7 +1247,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_errors, dependency_mode, elem, errors, fields, first_invalid_element, i, is_required, is_valid, l, name, original_value, prev_name, prev_phase_valid, ref, ref1, ref2, ref3, ref4, required, result, type, usedValFunc, valid_dependencies, validation, value, value_has_changed, value_info;
+      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_errors, dependency_mode, elem, errors, fields, first_invalid_element, i, is_required, is_valid, l, name, original_value, phase, prev_name, prev_phases_valid, ref, ref1, ref2, ref3, ref4, required, result, temp, type, usedValFunc, valid_dependencies, value, value_has_changed, value_info;
       if (options == null) {
         options = {};
       }
@@ -1284,60 +1288,102 @@
           this._apply_dependency_error_classes(elem, data.depends_on, true);
           continue;
         }
-        prev_phase_valid = true;
+        prev_phases_valid = true;
+        phase = VALIDATION_PHASES.DEPENDENCIES;
         ref1 = this._validate_dependencies(elem, data), dependency_errors = ref1.dependency_errors, dependency_elements = ref1.dependency_elements, dependency_mode = ref1.dependency_mode, valid_dependencies = ref1.valid_dependencies;
         if (!valid_dependencies) {
-          is_valid = false;
-          prev_phase_valid = false;
-          errors.push({
+          prev_phases_valid = false;
+          data.valid_dependencies = false;
+          data.errors[phase] = dependency_errors.concat({
             element: elem,
             required: is_required,
             type: "dependency",
-            phase: VALIDATION_PHASES.DEPENDENCIES,
+            phase: phase,
             mode: dependency_mode
           });
           if (first_invalid_element == null) {
             first_invalid_element = elem;
           }
+        } else {
+          data.valid_dependencies = true;
+          data.errors[phase] = [];
         }
+        errors = errors.concat(data.errors[phase]);
+        phase = VALIDATION_PHASES.VALUE;
         if (value_has_changed) {
-          if (prev_phase_valid || !options.stop_on_error) {
-            validation = this._validate_element(elem, data, value_info);
+          if (prev_phases_valid || !options.stop_on_error) {
             current_error = null;
-            if (validation !== true) {
-              prev_phase_valid = false;
+            if (this._validate_element(elem, data, value_info) !== true) {
+              prev_phases_valid = false;
+              data.valid_value = false;
               current_error = {
                 element: elem,
                 required: is_required,
                 type: type,
-                phase: VALIDATION_PHASES.VALUE,
+                phase: phase,
                 value: value
               };
-              errors.push(current_error);
+              data.errors[phase] = [current_error];
+              if (first_invalid_element == null) {
+                first_invalid_element = elem;
+              }
+            } else {
+              data.valid_value = true;
+              data.errors[phase] = [];
+            }
+          }
+        } else {
+          if (prev_phases_valid || !options.stop_on_error) {
+            if (data.valid_value !== true) {
+              prev_phases_valid = false;
               if (first_invalid_element == null) {
                 first_invalid_element = elem;
               }
             }
           }
-          if (prev_phase_valid || !options.stop_on_error) {
+        }
+        errors = errors.concat(data.errors[phase]);
+        phase = VALIDATION_PHASES.CONSTRAINTS;
+        if (value_has_changed) {
+          if (prev_phases_valid || !options.stop_on_error) {
+            data.valid_constraints = true;
+            temp = [];
             ref2 = this._validate_constraints(elem, data, value);
             for (constraint_name in ref2) {
               result = ref2[constraint_name];
               if (!(result !== true)) {
                 continue;
               }
-              prev_phase_valid = false;
-              errors.push($.extend(result, {
+              data.valid_constraints = false;
+              prev_phases_valid = false;
+              temp.push($.extend(result, {
                 element: elem,
                 required: is_required,
                 type: constraint_name,
-                phase: VALIDATION_PHASES.CONSTRAINTS,
+                phase: phase,
                 value: value
               }));
             }
+            data.errors[phase] = temp;
+            if (data.valid_constraints === false) {
+              if (first_invalid_element == null) {
+                first_invalid_element = elem;
+              }
+            }
+          }
+        } else {
+          if (prev_phases_valid || !options.stop_on_error) {
+            if (data.valid_constraints !== true) {
+              prev_phases_valid = false;
+              if (first_invalid_element == null) {
+                first_invalid_element = elem;
+              }
+            }
           }
         }
-        if (prev_phase_valid) {
+        errors = errors.concat(data.errors[phase]);
+        is_valid = data.valid_dependencies && data.valid_value && data.valid_constraints;
+        if (is_valid) {
           if (data.valid !== true || (data.postprocess == null) || (data.output_preprocessed == null)) {
             data.valid = true;
             this._cache_attribute(elem, data, "postprocess");
@@ -1378,11 +1424,11 @@
             });
             this._set_element_data(elem, data);
           }
-          this._apply_error_classes(elem, data.error_targets, prev_phase_valid);
+          this._apply_error_classes(elem, data.error_targets, is_valid);
           if (current_error != null) {
             current_error.error_targets = data.error_targets;
           }
-          this._apply_dependency_error_classes(elem, dependency_elements, prev_phase_valid);
+          this._apply_dependency_error_classes(elem, dependency_elements, is_valid);
         }
         prev_name = name;
       }

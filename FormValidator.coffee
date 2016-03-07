@@ -1,5 +1,6 @@
 class window.FormValidator
     # TODO: add effects for dependencies
+    # TODO: create bootstrap theme that uses bootstrap validation states (+ maybe icons)
 
 
     ########################################################################################################################
@@ -297,6 +298,7 @@ class window.FormValidator
             element.closest("[data-fv-error-targets]").attr("data-fv-error-targets") or
             DEFAULT_ATTR_VALUES.ERROR_TARGETS
 
+    # TODO: use only 1 function that gets classes as param
     # apply error classes and styles to element if invalid
     _apply_error_classes: (element, error_targets, is_valid) ->
         if error_targets?
@@ -544,6 +546,10 @@ class window.FormValidator
             # set keys that are cached later (lazily) to null (which means unknow)
             for key in OPTIONAL_CACHE
                 data[key] = null
+            data.errors = {}
+            data.errors[VALIDATION_PHASES.DEPENDENCIES] = []
+            data.errors[VALIDATION_PHASES.VALUE] = []
+            data.errors[VALIDATION_PHASES.CONSTRAINTS] = []
 
             @_set_element_data(elem, data)
         return @
@@ -574,15 +580,10 @@ class window.FormValidator
         if not @fields? or options.recache is true
             @cache()
 
-        CLASS           = @constructor
-        errors          = []
-        prev_name       = null
-        usedValFunc     = false
-
-        # NOTE: remerge required and optional fields in order to:
-        # 1. have 1 loop only
-        # 2. continuous and correct indices
-
+        CLASS = @constructor
+        errors = []
+        prev_name = null
+        usedValFunc = false
         required = @fields.required
         fields = @fields.all
         first_invalid_element = null
@@ -606,65 +607,95 @@ class window.FormValidator
                 @_apply_dependency_error_classes(elem, data.depends_on, true)
                 continue
 
-            prev_phase_valid = true
+            prev_phases_valid = true
 
 
             #########################################################
             # PHASE 1: validate dependencies (no matter if the value has changed because dependencies could have changed)
+            phase = VALIDATION_PHASES.DEPENDENCIES
             {dependency_errors, dependency_elements, dependency_mode, valid_dependencies} = @_validate_dependencies(elem, data)
             if not valid_dependencies
-                is_valid = false
-                prev_phase_valid = false
-                # create error if the element has unfulfilled dependencies
-                errors.push {
+                prev_phases_valid = false
+                data.valid_dependencies = false
+                data.errors[phase] = dependency_errors.concat {
                     element:    elem
                     required:   is_required
                     type:       "dependency"
-                    phase:      VALIDATION_PHASES.DEPENDENCIES
+                    phase:      phase
                     mode:       dependency_mode
                 }
-                if not first_invalid_element?
-                    first_invalid_element = elem
+                first_invalid_element ?= elem
+            else
+                data.valid_dependencies = true
+                data.errors[phase] = []
+            errors = errors.concat data.errors[phase]
 
 
             #########################################################
             # PHASE 2: validate the value
             # validate the current value only if it has changed
+            phase = VALIDATION_PHASES.VALUE
             if value_has_changed
-                if prev_phase_valid or not options.stop_on_error
-                    validation = @_validate_element(elem, data, value_info)
+                if prev_phases_valid or not options.stop_on_error
+                    # TODO is this var still needed??
                     current_error = null
-
                     # element is invalid
-                    if validation isnt true
-                        prev_phase_valid = false
+                    if @_validate_element(elem, data, value_info) isnt true
+                        prev_phases_valid = false
+                        data.valid_value = false
                         current_error =
                             element:    elem
                             required:   is_required
                             type:       type
-                            phase:      VALIDATION_PHASES.VALUE
+                            phase:      phase
                             value:      value
-                        errors.push current_error
+                        data.errors[phase] = [current_error]
+                        first_invalid_element ?= elem
+                    else
+                        data.valid_value = true
+                        data.errors[phase] = []
+            # value has not changed (data is unchanged)
+            else
+                if prev_phases_valid or not options.stop_on_error
+                    if data.valid_value isnt true
+                        prev_phases_valid = false
+                        first_invalid_element ?= elem
+            errors = errors.concat data.errors[phase]
 
-                        if not first_invalid_element?
-                            first_invalid_element = elem
 
-
-                #########################################################
-                # PHASE 3 - validate constraints
-                if prev_phase_valid or not options.stop_on_error
+            #########################################################
+            # PHASE 3 - validate constraints
+            phase = VALIDATION_PHASES.CONSTRAINTS
+            if value_has_changed
+                if prev_phases_valid or not options.stop_on_error
+                    data.valid_constraints = true
+                    temp = []
                     for constraint_name, result of @_validate_constraints(elem, data, value) when result isnt true
-                        prev_phase_valid = false
-                        errors.push $.extend result, {
+                        data.valid_constraints = false
+                        prev_phases_valid = false
+                        temp.push $.extend result, {
                             element: elem
                             required: is_required
                             type: constraint_name
-                            phase: VALIDATION_PHASES.CONSTRAINTS
+                            phase: phase
                             value: value
                         }
+                    data.errors[phase] = temp
+                    if data.valid_constraints is false
+                        first_invalid_element ?= elem
+            # value has not changed (data is unchanged)
+            else
+                if prev_phases_valid or not options.stop_on_error
+                    if data.valid_constraints isnt true
+                        prev_phases_valid = false
+                        first_invalid_element ?= elem
+            errors = errors.concat data.errors[phase]
+
+
+            is_valid = data.valid_dependencies and data.valid_value and data.valid_constraints
 
             # no validation phase was invalid => element is valid
-            if prev_phase_valid
+            if is_valid
                 # cache uncached data
                 if data.valid isnt true or not data.postprocess? or not data.output_preprocessed?
                     data.valid = true
@@ -693,6 +724,8 @@ class window.FormValidator
                     data.valid = false
                     @_set_element_data(elem, data)
 
+            #########################################################
+            # STYLES
             if options.apply_error_classes is true
                 if not data.error_targets?
                     @_cache_attribute elem, data, "error_targets", () ->
@@ -701,13 +734,13 @@ class window.FormValidator
                 @_apply_error_classes(
                     elem
                     data.error_targets
-                    prev_phase_valid
+                    is_valid
                 )
 
                 if current_error?
                     current_error.error_targets = data.error_targets
 
-                @_apply_dependency_error_classes(elem, dependency_elements, prev_phase_valid)
+                @_apply_dependency_error_classes(elem, dependency_elements, is_valid)
 
             prev_name = name
 

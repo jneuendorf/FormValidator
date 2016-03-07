@@ -48,7 +48,10 @@ OPTIONAL_CACHE = [
     "postprocess"
     # validation (meta) data
     "constraints"
-    "valid"
+    "errors"
+    "valid_constraints"
+    "valid_dependencies"
+    "valid_value"
     "value"
 ]
 # NOTE: those are not the values with which the cache is initialized! the following values are set when the field data is cached and an attribute is missing
