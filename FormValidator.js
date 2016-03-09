@@ -395,10 +395,12 @@
     constraint_enumerate_prefix: "'{{value}}'",
     constraint_list_prefix: "'{{value}}'",
     constraint_blacklist: "enthält ein Zeichen in '{{blacklist}}'",
-    constraint_max: "ist nicht kleiner als '{{max}}'",
-    constraint_max_include_max: "ist nicht kleiner als oder gleich '{{max}}'",
-    constraint_min: "ist nicht größer als '{{min}}'",
-    constraint_min_include_min: "ist nicht größer als oder gleich '{{min}}'",
+    constraint_max: "ist nicht kleiner als {{max}}",
+    constraint_max_include_max: "ist nicht kleiner als oder gleich {{max}}",
+    constraint_max_length: "ist länger als {{max_length}} Zeichen",
+    constraint_min: "ist nicht größer als {{min}}",
+    constraint_min_include_min: "ist nicht größer als oder gleich {{min}}",
+    constraint_min_length: "ist kürzer als {{min_length}} Zeichen",
     constraint_regex: "entspricht nicht dem regulären Ausdruck '{{regex}}'"
   });
 
@@ -430,10 +432,12 @@
     constraint_enumerate_prefix: "'{{value}}'",
     constraint_list_prefix: "'{{value}}'",
     constraint_blacklist: "enthält ein Zeichen in '{{blacklist}}'",
-    constraint_max: "ist nicht kleiner als '{{max}}'",
-    constraint_max_include_max: "ist nicht kleiner als oder gleich '{{max}}'",
-    constraint_min: "ist nicht größer als '{{min}}'",
-    constraint_min_include_min: "ist nicht größer als oder gleich '{{min}}'",
+    constraint_max: "ist nicht kleiner als {{max}}",
+    constraint_max_include_max: "ist nicht kleiner als oder gleich {{max}}",
+    constraint_max_length: "ist länger als {{max_length}} Zeichen",
+    constraint_min: "ist nicht größer als {{min}}",
+    constraint_min_include_min: "ist nicht größer als oder gleich {{min}}",
+    constraint_min_length: "ist kürzer als {{min_length}} Zeichen",
     constraint_regex: "entspricht nicht dem regulären Ausdruck '{{regex}}'"
   });
 
@@ -575,6 +579,9 @@
     key_prefix = phase_singular + "_";
     for (q = 0, len3 = grouped_errors.length; q < len3; q++) {
       errors = grouped_errors[q];
+      if (!(errors != null)) {
+        continue;
+      }
       keys = [];
       for (s = 0, len4 = errors.length; s < len4; s++) {
         error = errors[s];

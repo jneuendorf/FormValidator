@@ -103,7 +103,8 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
 
     # find combinable locale keys
     key_prefix = "#{phase_singular}_"
-    for errors in grouped_errors
+    # go through groups of errors (and skip those entries that have been put into 'ungrouped_errors')
+    for errors in grouped_errors when errors?
         keys = []
         for error in errors
             keys.push error.type

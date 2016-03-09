@@ -31,10 +31,12 @@ $.extend locales.de, {
     constraint_list_prefix: "'{{value}}'"
     # constraint validators (negated formulation because prefix is negated itself)
     constraint_blacklist: "enthält ein Zeichen in '{{blacklist}}'"
-    constraint_max: "ist nicht kleiner als '{{max}}'"
-    constraint_max_include_max: "ist nicht kleiner als oder gleich '{{max}}'"
-    constraint_min: "ist nicht größer als '{{min}}'"
-    constraint_min_include_min: "ist nicht größer als oder gleich '{{min}}'"
+    constraint_max: "ist nicht kleiner als {{max}}"
+    constraint_max_include_max: "ist nicht kleiner als oder gleich {{max}}"
+    constraint_max_length: "ist länger als {{max_length}} Zeichen"
+    constraint_min: "ist nicht größer als {{min}}"
+    constraint_min_include_min: "ist nicht größer als oder gleich {{min}}"
+    constraint_min_length: "ist kürzer als {{min_length}} Zeichen"
     constraint_regex: "entspricht nicht dem regulären Ausdruck '{{regex}}'"
 
 }
@@ -72,9 +74,11 @@ $.extend locales.en, {
     constraint_list_prefix: "'{{value}}'"
     # constraint validators (negated formulation because prefix is negated itself)
     constraint_blacklist: "enthält ein Zeichen in '{{blacklist}}'"
-    constraint_max: "ist nicht kleiner als '{{max}}'"
-    constraint_max_include_max: "ist nicht kleiner als oder gleich '{{max}}'"
-    constraint_min: "ist nicht größer als '{{min}}'"
-    constraint_min_include_min: "ist nicht größer als oder gleich '{{min}}'"
+    constraint_max: "ist nicht kleiner als {{max}}"
+    constraint_max_include_max: "ist nicht kleiner als oder gleich {{max}}"
+    constraint_max_length: "ist länger als {{max_length}} Zeichen"
+    constraint_min: "ist nicht größer als {{min}}"
+    constraint_min_include_min: "ist nicht größer als oder gleich {{min}}"
+    constraint_min_length: "ist kürzer als {{min_length}} Zeichen"
     constraint_regex: "entspricht nicht dem regulären Ausdruck '{{regex}}'"
 }

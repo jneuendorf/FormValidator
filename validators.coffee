@@ -11,6 +11,8 @@
 #       -> error_message_type: String (required)
 #       -> properties needed for the according error message (-> parameters)
 #       -> properties needed for other validators (as they will be able to access other validators' results)
+# TODO: remove option parameters (now done by constraint validators)
+# TODO: maybe use https://github.com/dropbox/zxcvbn and https://css-tricks.com/password-strength-meter/ for password validation
 validators =
     # "private" validator (used in other validators)
     _number: (str, elem, min, max, include_min = true, include_max = true) ->
@@ -106,7 +108,6 @@ validators =
                 error_message_type: "phone"
             }
         return true
-    # TODO: add options for minlength, maxlength
     text: (str, elem, min, max) ->
         return str.length > 0
     # element validators: expect jquery object
