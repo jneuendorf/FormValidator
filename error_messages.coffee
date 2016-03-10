@@ -25,19 +25,21 @@ $.extend locales.de, {
             return "Bitte füllen Sie das Feld nach '#{params.previous_name}' aus"
         return "Bitte füllen Sie das #{params.index_of_type}. Textfeld aus"
     # constraint validators (VALIDATION_PHASES_SINGULAR.CONSTRAINTS = 'constraint')
-    # pre-, suffixes
-    constraint_enumerate_prefix: "'{{value}}'"
+    # pre-, suffixes (those are used for all constraint_... keys that do not define it's own prefix)
+    constraint_enumerate_prefix: "'{{value}}' darf"
     # constraint_enumerate_suffix: ""
     constraint_list_prefix: "'{{value}}'"
     # constraint validators (negated formulation because prefix is negated itself)
-    constraint_blacklist: "enthält ein Zeichen in '{{blacklist}}'"
-    constraint_max: "ist nicht kleiner als {{max}}"
-    constraint_max_include_max: "ist nicht kleiner als oder gleich {{max}}"
-    constraint_max_length: "ist länger als {{max_length}} Zeichen"
-    constraint_min: "ist nicht größer als {{min}}"
-    constraint_min_include_min: "ist nicht größer als oder gleich {{min}}"
-    constraint_min_length: "ist kürzer als {{min_length}} Zeichen"
-    constraint_regex: "entspricht nicht dem regulären Ausdruck '{{regex}}'"
+    constraint_blacklist: "keines der Zeichen '{{blacklist}}' enthalten"
+    constraint_whitelist_prefix: "'{{value}}' muss"
+    constraint_whitelist: "jedes der Zeichen '{{whitelist}}' enthalten"
+    constraint_max: "nicht größer als {{max}} sein"
+    constraint_max_include_max: "nicht größer als oder gleich {{max}} sein"
+    constraint_max_length: "nicht länger als {{max_length}} Zeichen lang sein"
+    constraint_min: "nicht kleiner als {{min}} sein"
+    constraint_min_include_min: "nicht kleiner als oder gleich {{min}} sein"
+    constraint_min_length: "ist kürzer als {{min_length}} Zeichen sein"
+    constraint_regex: "nicht dem regulären Ausdruck '{{regex}}' widersprechen"
 
 }
 
@@ -61,7 +63,7 @@ $.extend locales.en, {
     value_radio:              "Die {{index_of_type}}. Auswahlbox wurde nicht ausgewählt"
     value_checkbox:           "Die {{index_of_type}}. Checkbox wurde nicht ausgewählt"
     value_select:             "Das {{index_of_type}}. Auswahlmenü wurde nicht ausgewählt"
-    text: (params) ->
+    value_text: (params) ->
         if params.name?
             return "Please fill in the field '#{params.name}'"
         if params.previous_name

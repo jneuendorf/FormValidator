@@ -639,16 +639,18 @@ class window.FormValidator
                 if prev_phases_valid or not options.stop_on_error
                     # TODO is this var still needed??
                     current_error = null
+                    validation_res = @_validate_element(elem, data, value_info)
                     # element is invalid
-                    if @_validate_element(elem, data, value_info) isnt true
+                    if validation_res isnt true
                         prev_phases_valid = false
                         data.valid_value = false
                         current_error =
-                            element:    elem
-                            required:   is_required
-                            type:       type
-                            phase:      phase
-                            value:      value
+                            element: elem
+                            error_message_type: validation_res.error_message_type
+                            phase: phase
+                            required: is_required
+                            type: type
+                            value: value
                         data.errors[phase] = [current_error]
                         first_invalid_element ?= elem
                     else

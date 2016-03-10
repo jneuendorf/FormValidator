@@ -45,3 +45,12 @@ get_subsets = (set, k) ->
             j++
 
     return subsets
+
+group_arr_by = (arr, get_prop) ->
+    grouped = {}
+    for elem in arr
+        key = get_prop?(elem) or elem
+        if not grouped[key]?
+            grouped[key] = []
+        grouped[key].push elem
+    return grouped

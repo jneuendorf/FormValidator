@@ -19,9 +19,9 @@ constraint_validators =
     regex: (value, regex, options) ->
         return (new RegExp(regex, options.flags)).test(value)
     whitelist: (value, whitelist) ->
-        for char in value when whitelist.indexOf(char) < 0
-            return false
-        return true
+        for char in value when whitelist.indexOf(char) >= 0
+            return true
+        return false
 
 
 # define which constraint-validator options are compatible with a constraint validator
@@ -74,4 +74,4 @@ constraint_validator_options_in_locale_key =
     include_min: true
 
 include_constraint_option_in_locale_key = (option, value) ->
-    return "#{constraint_validator_options_in_locale_key[option]}" is "#{value}"
+    return value? and "#{constraint_validator_options_in_locale_key[option]}" is "#{value}"

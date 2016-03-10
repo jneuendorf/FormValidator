@@ -8,9 +8,10 @@ $(document).ready(function() {
             }
         }
     }
-    var field = $("#field");
+    var $field = $("#field");
+    var $errors = $("#errors");
     $("select.validator").append(validators).change(function() {
-        field
+        $field
             .attr("data-fv-validate", $(this).val())
             .attr("placeholder", "enter some " + $(this).val());
         return true;
@@ -18,24 +19,24 @@ $(document).ready(function() {
 
 
     var form_validator = FormValidator.new(my_form, {
-        field_getter: function(form) {
-            return form.find("[data-fv-validate]").first();
-        },
+        // field_getter: function(form) {
+        //     return $field;
+        // },
         error_target_getter: function(e, t, i) {
-            if (e.filter("[type='checkbox'], [type='radio']").length > 0) {
-                return e.parent();
-            }
+            // if (e.filter("[type='checkbox'], [type='radio']").length > 0) {
+            //     return e.parent();
+            // }
             return e;
         }
     });
     // validation
     $(".btn.validate").click(function(evt) {
         form_validator.locale = $(".locale option:selected").val();
+        $errors.empty();
         var errors = form_validator.validate({recache: true});
         console.log(errors);
         for (var i = 0; i < errors.length; i++) {
-            var error = errors[i];
-            error.element.next(".error_output").empty().append(error.message);
+            $errors.append(errors[i].message);
         }
         return false;
     });
@@ -46,19 +47,19 @@ $(document).ready(function() {
         // checkbox
         if (t.filter("[type='checkbox']").length > 0) {
             if (t.prop("checked") === true) {
-                field.attr(t.attr("data-attr"), "true");
+                $field.attr(t.attr("data-attr"), "true");
             }
             else {
-                field.attr(t.attr("data-attr"), "false");
+                $field.attr(t.attr("data-attr"), "false");
             }
         }
         // text field
         else {
             if (val) {
-                field.attr(t.attr("data-attr"), t.val());
+                $field.attr(t.attr("data-attr"), t.val());
             }
             else {
-                field.attr(t.attr("data-attr"), null);
+                $field.attr(t.attr("data-attr"), null);
             }
         }
         return true;
