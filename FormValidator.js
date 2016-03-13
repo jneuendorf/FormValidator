@@ -110,7 +110,9 @@
     grouped = {};
     for (l = 0, len = arr.length; l < len; l++) {
       elem = arr[l];
-      key = (typeof get_prop === "function" ? get_prop(elem) : void 0) || elem;
+      if ((key = typeof get_prop === "function" ? get_prop(elem) : void 0) == null) {
+        key = elem;
+      }
       if (grouped[key] == null) {
         grouped[key] = [];
       }
@@ -406,11 +408,14 @@
       }
       return "Bitte füllen Sie das " + params.index_of_type + ". Textfeld aus";
     },
-    constraint_enumerate_prefix: "'{{value}}' darf",
+    constraint_enumerate_prefix: "'{{value}}'",
     constraint_list_prefix: "'{{value}}'",
-    constraint_blacklist: "keines der Zeichen '{{blacklist}}' enthalten",
-    constraint_whitelist_prefix: "'{{value}}' muss",
-    constraint_whitelist: "jedes der Zeichen '{{whitelist}}' enthalten",
+    constraint_blacklist_prefix: "darf",
+    constraint_blacklist: "keines der Zeichen '{{blacklist}}'",
+    constraint_blacklist_suffix: "enthalten",
+    constraint_whitelist_prefix: "muss",
+    constraint_whitelist: "jedes der Zeichen '{{whitelist}}'",
+    constraint_whitelist_suffix: "enthalten",
     constraint_max: "nicht größer als {{max}} sein",
     constraint_max_include_max: "nicht größer als oder gleich {{max}} sein",
     constraint_max_length: "nicht länger als {{max_length}} Zeichen lang sein",
@@ -465,41 +470,28 @@
   build_mode_helpers = {};
 
   build_mode_helpers[BUILD_MODES.ENUMERATE] = function(parts, locale, phase, build_mode) {
-    var default_prefix, i, lang_data, new_parts, part, parts_grouped_by_prefix, prefix;
+    var first_part, lang_data, last_part, new_parts, part, parts_grouped_by_prefix, parts_grouped_by_suffix, prefix, prefix_group, suffix, suffix_group;
     if (parts.length > 1) {
-      if (parts[0].key == null) {
-        return ((((function() {
-          var l, len, ref, results1;
-          ref = parts.slice(0, -1);
-          results1 = [];
-          for (l = 0, len = ref.length; l < len; l++) {
-            part = ref[l];
-            results1.push(part.message);
-          }
-          return results1;
-        })()).join(", ")) + " " + locales["and"] + " " + (parts.slice(-1).message)).trim();
-      }
       lang_data = locales[locale];
-      default_prefix = lang_data[(phase + "_" + build_mode + "_prefix").toLowerCase()] || "";
-      parts_grouped_by_prefix = group_arr_by(parts, function(part) {
-        return lang_data[part.key + "_prefix"] || default_prefix;
+      parts_grouped_by_suffix = group_arr_by(parts, function(part) {
+        return part.suffix;
       });
       new_parts = [];
-      for (prefix in parts_grouped_by_prefix) {
-        parts = parts_grouped_by_prefix[prefix];
-        parts = [parts[0]].concat((function() {
-          var l, len, results1;
-          results1 = [];
-          for (i = l = 0, len = parts.length; l < len; i = ++l) {
-            part = parts[i];
-            if (i > 0) {
-              results1.push(part.slice(prefix.length));
-            }
-          }
-          return results1;
-        })());
-        new_parts = new_parts.concat(parts);
+      for (suffix in parts_grouped_by_suffix) {
+        suffix_group = parts_grouped_by_suffix[suffix];
+        parts_grouped_by_prefix = group_arr_by(suffix_group, function(part) {
+          return part.prefix;
+        });
+        for (prefix in parts_grouped_by_prefix) {
+          prefix_group = parts_grouped_by_prefix[prefix];
+          first_part = prefix_group[0];
+          first_part.message = first_part.prefix + " " + first_part.message;
+        }
+        last_part = suffix_group[suffix_group.length - 1];
+        last_part.message = last_part.message + " " + last_part.suffix;
+        new_parts = new_parts.concat(suffix_group);
       }
+      console.log("new", new_parts);
       parts = new_parts;
       return ((((function() {
         var l, len, ref, results1;
@@ -510,7 +502,7 @@
           results1.push(part.message);
         }
         return results1;
-      })()).join(", ")) + " " + lang_data["and"] + " " + (parts.slice(-1).message)).trim();
+      })()).join(", ")) + " " + lang_data["and"] + " " + parts[parts.length - 1].message).trim();
     }
     return parts[0].message;
   };
@@ -602,7 +594,8 @@
           name = names[l];
           results1.push({
             message: "'" + name + "'",
-            key: null
+            prefix: "",
+            suffix: ""
           });
         }
         return results1;
@@ -618,13 +611,14 @@
     key = (VALIDATION_PHASES_SINGULAR[phase].toLowerCase()) + "_" + (error.error_message_type || error.type);
     part = {
       message: part_evaluator(locales[locale][key], error),
-      key: null
+      prefix: "",
+      suffix: ""
     };
     return default_message_builder(key, phase, BUILD_MODES.ENUMERATE, locale, [part]);
   };
 
   error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = function(errors, phase, build_mode, locale) {
-    var error, error_in_group, group, grouped_errors, i, key, key_prefix, keys, l, len, len1, len2, len3, len4, m, o, option, part, parts, phase_singular, prefix, q, ref, ref1, s, ungrouped_errors, val;
+    var default_prefix, default_suffix, error, error_in_group, group, grouped_errors, i, key, key_prefix, keys, l, len, len1, len2, len3, len4, m, o, option, parts, phase_singular, prefix, q, ref, ref1, s, ungrouped_errors, val;
     parts = [];
     grouped_errors = [];
     ungrouped_errors = [];
@@ -652,6 +646,8 @@
     }
     phase_singular = VALIDATION_PHASES_SINGULAR[phase].toLowerCase();
     key_prefix = phase_singular + "_";
+    default_prefix = locales[locale][(phase + "_" + build_mode + "_prefix").toLowerCase()] || "";
+    default_suffix = locales[locale][(phase + "_" + build_mode + "_suffix").toLowerCase()] || "";
     for (q = 0, len3 = grouped_errors.length; q < len3; q++) {
       errors = grouped_errors[q];
       if (!(errors != null)) {
@@ -675,24 +671,13 @@
       if (key != null) {
         parts.push({
           message: part_evaluator(locales[locale][key], error),
-          key: key
+          prefix: part_evaluator(locales[locale][key + "_prefix"], error) || default_prefix,
+          suffix: part_evaluator(locales[locale][key + "_suffix"], error) || default_suffix
         });
       } else if (DEBUG) {
         throw new Error("Could not find a translation for key while trying to create an error message during the constraint validation phase. The keys that were retrieved from the generated errors are: " + (JSON.stringify(keys)) + ". Define an according key in the 'locales' variable (e.g. '" + key_prefix + (keys.join("_")) + "')!");
       }
     }
-    parts = (function() {
-      var len5, results1, t;
-      results1 = [];
-      for (t = 0, len5 = parts.length; t < len5; t++) {
-        part = parts[t];
-        results1.push({
-          message: "" + locales[locale][(key + "_prefix") || ""] + part.message,
-          key: part.key
-        });
-      }
-      return results1;
-    })();
     key = phase_singular + "_" + (build_mode.toLowerCase());
     prefix = part_evaluator("" + locales[locale][key + "_prefix"], errors[0]);
     return default_message_builder(key, phase, build_mode, locale, parts, prefix);

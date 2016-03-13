@@ -26,13 +26,16 @@ $.extend locales.de, {
         return "Bitte füllen Sie das #{params.index_of_type}. Textfeld aus"
     # constraint validators (VALIDATION_PHASES_SINGULAR.CONSTRAINTS = 'constraint')
     # pre-, suffixes (those are used for all constraint_... keys that do not define it's own prefix)
-    constraint_enumerate_prefix: "'{{value}}' darf"
+    constraint_enumerate_prefix: "'{{value}}'"
     # constraint_enumerate_suffix: ""
     constraint_list_prefix: "'{{value}}'"
     # constraint validators (negated formulation because prefix is negated itself)
-    constraint_blacklist: "keines der Zeichen '{{blacklist}}' enthalten"
-    constraint_whitelist_prefix: "'{{value}}' muss"
-    constraint_whitelist: "jedes der Zeichen '{{whitelist}}' enthalten"
+    constraint_blacklist_prefix: "darf"
+    constraint_blacklist: "keines der Zeichen '{{blacklist}}'"
+    constraint_blacklist_suffix: "enthalten"
+    constraint_whitelist_prefix: "muss"
+    constraint_whitelist: "jedes der Zeichen '{{whitelist}}'"
+    constraint_whitelist_suffix: "enthalten"
     constraint_max: "nicht größer als {{max}} sein"
     constraint_max_include_max: "nicht größer als oder gleich {{max}} sein"
     constraint_max_length: "nicht länger als {{max_length}} Zeichen lang sein"

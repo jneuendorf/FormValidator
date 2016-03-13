@@ -10,38 +10,32 @@ build_mode_helpers = {}
 
 build_mode_helpers[BUILD_MODES.ENUMERATE] = (parts, locale, phase, build_mode) ->
     if parts.length > 1
-        # no key info passed => just join the messages
-        if not parts[0].key?
-            return "#{(part.message for part in parts.slice(0, -1)).join(", ")} #{locales["and"]} #{parts.slice(-1).message}".trim()
-
         lang_data = locales[locale]
-        default_prefix = lang_data["#{phase}_#{build_mode}_prefix".toLowerCase()] or ""
-        parts_grouped_by_prefix = group_arr_by parts, (part) ->
-            return lang_data["#{part.key}_prefix"] or default_prefix
-        # parts_grouped_by_prefix = {}
-        # for part in parts
-        #     prefix = lang_data["#{part.key}_prefix"] or default_prefix
-        #     if parts_grouped_by_prefix[prefix]?
-        #         parts_grouped_by_prefix[prefix].push part
-        #     else
-        #         parts_grouped_by_prefix[prefix] = [part]
-
-        # adjust parts' prefixes (only the first of each group may keep its prefix)
         new_parts = []
-        for prefix, parts of parts_grouped_by_prefix
-            parts = [parts[0]].concat(part.slice(prefix.length) for part, i in parts when i > 0)
-            # parts = (part.slice(prefix.length) for part in parts)
-            # parts[0] = prefix + parts[0]
-            new_parts = new_parts.concat parts
-        parts = new_parts
+        parts_grouped_by_suffix = group_arr_by parts, (part) ->
+            return part.suffix
 
-        return "#{(part.message for part in parts.slice(0, -1)).join(", ")} #{lang_data["and"]} #{parts.slice(-1).message}".trim()
+        for suffix, suffix_group of parts_grouped_by_suffix
+            parts_grouped_by_prefix = group_arr_by suffix_group, (part) ->
+                return part.prefix
+            # add common prefix to 1st in group
+            for prefix, prefix_group of parts_grouped_by_prefix
+                first_part = prefix_group[0]
+                first_part.message = "#{first_part.prefix} #{first_part.message}"
+            # add common suffix to last in group
+            last_part = suffix_group[suffix_group.length - 1]
+            last_part.message = "#{last_part.message} #{last_part.suffix}"
+            new_parts = new_parts.concat suffix_group
+
+        parts = new_parts
+        return ("#{(part.message for part in parts.slice(0, -1)).join(", ")} #{lang_data["and"]} #{parts[parts.length - 1].message}").trim()
     return parts[0].message
 
 build_mode_helpers[BUILD_MODES.SENTENCE] = (parts, locale, build_mode) ->
     return ("#{part.message[0].toUpperCase()}#{part.message.slice(1)}" for part in parts).join(". ").trim()
 
 build_mode_helpers[BUILD_MODES.LIST] = (parts, locale, build_mode) ->
+    # TODO: extract .message from part like above
     return "<ul><li>#{parts.join("</li><li>")}</li></ul>"
 
 
@@ -91,7 +85,7 @@ error_message_builders[VALIDATION_PHASES.DEPENDENCIES] = (errors, phase, build_m
         # sentence does not make sense in this case => fallback to enumerate
         if build_mode is BUILD_MODES.SENTENCE
             build_mode = BUILD_MODES.ENUMERATE
-        parts = ({message: "'#{name}'", key: null} for name in names)
+        parts = ({message: "'#{name}'", prefix: "", suffix: ""} for name in names)
         return default_message_builder(VALIDATION_PHASES_SINGULAR[phase].toLowerCase(), phase, build_mode, locale, parts)
     return locales[locale]["#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_general"]
 
@@ -103,7 +97,8 @@ error_message_builders[VALIDATION_PHASES.VALUE] = (errors, phase, build_mode, lo
     # here only 1 error is in the 'errors' list => therefore we just use the simplest build mode
     part =
         message: part_evaluator(locales[locale][key], error)
-        key: null
+        prefix: ""
+        suffix: ""
     return default_message_builder(key, phase, BUILD_MODES.ENUMERATE, locale, [part])
 
 
@@ -133,6 +128,8 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
 
     # find combinable locale keys (errors with the same type may use a special locale key)
     key_prefix = "#{phase_singular}_"
+    default_prefix = locales[locale]["#{phase}_#{build_mode}_prefix".toLowerCase()] or ""
+    default_suffix = locales[locale]["#{phase}_#{build_mode}_suffix".toLowerCase()] or ""
     # go through groups of errors (and skip empty entries caused in the above loop)
     for errors in grouped_errors when errors?
         keys = []
@@ -146,13 +143,14 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
         if key?
             parts.push {
                 message: part_evaluator(locales[locale][key], error)
-                key: key
+                prefix: part_evaluator(locales[locale]["#{key}_prefix"], error) or default_prefix
+                suffix: part_evaluator(locales[locale]["#{key}_suffix"], error) or default_suffix
             }
         else if DEBUG
             throw new Error("Could not find a translation for key while trying to create an error message during the constraint validation phase. The keys that were retrieved from the generated errors are: #{JSON.stringify(keys)}. Define an according key in the 'locales' variable (e.g. '#{key_prefix}#{keys.join("_")}')!")
 
     # add prefixes to parts
-    parts = ({message: "#{locales[locale]["#{key}_prefix" or ""]}#{part.message}", key: part.key} for part in parts)
+    # parts = ({message: "#{locales[locale]["#{key}_prefix" or ""]} #{part.message}", key: part.key} for part in parts)
 
     key = "#{phase_singular}_#{build_mode.toLowerCase()}"
     # replace {{value}} with the actual value

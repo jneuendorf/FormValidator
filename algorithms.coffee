@@ -49,7 +49,8 @@ get_subsets = (set, k) ->
 group_arr_by = (arr, get_prop) ->
     grouped = {}
     for elem in arr
-        key = get_prop?(elem) or elem
+        if not (key = get_prop?(elem))?
+            key = elem
         if not grouped[key]?
             grouped[key] = []
         grouped[key].push elem
