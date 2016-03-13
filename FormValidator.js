@@ -416,13 +416,27 @@
     constraint_whitelist_prefix: "muss",
     constraint_whitelist: "jedes der Zeichen '{{whitelist}}'",
     constraint_whitelist_suffix: "enthalten",
-    constraint_max: "nicht größer als {{max}} sein",
-    constraint_max_include_max: "nicht größer als oder gleich {{max}} sein",
-    constraint_max_length: "nicht länger als {{max_length}} Zeichen lang sein",
-    constraint_min: "nicht kleiner als {{min}} sein",
-    constraint_min_include_min: "nicht kleiner als oder gleich {{min}} sein",
-    constraint_min_length: "ist kürzer als {{min_length}} Zeichen sein",
-    constraint_regex: "nicht dem regulären Ausdruck '{{regex}}' widersprechen"
+    constraint_max_prefix: "darf",
+    constraint_max: "nicht größer als {{max}}",
+    constraint_max_suffix: "sein",
+    constraint_max_include_max_prefix: "darf",
+    constraint_max_include_max: "nicht größer als oder gleich {{max}}",
+    constraint_max_include_max_suffix: "sein",
+    constraint_max_length_prefix: "darf",
+    constraint_max_length: "nicht länger als {{max_length}} Zeichen",
+    constraint_max_length_suffix: "sein",
+    constraint_min_prefix: "darf",
+    constraint_min: "nicht kleiner als {{min}}",
+    constraint_min_suffix: "sein",
+    constraint_min_include_min_prefix: "darf",
+    constraint_min_include_min: "nicht kleiner als oder gleich {{min}}",
+    constraint_min_include_min_suffix: "sein",
+    constraint_min_length_prefix: "darf",
+    constraint_min_length: "nicht kürzer als {{min_length}} Zeichen",
+    constraint_min_length_suffix: "sein",
+    constraint_regex_prefix: "darf",
+    constraint_regex: "nicht dem regulären Ausdruck '{{regex}}'",
+    constraint_regex_suffix: "widersprechen"
   });
 
   $.extend(locales.en, {
@@ -473,10 +487,10 @@
     var first_part, lang_data, last_part, new_parts, part, parts_grouped_by_prefix, parts_grouped_by_suffix, prefix, prefix_group, suffix, suffix_group;
     if (parts.length > 1) {
       lang_data = locales[locale];
+      new_parts = [];
       parts_grouped_by_suffix = group_arr_by(parts, function(part) {
         return part.suffix;
       });
-      new_parts = [];
       for (suffix in parts_grouped_by_suffix) {
         suffix_group = parts_grouped_by_suffix[suffix];
         parts_grouped_by_prefix = group_arr_by(suffix_group, function(part) {
@@ -491,7 +505,6 @@
         last_part.message = last_part.message + " " + last_part.suffix;
         new_parts = new_parts.concat(suffix_group);
       }
-      console.log("new", new_parts);
       parts = new_parts;
       return ((((function() {
         var l, len, ref, results1;
@@ -502,9 +515,9 @@
           results1.push(part.message);
         }
         return results1;
-      })()).join(", ")) + " " + lang_data["and"] + " " + parts[parts.length - 1].message).trim();
+      })()).join(", ")) + " " + lang_data["and"] + " " + parts[parts.length - 1].message).replace(/\s+/g, " ");
     }
-    return parts[0].message;
+    return (parts[0].prefix + " " + parts[0].message + " " + parts[0].suffix).replace(/\s+/g, " ");
   };
 
   build_mode_helpers[BUILD_MODES.SENTENCE] = function(parts, locale, build_mode) {
@@ -517,7 +530,7 @@
         results1.push("" + (part.message[0].toUpperCase()) + (part.message.slice(1)));
       }
       return results1;
-    })()).join(". ").trim();
+    })()).join(". ").replace(/\s+/g, " ");
   };
 
   build_mode_helpers[BUILD_MODES.LIST] = function(parts, locale, build_mode) {

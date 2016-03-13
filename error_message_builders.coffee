@@ -28,11 +28,11 @@ build_mode_helpers[BUILD_MODES.ENUMERATE] = (parts, locale, phase, build_mode) -
             new_parts = new_parts.concat suffix_group
 
         parts = new_parts
-        return ("#{(part.message for part in parts.slice(0, -1)).join(", ")} #{lang_data["and"]} #{parts[parts.length - 1].message}").trim()
-    return parts[0].message
+        return ("#{(part.message for part in parts.slice(0, -1)).join(", ")} #{lang_data["and"]} #{parts[parts.length - 1].message}").replace(/\s+/g, " ")
+    return ("#{parts[0].prefix} #{parts[0].message} #{parts[0].suffix}").replace(/\s+/g, " ")
 
 build_mode_helpers[BUILD_MODES.SENTENCE] = (parts, locale, build_mode) ->
-    return ("#{part.message[0].toUpperCase()}#{part.message.slice(1)}" for part in parts).join(". ").trim()
+    return ("#{part.message[0].toUpperCase()}#{part.message.slice(1)}" for part in parts).join(". ").replace(/\s+/g, " ")
 
 build_mode_helpers[BUILD_MODES.LIST] = (parts, locale, build_mode) ->
     # TODO: extract .message from part like above
