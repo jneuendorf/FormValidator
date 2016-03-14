@@ -799,12 +799,18 @@
           placement: "top",
           content: function() {
             return $(this).data("_fv_popover");
-          }
+          },
+          trigger: "manual"
         }).focus(function() {
           element.popover("show");
-          return true;
+          return false;
         }).blur(function() {
           element.popover("hide");
+          return true;
+        }).click(function() {
+          if (document.activeElement === this) {
+            element.popover("toggle");
+          }
           return true;
         });
       }

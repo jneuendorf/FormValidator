@@ -29,12 +29,14 @@ $(document).ready(function() {
     // validation
     $(".btn.validate").click(function(evt) {
         form_validator.locale = $(".locale option:selected").val();
-        $errors.empty();
-        var errors = form_validator.validate({recache: true});
-        console.log(errors);
-        for (var i = 0; i < errors.length; i++) {
-            $errors.append(errors[i].message);
-        }
+        form_validator.form_modifier.error_output_mode = $(".error_output_mode option:selected").val();
+        form_validator.validate({recache: true});
+        // $errors.empty();
+        // var errors = form_validator.validate({recache: true});
+        // console.log(errors);
+        // for (var i = 0; i < errors.length; i++) {
+        //     $errors.append(errors[i].message);
+        // }
         return false;
     });
 

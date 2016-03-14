@@ -53,12 +53,17 @@ class FormModifier
                     placement: "top"
                     content: () ->
                         return $(@).data("_fv_popover")
+                    trigger: "manual"
                 }
                 .focus () ->
                     element.popover("show")
-                    return true
+                    return false
                 .blur () ->
                     element.popover("hide")
+                    return true
+                .click () ->
+                    if document.activeElement is @
+                        element.popover("toggle")
                     return true
         element.data("_fv_popover", message).popover("hide")
         return @
