@@ -120,5 +120,4 @@ class FormModifier
 
             @_process_error_message(message, elem, data)
 
-
         return @

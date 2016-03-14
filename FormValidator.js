@@ -1162,59 +1162,6 @@
       return (typeof this.error_target_getter === "function" ? this.error_target_getter(element, type, index) : void 0) || element.attr("data-fv-error-targets") || element.closest("[data-fv-error-targets]").attr("data-fv-error-targets") || DEFAULT_ATTR_VALUES.ERROR_TARGETS;
     };
 
-    FormValidator.prototype._apply_error_classes = function(element, error_targets, is_valid) {
-      var error_classes, i, l, len, target, targets;
-      if (error_targets != null) {
-        targets = this._find_targets(error_targets, element);
-        for (i = l = 0, len = targets.length; l < len; i = ++l) {
-          target = targets[i];
-          if (!(target instanceof jQuery)) {
-            target = targets.eq(i);
-          }
-          if ((error_classes = target.attr("data-fv-error-classes")) != null) {
-            if (is_valid === false) {
-              target.addClass(error_classes);
-            } else {
-              target.removeClass(error_classes);
-            }
-          } else {
-            if (is_valid === false) {
-              target.addClass(this.error_classes);
-            } else {
-              target.removeClass(this.error_classes);
-            }
-          }
-        }
-        return targets;
-      }
-      return [];
-    };
-
-    FormValidator.prototype._apply_dependency_error_classes = function(element, error_targets, is_valid) {
-      var error_classes, l, len, target, targets;
-      if (error_targets != null) {
-        targets = this._find_targets(error_targets, element);
-        for (l = 0, len = targets.length; l < len; l++) {
-          target = targets[l];
-          if ((error_classes = target.attr("data-fv-dependency-error-classes")) != null) {
-            if (is_valid === false) {
-              target.addClass(error_classes);
-            } else {
-              target.removeClass(error_classes);
-            }
-          } else {
-            if (is_valid === false) {
-              target.addClass(this.dependency_error_classes);
-            } else {
-              target.removeClass(this.dependency_error_classes);
-            }
-          }
-        }
-        return targets;
-      }
-      return [];
-    };
-
     FormValidator.prototype._group = function(fields) {
       var data, dict, elem, elems, group_name, i, l, name, ref;
       dict = {};

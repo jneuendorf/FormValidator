@@ -2,7 +2,6 @@ class window.FormValidator
     # TODO:10 add effects for dependencies
     # TODO: create themes
     # TODO:60 create bootstrap theme that uses bootstrap validation states (+ maybe icons)
-    # TODO: create separate file for all the code that happens after the validation and merge that into the formvalidator (maybe at compile time?!)
 
 
     ########################################################################################################################
@@ -165,8 +164,6 @@ class window.FormValidator
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
         # TODO: use this!
         @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
-        # TODO:40 choose how to output the generated errors (i.e. print below element (maybe even getbootstrap.com/javascript/#popovers))
-        # @error_output_mode      = if CLASS.ERROR_OUTPUT_MODES[options.error_output_mode]? then options.error_output_mode else CLASS.ERROR_OUTPUT_MODES.DEFAULT
         @locale                 = options.locale or "en"
 
         @error_target_getter    = options.error_target_getter or null
@@ -297,46 +294,6 @@ class window.FormValidator
             element.attr("data-fv-error-targets") or
             element.closest("[data-fv-error-targets]").attr("data-fv-error-targets") or
             DEFAULT_ATTR_VALUES.ERROR_TARGETS
-
-    # TODO:240 use only 1 function that gets classes as param
-    # apply error classes and styles to element if invalid
-    _apply_error_classes: (element, error_targets, is_valid) ->
-        if error_targets?
-            targets = @_find_targets(error_targets, element)
-            for target, i in targets
-                if target not instanceof jQuery
-                    target = targets.eq(i)
-                # apply element's or the form's error classes
-                if (error_classes = target.attr("data-fv-error-classes"))?
-                    if is_valid is false
-                        target.addClass error_classes
-                    else
-                        target.removeClass error_classes
-                else
-                    if is_valid is false
-                        target.addClass @error_classes
-                    else
-                        target.removeClass @error_classes
-            return targets
-        return []
-
-    # TODO:250 use only 1 function that gets classes as param
-    _apply_dependency_error_classes: (element, error_targets, is_valid) ->
-        if error_targets?
-            targets = @_find_targets(error_targets, element)
-            for target in targets
-                if (error_classes = target.attr("data-fv-dependency-error-classes"))?
-                    if is_valid is false
-                        target.addClass error_classes
-                    else
-                        target.removeClass error_classes
-                else
-                    if is_valid is false
-                        target.addClass @dependency_error_classes
-                    else
-                        target.removeClass @dependency_error_classes
-            return targets
-        return []
 
     # create list of sets where each set is 1 unit for counting progress
     _group: (fields) ->
