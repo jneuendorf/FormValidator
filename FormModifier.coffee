@@ -41,7 +41,7 @@ class FormModifier
                     title: () ->
                         return $(@).data("_fv_tooltip")
                 }
-        element.data("_fv_tooltip", message)
+        element.data("_fv_tooltip", message).tooltip("hide")
         return @
 
     _set_message_popover: (message, element, data) ->
@@ -53,9 +53,14 @@ class FormModifier
                     placement: "top"
                     content: () ->
                         return $(@).data("_fv_popover")
-                    trigger: "click focus"
                 }
-        element.data("_fv_popover", message)
+                .focus () ->
+                    element.popover("show")
+                    return true
+                .blur () ->
+                    element.popover("hide")
+                    return true
+        element.data("_fv_popover", message).popover("hide")
         return @
 
     _process_error_message: (message, element, data) ->

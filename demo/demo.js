@@ -22,7 +22,8 @@ $(document).ready(function() {
         error_target_getter: function(e, t, i) {
             return e;
         },
-        error_output_mode: FormValidator.ERROR_OUTPUT_MODES.POPOVER
+        // error_output_mode: FormValidator.ERROR_OUTPUT_MODES.POPOVER
+        error_output_mode: FormValidator.ERROR_OUTPUT_MODES.TOOLTIP
     });
     // validation
     $(".btn.validate").click(function(evt) {

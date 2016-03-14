@@ -788,7 +788,7 @@
           }
         });
       }
-      element.data("_fv_tooltip", message);
+      element.data("_fv_tooltip", message).tooltip("hide");
       return this;
     };
 
@@ -799,12 +799,16 @@
           placement: "top",
           content: function() {
             return $(this).data("_fv_popover");
-          },
-          trigger: "click focus"
+          }
+        }).focus(function() {
+          element.popover("show");
+          return true;
+        }).blur(function() {
+          element.popover("hide");
+          return true;
         });
       }
-      element.data("_fv_popover", message);
-      return this;
+      element.data("_fv_popover", message).popover("hide");
       return this;
     };
 
