@@ -19,15 +19,10 @@ $(document).ready(function() {
 
 
     var form_validator = FormValidator.new(my_form, {
-        // field_getter: function(form) {
-        //     return $field;
-        // },
         error_target_getter: function(e, t, i) {
-            // if (e.filter("[type='checkbox'], [type='radio']").length > 0) {
-            //     return e.parent();
-            // }
             return e;
-        }
+        },
+        error_output_mode: FormValidator.ERROR_OUTPUT_MODES.POPOVER
     });
     // validation
     $(".btn.validate").click(function(evt) {

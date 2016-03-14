@@ -6,7 +6,8 @@ ERROR_MODES.DEFAULT = ERROR_MODES.NORMAL
 
 ERROR_OUTPUT_MODES =
     BELOW: "BELOW"
-    BOOTSTRAP_POPOVER_ON_FOCUS: "BOOTSTRAP_POPOVER_ON_FOCUS"
+    TOOLTIP: "TOOLTIP"
+    POPOVER: "POPOVER"
     NONE: "NONE"
 ERROR_OUTPUT_MODES.DEFAULT = ERROR_OUTPUT_MODES.NONE
 
@@ -42,6 +43,8 @@ REQUIRED_CACHE = [
 OPTIONAL_CACHE = [
     # field data
     "dependency_mode"
+    "error_classes"
+    "dependency_error_classes"
     "error_targets"
     "group"
     "output_preprocessed"
@@ -54,7 +57,7 @@ OPTIONAL_CACHE = [
     "valid_value"
     "value"
 ]
-# NOTE: those are not the values with which the cache is initialized! the following values are set when the field data is cached and an attribute is missing
+# NOTE:60 those are not the values with which the cache is initialized! the following values are set when the field data is cached and an attribute is missing
 DEFAULT_ATTR_VALUES =
     PREPROCESS: true
     POSTPROCESS: false

@@ -1,6 +1,8 @@
 class window.FormValidator
-    # TODO: add effects for dependencies
-    # TODO: create bootstrap theme that uses bootstrap validation states (+ maybe icons)
+    # TODO:10 add effects for dependencies
+    # TODO: create themes
+    # TODO:60 create bootstrap theme that uses bootstrap validation states (+ maybe icons)
+    # TODO: create separate file for all the code that happens after the validation and merge that into the formvalidator (maybe at compile time?!)
 
 
     ########################################################################################################################
@@ -13,7 +15,7 @@ class window.FormValidator
     @BUILD_MODES = BUILD_MODES
     @ERROR_MESSAGE_CONFIG = ERROR_MESSAGE_CONFIG
 
-    # NOTE: REQUIRED_CACHE is already available in the closure
+    # NOTE:0 REQUIRED_CACHE is already available in the closure
 
 
     ########################################################################################################################
@@ -37,15 +39,11 @@ class window.FormValidator
     @default_preprocessors =
         number: (str, elem, locale) ->
             if locale is "de"
-                return str.replace(/\./g, "").replace(/\,/g, ".")
-            if locale is "en"
-                return str.replace(/\,/g, "")
+                return str.replace(/\,/g, ".")
             return str
         integer: (str, elem, locale) ->
             if locale is "de"
-                return str.replace(/\./g, "").replace(/\,/g, ".")
-            if locale is "en"
-                return str.replace(/\,/g, "")
+                return str.replace(/\,/g, ".")
             return str
 
 
@@ -53,18 +51,18 @@ class window.FormValidator
     ########################################################################################################################
     # CLASS METHODS
 
-    # NOTE: for @new see CONSTRUCTORS section
+    # NOTE:30 for @new see CONSTRUCTORS section
 
-    # define an error_message_type for each error mode (of ERROR_MODES) (for each validator that supports different error modes)
-    @get_error_message_type: (special_type, error_mode) ->
-        if error_mode is @ERROR_MODES.SIMPLE
-            base_type = special_type.split("_")[0]
-            switch base_type
-                when "integer"
-                    return "integer"
-                when "number"
-                    return "number"
-        return special_type
+    # # define an error_message_type for each error mode (of ERROR_MODES) (for each validator that supports different error modes)
+    # @get_error_message_type: (special_type, error_mode) ->
+    #     if error_mode is @ERROR_MODES.SIMPLE
+    #         base_type = special_type.split("_")[0]
+    #         switch base_type
+    #             when "integer"
+    #                 return "integer"
+    #             when "number"
+    #                 return "number"
+    #     return special_type
 
     @_build_error_message: (phase, errors, build_mode, locale) ->
         return @error_message_builders[phase](errors, phase, build_mode, locale)
@@ -121,7 +119,7 @@ class window.FormValidator
         $elem = $(@)
 
         # prevent click in textfields (which also triggers the change event on previously focussed inputs) to trigger validation
-        # TODO: negate selector to be like not(input[type=hidden], ...)
+        # TODO:160 negate selector to be like not(input[type=hidden], ...)
         if (evt.type is "click" or evt.type is "change") and $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length is $elem.length
             return true
 
@@ -154,6 +152,7 @@ class window.FormValidator
 
         @form = form
         @fields = null
+        @form_modifier = new FormModifier(@, options)
 
         # default css error classes. can be overridden by data-fv-error-classes on any error target
         @error_classes          = options.error_classes or @form.attr("data-fv-error-classes") or ""
@@ -164,9 +163,10 @@ class window.FormValidator
         # @error_messages         = options.error_messages
         @build_mode             = options.build_mode or BUILD_MODES.DEFAULT
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
+        # TODO: use this!
         @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
-        # TODO: choose how to output the generated errors (i.e. print below element (maybe even getbootstrap.com/javascript/#popovers))
-        @error_output_mode      = if CLASS.ERROR_OUTPUT_MODES[options.error_output_mode]? then options.error_output_mode else CLASS.ERROR_OUTPUT_MODES.DEFAULT
+        # TODO:40 choose how to output the generated errors (i.e. print below element (maybe even getbootstrap.com/javascript/#popovers))
+        # @error_output_mode      = if CLASS.ERROR_OUTPUT_MODES[options.error_output_mode]? then options.error_output_mode else CLASS.ERROR_OUTPUT_MODES.DEFAULT
         @locale                 = options.locale or "en"
 
         @error_target_getter    = options.error_target_getter or null
@@ -298,7 +298,7 @@ class window.FormValidator
             element.closest("[data-fv-error-targets]").attr("data-fv-error-targets") or
             DEFAULT_ATTR_VALUES.ERROR_TARGETS
 
-    # TODO: use only 1 function that gets classes as param
+    # TODO:240 use only 1 function that gets classes as param
     # apply error classes and styles to element if invalid
     _apply_error_classes: (element, error_targets, is_valid) ->
         if error_targets?
@@ -320,6 +320,7 @@ class window.FormValidator
             return targets
         return []
 
+    # TODO:250 use only 1 function that gets classes as param
     _apply_dependency_error_classes: (element, error_targets, is_valid) ->
         if error_targets?
             targets = @_find_targets(error_targets, element)
@@ -378,6 +379,27 @@ class window.FormValidator
                     message: message
                 }
         return result
+
+    # _post_validate: (grouped_errors) ->
+    #     # TODO:120 implement different error output modes
+    #     CLASS = @constructor
+    #     fields = @fields.all
+    #
+    #     # ERROR OUTPUT
+    #     if @error_output_mode is CLASS.ERROR_OUTPUT_MODES.POPOVER
+    #
+    #         for grouped_error in grouped_errors
+    #             elem = grouped_error.element
+    #             idx = fields.index(elem)
+    #             if idx >= 0
+    #
+    #
+    #         @fields.each (idx, elem) ->
+    #             elem = $ elem
+    #
+    #
+    #             return true
+
 
     ########################################################################################################################
     # VALIDATION HELPERS
@@ -598,7 +620,7 @@ class window.FormValidator
 
             # skip empty optional elements
             if options.all is false and not is_required and (value.length is 0 or type is "radio" or type is "checkbox")
-                # NOTE: if an optional value was invalid and was emptied the error target's error classes should be removed
+                # NOTE:40 if an optional value was invalid and was emptied the error target's error classes should be removed
                 if not data.error_targets?
                     data = @_cache_attribute elem, data, "error_targets", () ->
                         return @_get_error_targets(elem, type, i)
@@ -637,7 +659,7 @@ class window.FormValidator
             phase = VALIDATION_PHASES.VALUE
             if value_has_changed
                 if prev_phases_valid or not options.stop_on_error
-                    # TODO is this var still needed??
+                    # TODO:130 is this var still needed??
                     current_error = null
                     validation_res = @_validate_element(elem, data, value_info)
                     # element is invalid
@@ -693,7 +715,6 @@ class window.FormValidator
                         first_invalid_element ?= elem
             errors = errors.concat data.errors[phase]
 
-
             is_valid = data.valid_dependencies and data.valid_value and data.valid_constraints
 
             # no validation phase was invalid => element is valid
@@ -733,23 +754,25 @@ class window.FormValidator
                     @_cache_attribute elem, data, "error_targets", () ->
                         return @_get_error_targets(elem, type, i)
                     @_set_element_data(elem, data)
-                @_apply_error_classes(
-                    elem
-                    data.error_targets
-                    is_valid
-                )
-
-                if current_error?
-                    current_error.error_targets = data.error_targets
-
-                @_apply_dependency_error_classes(elem, dependency_elements, is_valid)
+                # @_apply_error_classes(
+                #     elem
+                #     data.error_targets
+                #     is_valid
+                # )
+                #
+                # if current_error?
+                #     current_error.error_targets = data.error_targets
+                #
+                # @_apply_dependency_error_classes(elem, dependency_elements, is_valid)
 
             prev_name = name
 
         if options.focus_invalid is true
             first_invalid_element?.focus()
 
-        return @_group_errors(errors, options)
+        grouped_errors =  @_group_errors(errors, options)
+        @form_modifier.modify(grouped_errors, options)
+        return grouped_errors
 
     get_progress: (options = {as_percentage: false, recache: false}) ->
         if not @fields? or options.recache is true
@@ -777,7 +800,7 @@ class window.FormValidator
                     break
 
             found_error = false
-            # NOTE: elem is either a jQuery object or a DOM element (but $.fn.is() can handle both!)
+            # NOTE:20 elem is either a jQuery object or a DOM element (but $.fn.is() can handle both!)
             for elem in group
                 elem = $(elem)
 

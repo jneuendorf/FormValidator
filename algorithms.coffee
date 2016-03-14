@@ -14,7 +14,7 @@ get_permutations = (arr) ->
 
 
 # from https://github.com/blazs/subsets
-# TODO: add credit
+# TODO:0 add credit
 get_subsets = (set, k) ->
     subsets = []
     n = set.length

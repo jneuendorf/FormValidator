@@ -1,4 +1,4 @@
-# NOTE: the name gets converted to kebap case => max_length -> data-fv-max-length
+# NOTE:50 the name gets converted to kebap case => max_length -> data-fv-max-length
 constraint_validators =
     blacklist: (value, blacklist) ->
         for char in value when blacklist.indexOf(char) >= 0
@@ -51,12 +51,12 @@ constraint_validator_options =
 # define which constraint validators are logically connected (and thus can potentially be combined to a new error message i.e. max + min => ...is not between... (instead of ...is not greater than or not less than...))
 # the groups must be disjoint (-> equivalence classes)
 constraint_validator_groups = [
-    ["max", "min"]
-    ["max_length", "min_length"]
+    # ["max", "min"]
+    # ["max_length", "min_length"]
 ]
 
 # define when to include a constraint validator option in the locale key (and when not (if not matching the below value))
-# TODO: does this make sense?
+# TODO:70 does this make sense?
 # value can also be: function(String locale) -> Mixed value
 # i.e. for include_max a function could be defined if different locales formulate the according error message differently:
 # - EN could be like 'the value is not less than {{max}}' (max is not included in valid range => locale key = "constraint_max") and

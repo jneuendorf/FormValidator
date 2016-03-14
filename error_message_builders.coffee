@@ -1,4 +1,4 @@
-# TODO: structure this file for better maintainance
+# TODO:190 structure this file for better maintainance
 # override build_mode_helpers here if needed (same signature as a build_mode_helper). i.e. enumeration could be different in other languages
 locale_build_mode_helpers =
     de: {}
@@ -35,7 +35,7 @@ build_mode_helpers[BUILD_MODES.SENTENCE] = (parts, locale, build_mode) ->
     return ("#{part.message[0].toUpperCase()}#{part.message.slice(1)}" for part in parts).join(". ").replace(/\s+/g, " ")
 
 build_mode_helpers[BUILD_MODES.LIST] = (parts, locale, build_mode) ->
-    # TODO: extract .message from part like above
+    # TODO:90 extract .message from part like above
     return "<ul><li>#{parts.join("</li><li>")}</li></ul>"
 
 
@@ -60,7 +60,12 @@ default_message_builder = (key, phase, build_mode, locale, parts, prefix, suffix
     return message
 
 # use this function to parse mustache-like strings or evaluate functions (used in the error message builders)
-part_evaluator = (part, values) ->
+part_evaluator = (part, values...) ->
+    if values.length is 1
+        values = values[0]
+    else
+        values = $.extend(values...)
+
     # string => mustache-like
     if typeof part is "string"
         for key, val of values when part.indexOf("{{#{key}}}") >= 0
@@ -91,7 +96,7 @@ error_message_builders[VALIDATION_PHASES.DEPENDENCIES] = (errors, phase, build_m
 
 
 error_message_builders[VALIDATION_PHASES.VALUE] = (errors, phase, build_mode, locale) ->
-    # NOTE: each error in errors (exactly 1 because of the phase) contains an error_message_type. that type is prefered over the normal type
+    # NOTE:10 each error in errors (exactly 1 because of the phase) contains an error_message_type. that type is prefered over the normal type
     error = errors[0]
     key = "#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_#{error.error_message_type or error.type}"
     # here only 1 error is in the 'errors' list => therefore we just use the simplest build mode
@@ -109,7 +114,7 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
     ungrouped_errors = []
     for error in errors
         error_in_group = false
-        # TODO: make constraint_validator_groups accessible from class and use this ref here
+        # TODO:140 make constraint_validator_groups accessible from class and use this ref here
         for group, i in constraint_validator_groups
             if error.type in group
                 error_in_group = true
@@ -142,7 +147,7 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
         key = get_combined_key(keys, locale, key_prefix)
         if key?
             parts.push {
-                message: part_evaluator(locales[locale][key], error)
+                message: part_evaluator(locales[locale][key], errors...)
                 prefix: part_evaluator(locales[locale]["#{key}_prefix"], error) or default_prefix
                 suffix: part_evaluator(locales[locale]["#{key}_suffix"], error) or default_suffix
             }
@@ -177,7 +182,7 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
 # intially use permutation to find the actually existing locale key for the given set
 # upon a match cache the key. whenever the match becomes invalid (-> returns null) return to the initial state (so permutation is used)
 
-# TODO: test caching
+# TODO:200 test caching
 permutation_cache = {}
 
 get_combined_key = (keys, locale, key_prefix = "", key_suffix = "") ->

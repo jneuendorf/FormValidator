@@ -11,8 +11,8 @@
 #       -> error_message_type: String (required)
 #       -> properties needed for the according error message (-> parameters)
 #       -> properties needed for other validators (as they will be able to access other validators' results)
-# TODO: remove option parameters (now done by constraint validators)
-# TODO: maybe use https://github.com/dropbox/zxcvbn and https://css-tricks.com/password-strength-meter/ for password validation
+# TODO:170 remove option parameters (now done by constraint validators)
+# TODO:150 maybe use https://github.com/dropbox/zxcvbn and https://css-tricks.com/password-strength-meter/ for password validation
 validators =
     # "private" validator (used in other validators)
     _number: (str, elem, min, max, include_min = true, include_max = true) ->
@@ -34,7 +34,7 @@ validators =
                 str = str.slice(0, -1)
 
         n = parseFloat(str)
-        # TODO: this doesnt work for inputs like 10e4 or 1e+5
+        # TODO:210 this doesnt work for inputs like 10e4 or 1e+5
         if isNaN(n) or not isFinite(n) or str isnt "#{n}"
             return {
                 error_message_type: "number"
@@ -59,7 +59,7 @@ validators =
             return {
                 error_message_type: "email_many_at"
             }
-        # TODO: check for trailing dot?
+        # TODO:30 check for trailing dot?
         if parts.length is 2 and parts[0] isnt "" and parts[1] isnt ""
             # check if there is a dot in domain parts
             if str.indexOf(".", str.indexOf("@")) < 0 or str[str.length - 1] is "."

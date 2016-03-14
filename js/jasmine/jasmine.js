@@ -573,7 +573,7 @@ getJasmineRequireObj().Env = function(j$) {
       return suite.getFullName() + ' ' + spec.description;
     };
 
-    // TODO: we may just be able to pass in the fn instead of wrapping here
+    // TODO:260 we may just be able to pass in the fn instead of wrapping here
     var buildExpectationResult = j$.buildExpectationResult,
         exceptionFormatter = new j$.ExceptionFormatter(),
         expectationResultFactory = function(attrs) {
@@ -583,7 +583,7 @@ getJasmineRequireObj().Env = function(j$) {
           return buildExpectationResult(attrs);
         };
 
-    // TODO: fix this naming, and here's where the value comes in
+    // TODO:100 fix this naming, and here's where the value comes in
     this.catchExceptions = function(value) {
       catchExceptions = !!value;
       return catchExceptions;
@@ -1402,7 +1402,7 @@ getJasmineRequireObj().Expectation = function() {
         expected = expected[0];
       }
 
-      // TODO: how many of these params are needed?
+      // TODO:110 how many of these params are needed?
       this.addExpectationResult(
         result.pass,
         {
@@ -1410,7 +1410,7 @@ getJasmineRequireObj().Expectation = function() {
           passed: result.pass,
           message: message,
           actual: this.actual,
-          expected: expected // TODO: this may need to be arrayified/sliced
+          expected: expected // TODO:220 this may need to be arrayified/sliced
         }
       );
     };
@@ -1429,8 +1429,8 @@ getJasmineRequireObj().Expectation = function() {
 
     var expect = new Expectation(options);
 
-    // TODO: this would be nice as its own Object - NegativeExpectation
-    // TODO: copy instead of mutate options
+    // TODO:230 this would be nice as its own Object - NegativeExpectation
+    // TODO:50 copy instead of mutate options
     options.isNot = true;
     expect.not = new Expectation(options);
 
@@ -1440,7 +1440,7 @@ getJasmineRequireObj().Expectation = function() {
   return Expectation;
 };
 
-//TODO: expectation result may make more sense as a presentation of an expectation.
+//TODO:80 expectation result may make more sense as a presentation of an expectation.
 getJasmineRequireObj().buildExpectationResult = function() {
   function buildExpectationResult(options) {
     var messageFormatter = options.messageFormatter || function() {},
@@ -1830,7 +1830,7 @@ getJasmineRequireObj().QueueRunner = function(j$) {
     function handleException(e, queueableFn) {
       onException(e, queueableFn);
       if (!self.catchException(e)) {
-        //TODO: set a var when we catch an exception and
+        //TODO:180 set a var when we catch an exception and
         //use a finally block to close the loop in a nice way..
         throw e;
       }
@@ -2541,7 +2541,7 @@ getJasmineRequireObj().errors = function() {
   };
 };
 getJasmineRequireObj().matchersUtil = function(j$) {
-  // TODO: what to do about jasmine.pp not being inject? move to JSON.stringify? gut PrettyPrinter?
+  // TODO:270 what to do about jasmine.pp not being inject? move to JSON.stringify? gut PrettyPrinter?
 
   return {
     equals: function(a, b, customTesters) {
