@@ -94,11 +94,6 @@ validators =
             return true
         return res
     phone: (str, elem) ->
-        if str.length < 3
-            return {
-                error_message_type: "phone_length"
-                length: 3
-            }
         str = str.replace(/[\s+\+\-\/\(\)]/g, "")
         # remove leading zeros because parseInt will drop them
         while str[0] is "0"

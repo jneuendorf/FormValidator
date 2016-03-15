@@ -57,7 +57,7 @@ OPTIONAL_CACHE = [
     "valid_value"
     "value"
 ]
-# NOTE:60 those are not the values with which the cache is initialized! the following values are set when the field data is cached and an attribute is missing
+# NOTE those are not the values with which the cache is initialized! the following values are set when the field data is cached and an attribute is missing
 DEFAULT_ATTR_VALUES =
     PREPROCESS: true
     POSTPROCESS: false
@@ -65,3 +65,6 @@ DEFAULT_ATTR_VALUES =
     OUTPUT_PREPROCESSED: true
     DEPENDENCY_MODE: "all"
     ERROR_TARGETS: ""
+    # CONSTRAINTS
+    INCLUDE_MAX: "true"
+    INCLUDE_MIN: "true"

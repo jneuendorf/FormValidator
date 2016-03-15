@@ -19,9 +19,9 @@ constraint_validators =
     regex: (value, regex, options) ->
         return (new RegExp(regex, options.flags)).test(value)
     whitelist: (value, whitelist) ->
-        for char in value when whitelist.indexOf(char) >= 0
-            return true
-        return false
+        for char in whitelist when value.indexOf(char) < 0
+            return false
+        return true
 
 
 # define which constraint-validator options are compatible with a constraint validator

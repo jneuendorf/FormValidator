@@ -14,7 +14,7 @@ class window.FormValidator
     @BUILD_MODES = BUILD_MODES
     @ERROR_MESSAGE_CONFIG = ERROR_MESSAGE_CONFIG
 
-    # NOTE:0 REQUIRED_CACHE is already available in the closure
+    # NOTE REQUIRED_CACHE is already available in the closure
 
 
     ########################################################################################################################
@@ -437,7 +437,8 @@ class window.FormValidator
                     if (constraint_validator_options = CLASS.constraint_validator_options[constraint_name])?
                         options = {}
                         for option in constraint_validator_options
-                            options[option] = element.attr("data-fv-#{option.replace(/\_/g, "-")}")
+                            # TODO: use the cache!!
+                            options[option] = element.attr("data-fv-#{option.replace(/\_/g, "-")}") or DEFAULT_ATTR_VALUES[option.toUpperCase()]
                     else
                         options = null
                     constraints.push {

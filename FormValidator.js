@@ -173,7 +173,9 @@
     REQUIRED: true,
     OUTPUT_PREPROCESSED: true,
     DEPENDENCY_MODE: "all",
-    ERROR_TARGETS: ""
+    ERROR_TARGETS: "",
+    INCLUDE_MAX: "true",
+    INCLUDE_MIN: "true"
   };
 
   validators = {
@@ -274,12 +276,6 @@
       return res;
     },
     phone: function(str, elem) {
-      if (str.length < 3) {
-        return {
-          error_message_type: "phone_length",
-          length: 3
-        };
-      }
       str = str.replace(/[\s+\+\-\/\(\)]/g, "");
       while (str[0] === "0") {
         str = str.slice(1);
@@ -339,13 +335,13 @@
     },
     whitelist: function(value, whitelist) {
       var char, l, len;
-      for (l = 0, len = value.length; l < len; l++) {
-        char = value[l];
-        if (whitelist.indexOf(char) >= 0) {
-          return true;
+      for (l = 0, len = whitelist.length; l < len; l++) {
+        char = whitelist[l];
+        if (value.indexOf(char) < 0) {
+          return false;
         }
       }
-      return false;
+      return true;
     }
   };
 
@@ -396,20 +392,11 @@
     value_integer: "'{{value}}' ist keine Zahl",
     value_integer_float: "'{{value}}' ist keine ganze Zahl",
     value_number: "'{{value}}' ist keine Zahl",
-    value_phone_length: "'{{value}}' ist weniger als {{length}} Zeichen lang",
     value_phone: "'{{value}}' ist keine gültige Telefonnummer",
     value_radio: "Die {{index_of_type}}. Auswahlbox wurde nicht ausgewählt",
     value_checkbox: "Die {{index_of_type}}. Checkbox wurde nicht ausgewählt",
     value_select: "Das {{index_of_type}}. Auswahlmenü wurde nicht ausgewählt",
-    value_text: function(params) {
-      if (params.name != null) {
-        return "Bitte füllen Sie das Feld '" + params.name + "' aus";
-      }
-      if (params.previous_name) {
-        return "Bitte füllen Sie das Feld nach '" + params.previous_name + "' aus";
-      }
-      return "Bitte füllen Sie das " + params.index_of_type + ". Textfeld aus";
-    },
+    value_text: "Bitte füllen Sie das Textfeld aus",
     constraint_enumerate_prefix: "'{{value}}'",
     constraint_list_prefix: "'{{value}}'",
     constraint_blacklist_prefix: "darf",
@@ -419,26 +406,26 @@
     constraint_whitelist: "jedes der Zeichen '{{whitelist}}'",
     constraint_whitelist_suffix: "enthalten",
     constraint_max_prefix: "darf",
-    constraint_max: "nicht größer als {{max}}",
+    constraint_max: "nicht größer als oder gleich {{max}}",
     constraint_max_suffix: "sein",
     constraint_max_include_max_prefix: "darf",
-    constraint_max_include_max: "nicht größer als oder gleich {{max}}",
+    constraint_max_include_max: "nicht größer als {{max}}",
     constraint_max_include_max_suffix: "sein",
     constraint_max_length_prefix: "darf",
     constraint_max_length: "nicht länger als {{max_length}} Zeichen",
     constraint_max_length_suffix: "sein",
     constraint_min_prefix: "darf",
-    constraint_min: "nicht kleiner als {{min}}",
+    constraint_min: "nicht kleiner als oder gleich {{min}}",
     constraint_min_suffix: "sein",
     constraint_min_include_min_prefix: "darf",
-    constraint_min_include_min: "nicht kleiner als oder gleich {{min}}",
+    constraint_min_include_min: "nicht kleiner als {{min}}",
     constraint_min_include_min_suffix: "sein",
     constraint_min_length_prefix: "darf",
     constraint_min_length: "nicht kürzer als {{min_length}} Zeichen",
     constraint_min_length_suffix: "sein",
-    constraint_regex_prefix: "darf",
-    constraint_regex: "nicht dem regulären Ausdruck '{{regex}}'",
-    constraint_regex_suffix: "widersprechen"
+    constraint_regex_prefix: "muss",
+    constraint_regex: "dem regulären Ausdruck '{{regex}}'",
+    constraint_regex_suffix: "entsprechen"
   });
 
   $.extend(locales.en, {
@@ -446,26 +433,17 @@
     dependency_prefix: "The fields",
     dependency_suffix: "are still invalid",
     value_email: "'{{value}}' is no valid e-mail address",
-    value_email_at: "Eine E-Mail-Adresse muss ein @-Zeichen enthalten",
-    value_email_many_at: "Eine E-Mail-Adresse darf höchstens ein @-Zeichen enthalten",
+    value_email_at: "An e-mail address must contain the @ symbol",
+    value_email_many_at: "An e-mail address must contain only one @ symbol",
     value_email_dot: "'{{value}}' hat keine korrekte Endung (z.B. '.de')",
     value_integer: "'{{value}}' is no valid integer",
     value_integer_float: "'{{value}}' ist keine ganze Zahl",
     value_number: "'{{value}}' is no valid number",
-    value_phone_length: "'{{value}}' ist weniger als {{length}} Zeichen lang",
     value_phone: "'{{value}}' is no valid phone number",
     value_radio: "Die {{index_of_type}}. Auswahlbox wurde nicht ausgewählt",
     value_checkbox: "Die {{index_of_type}}. Checkbox wurde nicht ausgewählt",
     value_select: "Das {{index_of_type}}. Auswahlmenü wurde nicht ausgewählt",
-    value_text: function(params) {
-      if (params.name != null) {
-        return "Please fill in the field '" + params.name + "'";
-      }
-      if (params.previous_name) {
-        return "Please fill in the field after '" + params.previous_name + "'";
-      }
-      return "Please fill in the " + params.index_of_type + ". text field";
-    },
+    value_text: "Please fill in this text field",
     constraint_enumerate_prefix: "'{{value}}'",
     constraint_list_prefix: "'{{value}}'",
     constraint_blacklist: "enthält ein Zeichen in '{{blacklist}}'",
@@ -1307,7 +1285,7 @@
               options = {};
               for (l = 0, len = constraint_validator_options.length; l < len; l++) {
                 option = constraint_validator_options[l];
-                options[option] = element.attr("data-fv-" + (option.replace(/\_/g, "-")));
+                options[option] = element.attr("data-fv-" + (option.replace(/\_/g, "-"))) || DEFAULT_ATTR_VALUES[option.toUpperCase()];
               }
             } else {
               options = null;

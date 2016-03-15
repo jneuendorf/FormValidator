@@ -96,7 +96,7 @@ error_message_builders[VALIDATION_PHASES.DEPENDENCIES] = (errors, phase, build_m
 
 
 error_message_builders[VALIDATION_PHASES.VALUE] = (errors, phase, build_mode, locale) ->
-    # NOTE:10 each error in errors (exactly 1 because of the phase) contains an error_message_type. that type is prefered over the normal type
+    # NOTE each error in errors (exactly 1 because of the phase) contains an error_message_type. that type is prefered over the normal type
     error = errors[0]
     key = "#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_#{error.error_message_type or error.type}"
     # here only 1 error is in the 'errors' list => therefore we just use the simplest build mode
@@ -182,7 +182,7 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
 # intially use permutation to find the actually existing locale key for the given set
 # upon a match cache the key. whenever the match becomes invalid (-> returns null) return to the initial state (so permutation is used)
 
-# TODO:200 test caching
+# REVIEW test caching
 permutation_cache = {}
 
 get_combined_key = (keys, locale, key_prefix = "", key_suffix = "") ->

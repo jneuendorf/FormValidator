@@ -21,22 +21,17 @@ $(document).ready(function() {
     var form_validator = FormValidator.new(my_form, {
         error_target_getter: function(e, t, i) {
             return e;
-        },
-        // error_output_mode: FormValidator.ERROR_OUTPUT_MODES.POPOVER
-        // error_output_mode: FormValidator.ERROR_OUTPUT_MODES.TOOLTIP
-        error_output_mode: FormValidator.ERROR_OUTPUT_MODES.BELOW
+        }
     });
+    $(".error_output_mode").change(function(evt) {
+        form_validator.form_modifier.error_output_mode = $(this).find(":selected").val();
+        $field.tooltip("destroy").popover("destroy");
+        return true;
+    }).val("BELOW").change();
     // validation
     $(".btn.validate").click(function(evt) {
         form_validator.locale = $(".locale option:selected").val();
-        form_validator.form_modifier.error_output_mode = $(".error_output_mode option:selected").val();
         form_validator.validate({recache: true});
-        // $errors.empty();
-        // var errors = form_validator.validate({recache: true});
-        // console.log(errors);
-        // for (var i = 0; i < errors.length; i++) {
-        //     $errors.append(errors[i].message);
-        // }
         return false;
     });
 
