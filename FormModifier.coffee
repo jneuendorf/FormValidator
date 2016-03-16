@@ -25,19 +25,25 @@ class FormModifier
         return []
 
     _set_message_below: (message, element, data) ->
-        if (target = element.siblings(".fv-error-message")).length is 0
-            target = $ """<div class="fv-error-message" />"""
-            element.after target
+        if not (target = element.data("_fv_error_container"))?
+            # put errors for radio buttons BEHIND the LAST instead of after the 1st
+            if data.type is "radio"
+                element = $("input[name='#{element.attr("name")}']").last()
+
+            if (target = element.next(".fv-error-message")).length is 0
+                target = $ """<div class="fv-error-message" />"""
+                element.after target
+            element.data("_fv_error_container", target)
         target.html message
         return @
 
     _set_message_tooltip: (message, element, data) ->
         # 1st initialization
-        if not element.data("_fv_tooltip")
+        if not element.data("_fv_tooltip")?
             element
                 .tooltip {
                     html: true
-                    placement: "top"
+                    placement: element.attr("data-placement") or "top"
                     title: () ->
                         return $(@).data("_fv_tooltip")
                 }
@@ -45,12 +51,17 @@ class FormModifier
         return @
 
     _set_message_popover: (message, element, data) ->
+        # fallback for some elements where an error message on click does not make sense
+        if data.type is "checkbox" or data.type is "radio" or data.type is "select"
+            element.attr("title", message)
+            return @
+        # else:
         # 1st initialization
-        if not element.data("_fv_popover")
+        if not element.data("_fv_popover")?
             element
                 .popover {
                     html: true
-                    placement: "top"
+                    placement: element.attr("data-placement") or "right"
                     content: () ->
                         return $(@).data("_fv_popover")
                     trigger: "manual"
@@ -91,8 +102,8 @@ class FormModifier
             data = form_validator._get_element_data(elem)
             grouped_error = null
 
-            for grouped_error in grouped_errors when grouped_error.element is elem
-                grouped_error = grouped_error
+            for err in grouped_errors when err.element.is(elem)
+                grouped_error = err
                 break
 
             # no grouped_error => elem is valid

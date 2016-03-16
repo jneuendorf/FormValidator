@@ -9,7 +9,6 @@ $(document).ready(function() {
         }
     }
     var $field = $("#field");
-    var $errors = $("#errors");
     $("select.validator").append(validators).change(function() {
         $field
             .attr("data-fv-validate", $(this).val())
@@ -31,7 +30,7 @@ $(document).ready(function() {
     // validation
     $(".btn.validate").click(function(evt) {
         form_validator.locale = $(".locale option:selected").val();
-        form_validator.validate({recache: true});
+        console.log(form_validator.validate({recache: true}));
         return false;
     });
 
@@ -58,31 +57,4 @@ $(document).ready(function() {
         }
         return true;
     });
-
-    // // checkbox toggle
-    // my_form.on("change", ".mod_checkbox", function(evt) {
-    //     var $elem = $(this);
-    //     var $mod_input = $elem.closest(".row").find("input[type='text']");
-    //     var $input = $("#" + $elem.attr("data-target-id"));
-    //     var constraint = $mod_input.attr("data-constraint");
-    //     var attribute = "data-fv-" + $mod_input.attr("data-constraint").replace(/\_/g, "-");
-    //     var options_row = $mod_input.closest(".row").siblings(".row.option[data-constraint='" + constraint + "']");
-    //
-    //     if ($elem.prop("checked") === true) {
-    //         $mod_input.prop("disabled", false).focus().change();
-    //         options_row.find("input[type='checkbox']").prop("disabled", false);
-    //     }
-    //     else {
-    //         $mod_input.prop("disabled", true);
-    //         options_row.find("input").prop("disabled", true).filter("[type=checkbox]").prop("checked", false);
-    //         $input.attr(attribute, null);
-    //     }
-    // });
-    // // constraint input
-    // my_form.on("change", ".mod_input", function(evt) {
-    //     var $elem = $(this);
-    //     var attribute = "data-fv-" + $elem.attr("data-constraint").replace(/\_/g, "-");
-    //     var val = $elem.val() || null;
-    //     $("#" + $elem.attr("data-target-id")).attr(attribute, val);
-    // });
 });
