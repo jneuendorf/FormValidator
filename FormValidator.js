@@ -382,22 +382,22 @@
   };
 
   $.extend(locales.de, {
-    dependency_general: "Dieses Feld kann erst dann korrekt ausgefüllt werden, wenn seine Abhängigkeiten korrekt ausgefüllt wurden",
+    dependency_general: "Die Abhängigkeiten dieses Felds müssen zuerst korrekt ausgefüllt wurden",
     dependency_prefix: "Die Felder",
-    dependency_suffix: "sind noch ungültig",
+    dependency_suffix: "müssen noch korrekt ausgefüllt werden",
     dependency_singular_prefix: "Das Feld",
-    dependency_singular_suffix: "ist noch ungültig",
-    value_email: "'{{value}}' ist keine gültige E-Mail-Adresse",
-    value_email_at: "Eine E-Mail-Adresse muss ein @-Zeichen enthalten",
-    value_email_many_at: "Eine E-Mail-Adresse darf höchstens ein @-Zeichen enthalten",
+    dependency_singular_suffix: "muss noch korrekt ausgefüllt werden",
+    value_email: "'{{value}}' muss die Form 'meine.adresse@anbieter.endung' haben",
+    value_email_at: "'{{value}}' muss ein @-Zeichen enthalten",
+    value_email_many_at: "'{{value}}' darf höchstens ein @-Zeichen enthalten",
     value_email_dot: "'{{value}}' muss eine korrekte Endung haben (z.B. '.de')",
     value_integer: "'{{value}}' muss eine Zahl sein",
-    value_integer_float: "'{{value}}' muss eine ganze Zahl sein",
+    value_integer_float: "'{{value}}' darf keine Kommazahl sein",
     value_number: "'{{value}}' muss eine Zahl sein",
     value_phone: "'{{value}}' darf nur aus Zahlen, Leerzeichen und den Zeichen '+-/()' bestehen",
     value_radio: "Eins der Optionsfelder muss ausgewählt werden",
     value_checkbox: "Das Kontrollkästchen muss ausgewählt werden",
-    value_select: "Es muss eine andere Option der Auswahlbox ausgewählt werden",
+    value_select: "Es muss eine andere Option ausgewählt werden",
     value_text: "Das Textfeld muss ausgefüllt werden",
     constraint_enumerate_prefix: "'{{value}}'",
     constraint_list_prefix: "'{{value}}'",
@@ -431,31 +431,52 @@
   });
 
   $.extend(locales.en, {
-    dependency_general: "This field can only be filled in after filling in its required fields",
+    dependency_general: "This field's dependencies must be correctly filled in first",
     dependency_prefix: "The fields",
-    dependency_suffix: "are still invalid",
-    value_email: "'{{value}}' is no valid e-mail address",
-    value_email_at: "An e-mail address must contain the @ symbol",
-    value_email_many_at: "An e-mail address must contain only one @ symbol",
-    value_email_dot: "'{{value}}' hat keine korrekte Endung (z.B. '.de')",
-    value_integer: "'{{value}}' is no valid integer",
-    value_integer_float: "'{{value}}' ist keine ganze Zahl",
-    value_number: "'{{value}}' is no valid number",
-    value_phone: "'{{value}}' is no valid phone number",
-    value_radio: "Die {{index_of_type}}. Auswahlbox wurde nicht ausgewählt",
-    value_checkbox: "Die {{index_of_type}}. Checkbox wurde nicht ausgewählt",
-    value_select: "Das {{index_of_type}}. Auswahlmenü wurde nicht ausgewählt",
+    dependency_suffix: "must be filled in correctly",
+    dependency_singular_prefix: "The field",
+    dependency_singular_suffix: "must be filled in correctly",
+    value_email: "'{{value}}' address must be of the form 'my.address@provider.ending'",
+    value_email_at: "'{{value}}' address must contain an @ symbol",
+    value_email_many_at: "'{{value}}' address can only have one @ symbol",
+    value_email_dot: "'{{value}}' must have a correct ending (i.e. '.com')",
+    value_integer: "'{{value}}' must be an integer",
+    value_integer_float: "'{{value}}' must not be decimal",
+    value_number: "'{{value}}' must be a number",
+    value_phone: "'{{value}}' can only contain numbers, spaces, and the characters '+-/()'",
+    value_radio: "One of the radio buttons must be selected",
+    value_checkbox: "The checkbox must be selected",
+    value_select: "Another option must be selected",
     value_text: "Please fill in this text field",
     constraint_enumerate_prefix: "'{{value}}'",
     constraint_list_prefix: "'{{value}}'",
-    constraint_blacklist: "enthält ein Zeichen in '{{blacklist}}'",
-    constraint_max: "ist nicht kleiner als {{max}}",
-    constraint_max_include_max: "ist nicht kleiner als oder gleich {{max}}",
-    constraint_max_length: "ist länger als {{max_length}} Zeichen",
-    constraint_min: "ist nicht größer als {{min}}",
-    constraint_min_include_min: "ist nicht größer als oder gleich {{min}}",
-    constraint_min_length: "ist kürzer als {{min_length}} Zeichen",
-    constraint_regex: "entspricht nicht dem regulären Ausdruck '{{regex}}'"
+    constraint_blacklist_prefix: "must not",
+    constraint_blacklist: "contain any of the characters '{{blacklist}}'",
+    constraint_blacklist_suffix: "",
+    constraint_whitelist_prefix: "must",
+    constraint_whitelist: "contain each of the characters '{{whitelist}}'",
+    constraint_whitelist_suffix: "",
+    constraint_max_prefix: "must not",
+    constraint_max: "be greater than or equal to {{max}}",
+    constraint_max_suffix: "",
+    constraint_max_include_max_prefix: "must not",
+    constraint_max_include_max: "be greater than {{max}}",
+    constraint_max_include_max_suffix: "",
+    constraint_max_length_prefix: "must not",
+    constraint_max_length: "be longer than {{max_length}} characters",
+    constraint_max_length_suffix: "",
+    constraint_min_prefix: "must not",
+    constraint_min: "be less than or equal to {{min}}",
+    constraint_min_suffix: "",
+    constraint_min_include_min_prefix: "must not",
+    constraint_min_include_min: "be less than {{min}}",
+    constraint_min_include_min_suffix: "",
+    constraint_min_length_prefix: "must not",
+    constraint_min_length: "be shorter than {{min_length}} characters",
+    constraint_min_length_suffix: "",
+    constraint_regex_prefix: "must",
+    constraint_regex: "match the regular expression '{{regex}}'",
+    constraint_regex_suffix: ""
   });
 
   locale_build_mode_helpers = {
@@ -1035,6 +1056,7 @@
       this.preprocessors = $.extend(CLASS.default_preprocessors, options.preprocessors || {});
       this.postprocessors = options.postprocessors || {};
       this.group = options.group || null;
+      this.process_errors = options.process_errors || null;
     }
 
     FormValidator.prototype._get_attribute_value_for_key = function(element, key) {
@@ -1414,7 +1436,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_error, dependency_errors, dependency_mode, elem, errors, fields, first_invalid_element, grouped_errors, i, is_required, is_valid, l, len, m, name, original_value, phase, prev_name, prev_phases_valid, ref, ref1, ref2, ref3, ref4, required, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed, value_info;
+      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_error, dependency_errors, dependency_mode, elem, errors, fields, first_invalid_element, grouped_errors, i, is_required, is_valid, l, len, m, name, original_value, phase, prev_phases_valid, ref, ref1, ref2, ref3, ref4, required, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed, value_info;
       if (options == null) {
         options = {};
       }
@@ -1432,7 +1454,6 @@
       }
       CLASS = this.constructor;
       errors = [];
-      prev_name = null;
       usedValFunc = false;
       required = this.fields.required;
       fields = this.fields.all;
@@ -1599,7 +1620,6 @@
             this._set_element_data(elem, data);
           }
         }
-        prev_name = name;
       }
       if (options.focus_invalid === true) {
         if (first_invalid_element != null) {
@@ -1607,6 +1627,9 @@
         }
       }
       grouped_errors = this._group_errors(errors, options);
+      if (typeof this.process_errors === "function") {
+        this.process_errors(grouped_errors);
+      }
       this.form_modifier.modify(grouped_errors, options);
       return grouped_errors;
     };

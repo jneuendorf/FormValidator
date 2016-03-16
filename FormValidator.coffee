@@ -172,7 +172,10 @@ class window.FormValidator
         @create_dependency_error_message = options.create_dependency_error_message or null
         @preprocessors          = $.extend CLASS.default_preprocessors, options.preprocessors or {}
         @postprocessors         = options.postprocessors or {}
+
         @group                  = options.group or null
+        # in place modifcation of the errors possible before they are applied to DOM
+        @process_errors         = options.process_errors or null
 
 
     ########################################################################################################################
@@ -337,27 +340,6 @@ class window.FormValidator
                 }
         return result
 
-    # _post_validate: (grouped_errors) ->
-    #     # TODO:120 implement different error output modes
-    #     CLASS = @constructor
-    #     fields = @fields.all
-    #
-    #     # ERROR OUTPUT
-    #     if @error_output_mode is CLASS.ERROR_OUTPUT_MODES.POPOVER
-    #
-    #         for grouped_error in grouped_errors
-    #             elem = grouped_error.element
-    #             idx = fields.index(elem)
-    #             if idx >= 0
-    #
-    #
-    #         @fields.each (idx, elem) ->
-    #             elem = $ elem
-    #
-    #
-    #             return true
-
-
     ########################################################################################################################
     # VALIDATION HELPERS
 
@@ -468,6 +450,8 @@ class window.FormValidator
     # END - VALIDATION HELPERS
 
 
+
+
     ########################################################################################################################
     ########################################################################################################################
     # PUBLIC
@@ -562,7 +546,6 @@ class window.FormValidator
 
         CLASS = @constructor
         errors = []
-        prev_name = null
         usedValFunc = false
         required = @fields.required
         fields = @fields.all
@@ -721,23 +704,12 @@ class window.FormValidator
                     @_cache_attribute elem, data, "error_targets", () ->
                         return @_get_error_targets(elem, type, i)
                     @_set_element_data(elem, data)
-                # @_apply_error_classes(
-                #     elem
-                #     data.error_targets
-                #     is_valid
-                # )
-                #
-                # if current_error?
-                #     current_error.error_targets = data.error_targets
-                #
-                # @_apply_dependency_error_classes(elem, dependency_elements, is_valid)
-
-            prev_name = name
 
         if options.focus_invalid is true
             first_invalid_element?.focus()
 
         grouped_errors =  @_group_errors(errors, options)
+        @process_errors?(grouped_errors)
         @form_modifier.modify(grouped_errors, options)
         return grouped_errors
 
