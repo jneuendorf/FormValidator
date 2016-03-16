@@ -91,7 +91,10 @@ error_message_builders[VALIDATION_PHASES.DEPENDENCIES] = (errors, phase, build_m
         if build_mode is BUILD_MODES.SENTENCE
             build_mode = BUILD_MODES.ENUMERATE
         parts = ({message: "'#{name}'", prefix: "", suffix: ""} for name in names)
-        return default_message_builder(VALIDATION_PHASES_SINGULAR[phase].toLowerCase(), phase, build_mode, locale, parts)
+        key = VALIDATION_PHASES_SINGULAR[phase].toLowerCase()
+        if parts.length is 1
+            key += "_singular"
+        return default_message_builder(key, phase, build_mode, locale, parts)
     return locales[locale]["#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_general"]
 
 

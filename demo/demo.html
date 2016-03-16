@@ -77,16 +77,16 @@
             <div class="form-group">
                 <label for="field" class="col-xs-2 control-label">the input</label>
                 <div class="col-xs-10">
-                    <input id="field" class="form-control input-lg" type="text" data-fv-validate="text">
+                    <input id="field" class="form-control input-lg" type="text" data-fv-validate="text" data-fv-name="the input">
                 </div>
                 <div class="col-xs-10 col-xs-push-2">
                     <br>
                     check me
-                    <input type="checkbox" data-fv-validate="checkbox"><br>
+                    <input type="checkbox" data-fv-validate="checkbox" data-fv-depends-on="body #field"><br>
                     check either one
-                    <input type="radio" name="radios" data-fv-validate="radio">
+                    <input type="radio" name="radios" data-fv-validate="radio" data-fv-depends-on="body #field">
                     <input type="radio" name="radios"><br>
-                    <select data-fv-validate="select">
+                    <select data-fv-validate="select" data-fv-depends-on="body #field">
                         <option value="">null</option>
                         <option value="one">valid option 1</option>
                         <option value="two">valid option 2</option>

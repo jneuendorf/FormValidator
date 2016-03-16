@@ -597,13 +597,22 @@ class window.FormValidator
             if not valid_dependencies
                 prev_phases_valid = false
                 data.valid_dependencies = false
-                data.errors[phase] = dependency_errors.concat {
+                console.log dependency_errors
+                $.extend(dependency_error, {
                     element:    elem
                     required:   is_required
                     type:       "dependency"
                     phase:      phase
                     mode:       dependency_mode
-                }
+                }) for dependency_error in dependency_errors
+                data.errors[phase] = dependency_errors
+                # data.errors[phase] = dependency_errors.concat {
+                #     element:    elem
+                #     required:   is_required
+                #     type:       "dependency"
+                #     phase:      phase
+                #     mode:       dependency_mode
+                # }
                 first_invalid_element ?= elem
             else
                 data.valid_dependencies = true

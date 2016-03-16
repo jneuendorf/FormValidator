@@ -385,6 +385,8 @@
     dependency_general: "Dieses Feld kann erst dann korrekt ausgefüllt werden, wenn seine Abhängigkeiten korrekt ausgefüllt wurden",
     dependency_prefix: "Die Felder",
     dependency_suffix: "sind noch ungültig",
+    dependency_singular_prefix: "Das Feld",
+    dependency_singular_suffix: "ist noch ungültig",
     value_email: "'{{value}}' ist keine gültige E-Mail-Adresse",
     value_email_at: "Eine E-Mail-Adresse muss ein @-Zeichen enthalten",
     value_email_many_at: "Eine E-Mail-Adresse darf höchstens ein @-Zeichen enthalten",
@@ -570,7 +572,7 @@
   error_message_builders = {};
 
   error_message_builders[VALIDATION_PHASES.DEPENDENCIES] = function(errors, phase, build_mode, locale) {
-    var error, name, names, parts;
+    var error, key, name, names, parts;
     names = (function() {
       var l, len, results1;
       results1 = [];
@@ -599,7 +601,11 @@
         }
         return results1;
       })();
-      return default_message_builder(VALIDATION_PHASES_SINGULAR[phase].toLowerCase(), phase, build_mode, locale, parts);
+      key = VALIDATION_PHASES_SINGULAR[phase].toLowerCase();
+      if (parts.length === 1) {
+        key += "_singular";
+      }
+      return default_message_builder(key, phase, build_mode, locale, parts);
     }
     return locales[locale][(VALIDATION_PHASES_SINGULAR[phase].toLowerCase()) + "_general"];
   };
@@ -1408,7 +1414,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_errors, dependency_mode, elem, errors, fields, first_invalid_element, grouped_errors, i, is_required, is_valid, l, name, original_value, phase, prev_name, prev_phases_valid, ref, ref1, ref2, ref3, ref4, required, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed, value_info;
+      var CLASS, constraint_name, current_error, data, default_options, dependency_elements, dependency_error, dependency_errors, dependency_mode, elem, errors, fields, first_invalid_element, grouped_errors, i, is_required, is_valid, l, len, m, name, original_value, phase, prev_name, prev_phases_valid, ref, ref1, ref2, ref3, ref4, required, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed, value_info;
       if (options == null) {
         options = {};
       }
@@ -1455,13 +1461,18 @@
         if (!valid_dependencies) {
           prev_phases_valid = false;
           data.valid_dependencies = false;
-          data.errors[phase] = dependency_errors.concat({
-            element: elem,
-            required: is_required,
-            type: "dependency",
-            phase: phase,
-            mode: dependency_mode
-          });
+          console.log(dependency_errors);
+          for (m = 0, len = dependency_errors.length; m < len; m++) {
+            dependency_error = dependency_errors[m];
+            $.extend(dependency_error, {
+              element: elem,
+              required: is_required,
+              type: "dependency",
+              phase: phase,
+              mode: dependency_mode
+            });
+          }
+          data.errors[phase] = dependency_errors;
           if (first_invalid_element == null) {
             first_invalid_element = elem;
           }

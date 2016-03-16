@@ -5,6 +5,8 @@ $.extend locales.de, {
     dependency_general: "Dieses Feld kann erst dann korrekt ausgefüllt werden, wenn seine Abhängigkeiten korrekt ausgefüllt wurden"
     dependency_prefix:  "Die Felder"
     dependency_suffix:  "sind noch ungültig"
+    dependency_singular_prefix:  "Das Feld"
+    dependency_singular_suffix:  "ist noch ungültig"
     # validators (VALIDATION_PHASES_SINGULAR.VALUE = 'value')
     value_email: "'{{value}}' ist keine gültige E-Mail-Adresse"
     value_email_at: "Eine E-Mail-Adresse muss ein @-Zeichen enthalten"
