@@ -35,6 +35,7 @@ ERROR_MESSAGE_CONFIG =
 # => this is the list of data that is always cached
 REQUIRED_CACHE = [
     "depends_on"
+    "id"
     "name"
     "preprocess"
     "required"

@@ -366,26 +366,22 @@ class window.FormValidator
     # validation - phase 1
     _validate_dependencies: (element, data) ->
         errors = []
-        elements = []
-        if data.depends_on?
-            elements = data.depends_on
-            for dependency_elem, i in elements
-                dependency_data = @_get_element_data(dependency_elem)
-                dependency_validation = @_validate_element(
-                    dependency_elem
-                    dependency_data
-                    @_get_value_info(dependency_elem, dependency_data)
-                )
-                if dependency_validation isnt true
-                    errors.push $.extend(dependency_validation, {
-                        dependency_element: dependency_elem
-                        element: element
-                        index: i
-                        type: dependency_data.type
-                        name: dependency_data.name
-                    })
-        else if DEBUG
-            throw new Error("FormValidator::_validate_dependencies: For some reason the dependencies were not cached before validation! This should never happen so this is probably a bug.")
+        elements = data.depends_on
+        for dependency_elem, i in elements
+            dependency_data = @_get_element_data(dependency_elem)
+            dependency_validation = @_validate_element(
+                dependency_elem
+                dependency_data
+                @_get_value_info(dependency_elem, dependency_data)
+            )
+            if dependency_validation isnt true
+                errors.push $.extend(dependency_validation, {
+                    dependency_element: dependency_elem
+                    element: element
+                    index: i
+                    type: dependency_data.type
+                    name: dependency_data.name
+                })
 
         # cache dependency mode
         if not data.dependency_mode?
@@ -506,6 +502,7 @@ class window.FormValidator
                 data[key] = @_get_attribute_value_for_key(elem, key)
             # already parse the list of dependencies as list of jquery elements ("" => [], null => []), delimiter = ';'
             data.depends_on = @_find_targets(data.depends_on, elem, /^\s*\;\s*$/g)
+            data.id = i;
 
             # set keys that are cached later (lazily) to null (which means unknow)
             for key in OPTIONAL_CACHE
@@ -551,8 +548,24 @@ class window.FormValidator
         fields = @fields.all
         first_invalid_element = null
 
+        # determine validation order according to defined dependencies
+        # TODO: make this easier after refactoring toposort
+        dependency_data = {}
+        id_to_elem = {}
         for i in [0...fields.length]
             elem = fields.eq(i)
+            data = @_get_element_data(elem)
+            id_to_elem[data.id] = elem
+            deps = []
+            for dep in data.depends_on
+                dep_data = @_get_element_data(dep)
+                deps.push dep_data.id
+            dependency_data[data.id] = deps.join(" ")
+
+        fields = (id_to_elem[id] for id in toposort(dependency_data))
+        console.log fields
+
+        for elem in fields
             data = @_get_element_data(elem)
             is_required = data.required
             {type, name} = data
