@@ -369,21 +369,28 @@ class window.FormValidator
         elements = data.depends_on
         for dependency_elem, i in elements
             dependency_data = @_get_element_data(dependency_elem)
-            # TODO: validating the value only (no dependencies, no constraint) is not sufficient!
-            dependency_validation = @_validate_element(
+            elem_errors = @_validate_element(
                 dependency_elem
                 dependency_data
                 @_get_value_info(dependency_elem, dependency_data)
                 options
             )
-            if dependency_validation isnt true
-                errors.push $.extend(dependency_validation, {
+            if elem_errors.length > 0
+                errors.push {
                     dependency_element: dependency_elem
                     element: element
                     index: i
                     type: dependency_data.type
                     name: dependency_data.name
-                })
+                }
+            # if dependency_validation isnt true
+            #     errors.push $.extend(dependency_validation, {
+            #         dependency_element: dependency_elem
+            #         element: element
+            #         index: i
+            #         type: dependency_data.type
+            #         name: dependency_data.name
+            #     })
 
         # cache dependency mode
         if not data.dependency_mode?

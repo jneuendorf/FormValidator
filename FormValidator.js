@@ -1374,21 +1374,21 @@
     };
 
     FormValidator.prototype._validate_dependencies = function(element, data, options) {
-      var dependency_data, dependency_elem, dependency_validation, elements, errors, i, l, len, valid;
+      var dependency_data, dependency_elem, elem_errors, elements, errors, i, l, len, valid;
       errors = [];
       elements = data.depends_on;
       for (i = l = 0, len = elements.length; l < len; i = ++l) {
         dependency_elem = elements[i];
         dependency_data = this._get_element_data(dependency_elem);
-        dependency_validation = this._validate_element(dependency_elem, dependency_data, this._get_value_info(dependency_elem, dependency_data), options);
-        if (dependency_validation !== true) {
-          errors.push($.extend(dependency_validation, {
+        elem_errors = this._validate_element(dependency_elem, dependency_data, this._get_value_info(dependency_elem, dependency_data), options);
+        if (elem_errors.length > 0) {
+          errors.push({
             dependency_element: dependency_elem,
             element: element,
             index: i,
             type: dependency_data.type,
             name: dependency_data.name
-          }));
+          });
         }
       }
       if (data.dependency_mode == null) {
