@@ -125,7 +125,7 @@ toposort = (targets) ->
             if targets[k].cnt is 0
                 delete targets[k]
                 independents.push k
-    console.log independents
+    # console.log independents
 
     # Note reverse dependencies for theoretical O(M+N) efficiency.
     reverse_deps = []
@@ -150,7 +150,8 @@ toposort = (targets) ->
 
     # Show unresolvable dependencies
     for k of targets
-        console.log "WARNING: node #{k} is part of cyclical dependency"
+        # console.log "WARNING: node #{k} is part of cyclical dependency"
+        throw new Error("FormValidator::validate: Detected cyclical dependencies. Adjust your dependency definitions")
     return result
 
 parse_deps = (data) ->
@@ -168,7 +169,8 @@ parse_deps = (data) ->
         targets[k] = set()
         children = v.split(' ')
         for child in children
-            continue if child is ''
+            if child is ''
+                continue
             set_add targets[k], child unless child is k
             set_add deps, child
 
@@ -178,19 +180,29 @@ parse_deps = (data) ->
             targets[dep] = set()
     return targets
 
-set = ->
-    cnt: 0
-    v: {}
+set = () ->
+    return {
+        cnt: 0
+        v: {}
+    }
 
 set_add = (s, e) ->
-    return if s.v[e]
-    s.cnt += 1
-    s.v[e] = true
+    # return if s.v[e]
+    # s.cnt += 1
+    # s.v[e] = true
+    if not s.v[e]
+        s.cnt += 1
+        s.v[e] = true
+    return s
 
 set_remove = (s, e) ->
-    return if not s.v[e]
-    s.cnt -= 1
-    delete s.v[e]
+    # return if not s.v[e]
+    # s.cnt -= 1
+    # delete s.v[e]
+    if s.v[e]
+        s.cnt -= 1
+        delete s.v[e]
+    return s
 
 # data =
 #       des_system_lib:   "std synopsys std_cell_lib des_system_lib dw02 dw01 ramlib ieee"

@@ -139,7 +139,6 @@
       }
       return results1;
     })();
-    console.log(independents);
     reverse_deps = [];
     (function() {
       var child, k, results1;
@@ -174,7 +173,7 @@
       }
     }
     for (k in targets) {
-      console.log("WARNING: node " + k + " is part of cyclical dependency");
+      throw new Error("FormValidator::validate: Detected cyclical dependencies. Adjust your dependency definitions");
     }
     return result;
   };
@@ -214,19 +213,19 @@
   };
 
   set_add = function(s, e) {
-    if (s.v[e]) {
-      return;
+    if (!s.v[e]) {
+      s.cnt += 1;
+      s.v[e] = true;
     }
-    s.cnt += 1;
-    return s.v[e] = true;
+    return s;
   };
 
   set_remove = function(s, e) {
-    if (!s.v[e]) {
-      return;
+    if (s.v[e]) {
+      s.cnt -= 1;
+      delete s.v[e];
     }
-    s.cnt -= 1;
-    return delete s.v[e];
+    return s;
   };
 
   ERROR_MODES = {
@@ -1287,8 +1286,8 @@
       return result;
     };
 
-    FormValidator.prototype._get_error_targets = function(element, type, index) {
-      return (typeof this.error_target_getter === "function" ? this.error_target_getter(element, type, index) : void 0) || element.attr("data-fv-error-targets") || element.closest("[data-fv-error-targets]").attr("data-fv-error-targets") || DEFAULT_ATTR_VALUES.ERROR_TARGETS;
+    FormValidator.prototype._get_error_targets = function(element, type) {
+      return (typeof this.error_target_getter === "function" ? this.error_target_getter(element, type) : void 0) || element.attr("data-fv-error-targets") || element.closest("[data-fv-error-targets]").attr("data-fv-error-targets") || DEFAULT_ATTR_VALUES.ERROR_TARGETS;
     };
 
     FormValidator.prototype._group = function(fields) {
@@ -1353,13 +1352,13 @@
       return result;
     };
 
-    FormValidator.prototype._validate_element = function(element, data, value_info) {
+    FormValidator.prototype._validate_value = function(element, data, value_info) {
       var type, validation, validator, value;
       type = data.type;
       value = value_info.value;
       validator = this.validators[type];
       if (validator == null) {
-        throw new Error("FormValidator::_validate_element: No validator found for type '" + type + "'. Make sure the type is correct or define a validator!");
+        throw new Error("FormValidator::_validate_value: No validator found for type '" + type + "'. Make sure the type is correct or define a validator!");
       }
       validation = validator.call(this.validators, value, element);
       if (validation === false) {
@@ -1374,14 +1373,14 @@
       return validation;
     };
 
-    FormValidator.prototype._validate_dependencies = function(element, data) {
+    FormValidator.prototype._validate_dependencies = function(element, data, options) {
       var dependency_data, dependency_elem, dependency_validation, elements, errors, i, l, len, valid;
       errors = [];
       elements = data.depends_on;
       for (i = l = 0, len = elements.length; l < len; i = ++l) {
         dependency_elem = elements[i];
         dependency_data = this._get_element_data(dependency_elem);
-        dependency_validation = this._validate_element(dependency_elem, dependency_data, this._get_value_info(dependency_elem, dependency_data));
+        dependency_validation = this._validate_element(dependency_elem, dependency_data, this._get_value_info(dependency_elem, dependency_data), options);
         if (dependency_validation !== true) {
           errors.push($.extend(dependency_validation, {
             dependency_element: dependency_elem,
@@ -1453,6 +1452,139 @@
         }
       }
       return results;
+    };
+
+    FormValidator.prototype._validate_element = function(elem, data, value_info, options) {
+      var constraint_name, current_error, dependency_elements, dependency_error, dependency_errors, dependency_mode, errors, is_required, l, len, original_value, phase, prev_phases_valid, ref, ref1, ref2, ref3, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed;
+      errors = [];
+      prev_phases_valid = true;
+      is_required = data.required;
+      type = data.type;
+      value = value_info.value, original_value = value_info.original_value, value_has_changed = value_info.value_has_changed, usedValFunc = value_info.usedValFunc;
+      phase = VALIDATION_PHASES.DEPENDENCIES;
+      ref = this._validate_dependencies(elem, data, options), dependency_errors = ref.dependency_errors, dependency_elements = ref.dependency_elements, dependency_mode = ref.dependency_mode, valid_dependencies = ref.valid_dependencies;
+      if (!valid_dependencies) {
+        prev_phases_valid = false;
+        data.valid_dependencies = false;
+        console.log(dependency_errors);
+        for (l = 0, len = dependency_errors.length; l < len; l++) {
+          dependency_error = dependency_errors[l];
+          $.extend(dependency_error, {
+            element: elem,
+            required: is_required,
+            type: "dependency",
+            phase: phase,
+            mode: dependency_mode
+          });
+        }
+        data.errors[phase] = dependency_errors;
+      } else {
+        data.valid_dependencies = true;
+        data.errors[phase] = [];
+      }
+      errors = errors.concat(data.errors[phase]);
+      phase = VALIDATION_PHASES.VALUE;
+      if (value_has_changed) {
+        if (prev_phases_valid || !options.stop_on_error) {
+          current_error = null;
+          validation_res = this._validate_value(elem, data, value_info);
+          if (validation_res !== true) {
+            prev_phases_valid = false;
+            data.valid_value = false;
+            current_error = {
+              element: elem,
+              error_message_type: validation_res.error_message_type,
+              phase: phase,
+              required: is_required,
+              type: type,
+              value: value
+            };
+            data.errors[phase] = [current_error];
+          } else {
+            data.valid_value = true;
+            data.errors[phase] = [];
+          }
+        }
+      } else {
+        if (prev_phases_valid || !options.stop_on_error) {
+          if (data.valid_value !== true) {
+            prev_phases_valid = false;
+          }
+        }
+      }
+      errors = errors.concat(data.errors[phase]);
+      phase = VALIDATION_PHASES.CONSTRAINTS;
+      if (value_has_changed) {
+        if (prev_phases_valid || !options.stop_on_error) {
+          data.valid_constraints = true;
+          temp = [];
+          ref1 = this._validate_constraints(elem, data, value);
+          for (constraint_name in ref1) {
+            result = ref1[constraint_name];
+            if (!(result !== true)) {
+              continue;
+            }
+            data.valid_constraints = false;
+            prev_phases_valid = false;
+            temp.push($.extend(result, {
+              element: elem,
+              required: is_required,
+              type: constraint_name,
+              phase: phase,
+              value: value
+            }));
+          }
+          data.errors[phase] = temp;
+        }
+      } else {
+        if (prev_phases_valid || !options.stop_on_error) {
+          if (data.valid_constraints !== true) {
+            prev_phases_valid = false;
+          }
+        }
+      }
+      errors = errors.concat(data.errors[phase]);
+      if (data.valid_dependencies && data.valid_value && data.valid_constraints) {
+        if (data.valid !== true || (data.postprocess == null) || (data.output_preprocessed == null)) {
+          data.valid = true;
+          this._cache_attribute(elem, data, "postprocess");
+          this._cache_attribute(elem, data, "output_preprocessed");
+          this._set_element_data(elem, data);
+        }
+        if (data.postprocess === true) {
+          value = (ref2 = this.postprocessors[type]) != null ? ref2.call(this.postprocessors, value, elem, this.locale) : void 0;
+          if (usedValFunc) {
+            elem.val(value);
+          } else {
+            elem.text(value);
+          }
+          if (current_error != null) {
+            current_error.value = value;
+          }
+        } else if (data.output_preprocessed === true) {
+          value = (ref3 = this.preprocessors[type]) != null ? ref3.call(this.preprocessors, value, elem, this.locale) : void 0;
+          if (usedValFunc) {
+            elem.val(value);
+          } else {
+            elem.text(value);
+          }
+          if (current_error != null) {
+            current_error.value = value;
+          }
+        }
+      } else {
+        if (data.valid !== false) {
+          data.valid = false;
+          this._set_element_data(elem, data);
+        }
+      }
+      if (options.apply_error_classes === true && (data.error_targets == null)) {
+        this._cache_attribute(elem, data, "error_targets", function() {
+          return this._get_error_targets(elem, type);
+        });
+        this._set_element_data(elem, data);
+      }
+      return errors;
     };
 
     FormValidator.prototype.register_validator = function(type, validator, error_message_types) {
@@ -1539,7 +1671,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, constraint_name, current_error, data, default_options, dep, dep_data, dependency_data, dependency_elements, dependency_error, dependency_errors, dependency_mode, deps, elem, errors, fields, first_invalid_element, grouped_errors, i, id, id_to_elem, is_required, is_valid, l, len, len1, len2, m, name, o, original_value, phase, prev_phases_valid, q, ref, ref1, ref2, ref3, ref4, ref5, required, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed, value_info;
+      var CLASS, data, default_options, dep, dep_data, dependency_data, deps, elem, elem_errors, errors, fields, first_invalid_element, grouped_errors, i, id, id_to_elem, is_required, l, len, len1, m, name, o, original_value, ref, ref1, required, type, usedValFunc, value, value_has_changed, value_info;
       if (options == null) {
         options = {};
       }
@@ -1597,7 +1729,7 @@
         if (options.all === false && !is_required && (value.length === 0 || type === "radio" || type === "checkbox")) {
           if (data.error_targets == null) {
             data = this._cache_attribute(elem, data, "error_targets", function() {
-              return this._get_error_targets(elem, type, i);
+              return this._get_error_targets(elem, type);
             });
             this._set_element_data(elem, data);
           }
@@ -1605,149 +1737,12 @@
           this._apply_dependency_error_classes(elem, data.depends_on, true);
           continue;
         }
-        prev_phases_valid = true;
-        phase = VALIDATION_PHASES.DEPENDENCIES;
-        ref2 = this._validate_dependencies(elem, data), dependency_errors = ref2.dependency_errors, dependency_elements = ref2.dependency_elements, dependency_mode = ref2.dependency_mode, valid_dependencies = ref2.valid_dependencies;
-        if (!valid_dependencies) {
-          prev_phases_valid = false;
-          data.valid_dependencies = false;
-          console.log(dependency_errors);
-          for (q = 0, len2 = dependency_errors.length; q < len2; q++) {
-            dependency_error = dependency_errors[q];
-            $.extend(dependency_error, {
-              element: elem,
-              required: is_required,
-              type: "dependency",
-              phase: phase,
-              mode: dependency_mode
-            });
-          }
-          data.errors[phase] = dependency_errors;
+        elem_errors = this._validate_element(elem, data, value_info, options);
+        if (elem_errors.length > 0) {
           if (first_invalid_element == null) {
             first_invalid_element = elem;
           }
-        } else {
-          data.valid_dependencies = true;
-          data.errors[phase] = [];
-        }
-        errors = errors.concat(data.errors[phase]);
-        phase = VALIDATION_PHASES.VALUE;
-        if (value_has_changed) {
-          if (prev_phases_valid || !options.stop_on_error) {
-            current_error = null;
-            validation_res = this._validate_element(elem, data, value_info);
-            if (validation_res !== true) {
-              prev_phases_valid = false;
-              data.valid_value = false;
-              current_error = {
-                element: elem,
-                error_message_type: validation_res.error_message_type,
-                phase: phase,
-                required: is_required,
-                type: type,
-                value: value
-              };
-              data.errors[phase] = [current_error];
-              if (first_invalid_element == null) {
-                first_invalid_element = elem;
-              }
-            } else {
-              data.valid_value = true;
-              data.errors[phase] = [];
-            }
-          }
-        } else {
-          if (prev_phases_valid || !options.stop_on_error) {
-            if (data.valid_value !== true) {
-              prev_phases_valid = false;
-              if (first_invalid_element == null) {
-                first_invalid_element = elem;
-              }
-            }
-          }
-        }
-        errors = errors.concat(data.errors[phase]);
-        phase = VALIDATION_PHASES.CONSTRAINTS;
-        if (value_has_changed) {
-          if (prev_phases_valid || !options.stop_on_error) {
-            data.valid_constraints = true;
-            temp = [];
-            ref3 = this._validate_constraints(elem, data, value);
-            for (constraint_name in ref3) {
-              result = ref3[constraint_name];
-              if (!(result !== true)) {
-                continue;
-              }
-              data.valid_constraints = false;
-              prev_phases_valid = false;
-              temp.push($.extend(result, {
-                element: elem,
-                required: is_required,
-                type: constraint_name,
-                phase: phase,
-                value: value
-              }));
-            }
-            data.errors[phase] = temp;
-            if (data.valid_constraints === false) {
-              if (first_invalid_element == null) {
-                first_invalid_element = elem;
-              }
-            }
-          }
-        } else {
-          if (prev_phases_valid || !options.stop_on_error) {
-            if (data.valid_constraints !== true) {
-              prev_phases_valid = false;
-              if (first_invalid_element == null) {
-                first_invalid_element = elem;
-              }
-            }
-          }
-        }
-        errors = errors.concat(data.errors[phase]);
-        is_valid = data.valid_dependencies && data.valid_value && data.valid_constraints;
-        if (is_valid) {
-          if (data.valid !== true || (data.postprocess == null) || (data.output_preprocessed == null)) {
-            data.valid = true;
-            this._cache_attribute(elem, data, "postprocess");
-            this._cache_attribute(elem, data, "output_preprocessed");
-            this._set_element_data(elem, data);
-          }
-          if (data.postprocess === true) {
-            value = (ref4 = this.postprocessors[type]) != null ? ref4.call(this.postprocessors, value, elem, this.locale) : void 0;
-            if (usedValFunc) {
-              elem.val(value);
-            } else {
-              elem.text(value);
-            }
-            if (current_error != null) {
-              current_error.value = value;
-            }
-          } else if (data.output_preprocessed === true) {
-            value = (ref5 = this.preprocessors[type]) != null ? ref5.call(this.preprocessors, value, elem, this.locale) : void 0;
-            if (usedValFunc) {
-              elem.val(value);
-            } else {
-              elem.text(value);
-            }
-            if (current_error != null) {
-              current_error.value = value;
-            }
-          }
-        } else {
-          if (data.valid !== false) {
-            data.valid = false;
-            this._set_element_data(elem, data);
-          }
-        }
-        if (options.apply_error_classes === true) {
-          if (data.error_targets == null) {
-            this._cache_attribute(elem, data, "error_targets", function() {
-              return this._get_error_targets(elem, type, i);
-            });
-            this._set_element_data(elem, data);
-          }
+          errors = errors.concat(elem_errors);
         }
       }
       if (options.focus_invalid === true) {
