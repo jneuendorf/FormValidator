@@ -1,21 +1,15 @@
 class window.FormValidator
-    # TODO:10 add effects for dependencies
-    # TODO: create themes
-    # TODO:60 create bootstrap theme that uses bootstrap validation states (+ maybe icons)
+    # TODO:70 add effects for dependencies
+    # TODO:10 create themes
+    # TODO:90 create bootstrap theme that uses bootstrap validation states (+ maybe icons)
 
 
     ########################################################################################################################
     ########################################################################################################################
     # CONSTANTS
 
-    @ERROR_MODES = ERROR_MODES
-    @ERROR_OUTPUT_MODES = ERROR_OUTPUT_MODES
-    @VALIDATION_PHASES = VALIDATION_PHASES
-    @BUILD_MODES = BUILD_MODES
-    @ERROR_MESSAGE_CONFIG = ERROR_MESSAGE_CONFIG
-
-    # NOTE REQUIRED_CACHE is already available in the closure
-
+    for name, constant of EXPOSED_CONSTANTS
+        @[name] = constant
 
     ########################################################################################################################
     ########################################################################################################################
@@ -37,31 +31,35 @@ class window.FormValidator
 
     @default_preprocessors =
         number: (str, elem, locale) ->
-            if locale is "de"
-                return str.replace(/\,/g, ".")
-            return str
+            switch locale
+                when "de"
+                    str.replace(/\,/g, ".")
+                else
+                    str
         integer: (str, elem, locale) ->
-            if locale is "de"
-                return str.replace(/\,/g, ".")
-            return str
+            switch locale
+                when "de"
+                    str.replace(/\,/g, ".")
+                else
+                    str
 
 
     ########################################################################################################################
     ########################################################################################################################
     # CLASS METHODS
 
-    # NOTE:30 for @new see CONSTRUCTORS section
+    # for FormValidator.new see CONSTRUCTORS section
 
-    # # define an error_message_type for each error mode (of ERROR_MODES) (for each validator that supports different error modes)
-    # @get_error_message_type: (special_type, error_mode) ->
-    #     if error_mode is @ERROR_MODES.SIMPLE
-    #         base_type = special_type.split("_")[0]
-    #         switch base_type
-    #             when "integer"
-    #                 return "integer"
-    #             when "number"
-    #                 return "number"
-    #     return special_type
+    # define an error_message_type for each error mode (of ERROR_MODES) (for each validator that supports different error modes)
+    @get_error_message_type: (special_type, error_mode) ->
+        # define more simple error message types for the detailed ones
+        if error_mode is @ERROR_MODES.SIMPLE
+            base_type = special_type.split("_")[0]
+            # here would be types that don't follow the convention that the base type is the most general type, i.e.:
+            # if base_type is "my_unconventional_type"
+            #     return "my_unconventional_type_general"
+            return base_type
+        return special_type
 
     @_build_error_message: (phase, errors, build_mode, locale) ->
         return @error_message_builders[phase](errors, phase, build_mode, locale)
@@ -118,7 +116,7 @@ class window.FormValidator
         $elem = $(@)
 
         # prevent click in textfields (which also triggers the change event on previously focussed inputs) to trigger validation
-        # TODO:160 negate selector to be like not(input[type=hidden], ...)
+        # TODO:140 negate selector to be like not(input[type=hidden], ...)
         if (evt.type is "click" or evt.type is "change") and $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length is $elem.length
             return true
 
@@ -162,7 +160,7 @@ class window.FormValidator
         # @error_messages         = options.error_messages
         @build_mode             = options.build_mode or BUILD_MODES.DEFAULT
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
-        # TODO: use this!
+        # TODO:60 use this!
         @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
         @locale                 = options.locale or "en"
 
@@ -360,6 +358,8 @@ class window.FormValidator
             validation = {
                 error_message_type: validation
             }
+        if validation isnt true
+            validation.error_message_type = @constructor.get_error_message_type(validation.error_message_type, @error_mode)
 
         return validation
 
@@ -383,14 +383,6 @@ class window.FormValidator
                     type: dependency_data.type
                     name: dependency_data.name
                 }
-            # if dependency_validation isnt true
-            #     errors.push $.extend(dependency_validation, {
-            #         dependency_element: dependency_elem
-            #         element: element
-            #         index: i
-            #         type: dependency_data.type
-            #         name: dependency_data.name
-            #     })
 
         # cache dependency mode
         if not data.dependency_mode?
@@ -413,8 +405,10 @@ class window.FormValidator
 
     _validate_constraints: (element, data, value) ->
         results = {}
+        # use cache
         if data.constraints?
             constraints = data.constraints
+        # fill cache
         else
             CLASS = @constructor
             constraints = []
@@ -424,7 +418,6 @@ class window.FormValidator
                     if (constraint_validator_options = CLASS.constraint_validator_options[constraint_name])?
                         options = {}
                         for option in constraint_validator_options
-                            # TODO: use the cache!!
                             options[option] = element.attr("data-fv-#{option.replace(/\_/g, "-")}") or DEFAULT_ATTR_VALUES[option.toUpperCase()]
                     else
                         options = null
@@ -453,7 +446,7 @@ class window.FormValidator
         return results
 
     _validate_element: (elem, data, value_info, options) ->
-        # TODO: use cached errors instead of always creating new ones!
+        # TODO:40 use cached errors instead of always creating new ones!
         errors = []
         # accumulator (AND of each phase's valid state)
         prev_phases_valid = true
@@ -477,14 +470,6 @@ class window.FormValidator
                 mode:       dependency_mode
             }) for dependency_error in dependency_errors
             data.errors[phase] = dependency_errors
-            # data.errors[phase] = dependency_errors.concat {
-            #     element:    elem
-            #     required:   is_required
-            #     type:       "dependency"
-            #     phase:      phase
-            #     mode:       dependency_mode
-            # }
-            # first_invalid_element ?= elem
         else
             data.valid_dependencies = true
             data.errors[phase] = []
@@ -497,7 +482,7 @@ class window.FormValidator
         phase = VALIDATION_PHASES.VALUE
         if value_has_changed
             if prev_phases_valid or not options.stop_on_error
-                # TODO:130 is this var still needed??
+                # TODO:110 is this var still needed??
                 current_error = null
                 validation_res = @_validate_value(elem, data, value_info)
                 # element is invalid
@@ -591,14 +576,8 @@ class window.FormValidator
                 return @_get_error_targets(elem, type)
             @_set_element_data(elem, data)
 
-        # return {
-        #     errors: errors
-        # }
         return errors
-
     # END - VALIDATION HELPERS
-
-
 
 
     ########################################################################################################################
@@ -702,7 +681,7 @@ class window.FormValidator
         first_invalid_element = null
 
         # determine validation order according to defined dependencies
-        # TODO: make this easier after refactoring toposort
+        # TODO:30 make this easier after refactoring toposort
         dependency_data = {}
         id_to_elem = {}
         for i in [0...fields.length]
@@ -736,138 +715,6 @@ class window.FormValidator
                 @_apply_dependency_error_classes(elem, data.depends_on, true)
                 continue
 
-            # # accumulator (AND of each phase's valid state)
-            # prev_phases_valid = true
-            #
-            # #########################################################
-            # # PHASE 1: validate dependencies (no matter if the value has changed because dependencies could have changed)
-            # phase = VALIDATION_PHASES.DEPENDENCIES
-            # {dependency_errors, dependency_elements, dependency_mode, valid_dependencies} = @_validate_dependencies(elem, data)
-            # if not valid_dependencies
-            #     prev_phases_valid = false
-            #     data.valid_dependencies = false
-            #     console.log dependency_errors
-            #     $.extend(dependency_error, {
-            #         element:    elem
-            #         required:   is_required
-            #         type:       "dependency"
-            #         phase:      phase
-            #         mode:       dependency_mode
-            #     }) for dependency_error in dependency_errors
-            #     data.errors[phase] = dependency_errors
-            #     # data.errors[phase] = dependency_errors.concat {
-            #     #     element:    elem
-            #     #     required:   is_required
-            #     #     type:       "dependency"
-            #     #     phase:      phase
-            #     #     mode:       dependency_mode
-            #     # }
-            #     first_invalid_element ?= elem
-            # else
-            #     data.valid_dependencies = true
-            #     data.errors[phase] = []
-            # errors = errors.concat data.errors[phase]
-            #
-            #
-            # #########################################################
-            # # PHASE 2: validate the value
-            # # validate the current value only if it has changed
-            # phase = VALIDATION_PHASES.VALUE
-            # if value_has_changed
-            #     if prev_phases_valid or not options.stop_on_error
-            #         # TODO:130 is this var still needed??
-            #         current_error = null
-            #         validation_res = @_validate_value(elem, data, value_info)
-            #         # element is invalid
-            #         if validation_res isnt true
-            #             prev_phases_valid = false
-            #             data.valid_value = false
-            #             current_error =
-            #                 element: elem
-            #                 error_message_type: validation_res.error_message_type
-            #                 phase: phase
-            #                 required: is_required
-            #                 type: type
-            #                 value: value
-            #             data.errors[phase] = [current_error]
-            #             first_invalid_element ?= elem
-            #         else
-            #             data.valid_value = true
-            #             data.errors[phase] = []
-            # # value has not changed (data is unchanged)
-            # else
-            #     if prev_phases_valid or not options.stop_on_error
-            #         if data.valid_value isnt true
-            #             prev_phases_valid = false
-            #             first_invalid_element ?= elem
-            # errors = errors.concat data.errors[phase]
-            #
-            #
-            # #########################################################
-            # # PHASE 3 - validate constraints
-            # phase = VALIDATION_PHASES.CONSTRAINTS
-            # if value_has_changed
-            #     if prev_phases_valid or not options.stop_on_error
-            #         data.valid_constraints = true
-            #         temp = []
-            #         for constraint_name, result of @_validate_constraints(elem, data, value) when result isnt true
-            #             data.valid_constraints = false
-            #             prev_phases_valid = false
-            #             temp.push $.extend result, {
-            #                 element: elem
-            #                 required: is_required
-            #                 type: constraint_name
-            #                 phase: phase
-            #                 value: value
-            #             }
-            #         data.errors[phase] = temp
-            #         if data.valid_constraints is false
-            #             first_invalid_element ?= elem
-            # # value has not changed (data is unchanged)
-            # else
-            #     if prev_phases_valid or not options.stop_on_error
-            #         if data.valid_constraints isnt true
-            #             prev_phases_valid = false
-            #             first_invalid_element ?= elem
-            #
-            # errors = errors.concat data.errors[phase]
-            # # is_valid = data.valid_dependencies and data.valid_value and data.valid_constraints
-            #
-            # # if is_valid
-            # if data.valid_dependencies and data.valid_value and data.valid_constraints
-            #     # cache uncached data
-            #     if data.valid isnt true or not data.postprocess? or not data.output_preprocessed?
-            #         data.valid = true
-            #         @_cache_attribute(elem, data, "postprocess")
-            #         @_cache_attribute(elem, data, "output_preprocessed")
-            #         @_set_element_data(elem, data)
-            #
-            #     # replace old value with post processed value
-            #     if data.postprocess is true
-            #         value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
-            #         if usedValFunc
-            #             elem.val value
-            #         else
-            #             elem.text value
-            #         current_error?.value = value
-            #     # replace old value with pre processed value
-            #     else if data.output_preprocessed is true
-            #         value = @preprocessors[type]?.call(@preprocessors, value, elem, @locale)
-            #         if usedValFunc
-            #             elem.val value
-            #         else
-            #             elem.text value
-            #         current_error?.value = value
-            # else
-            #     if data.valid isnt false
-            #         data.valid = false
-            #         @_set_element_data(elem, data)
-            #
-            # # cache error targets because error classes will be applied to them in the next step (form modifcation)
-            # if options.apply_error_classes is true and not data.error_targets?
-            #     @_cache_attribute elem, data, "error_targets", () ->
-            #         return @_get_error_targets(elem, type, i)
-            #     @_set_element_data(elem, data)
             elem_errors = @_validate_element(elem, data, value_info, options)
             if elem_errors.length > 0
                 first_invalid_element ?= elem

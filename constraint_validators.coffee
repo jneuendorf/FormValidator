@@ -56,7 +56,7 @@ constraint_validator_groups = [
 ]
 
 # define when to include a constraint validator option in the locale key (and when not (if not matching the below value))
-# TODO:70 does this make sense?
+# TODO:100 does this make sense?
 # value can also be: function(String locale) -> Mixed value
 # i.e. for include_max a function could be defined if different locales formulate the according error message differently:
 # - EN could be like 'the value is not less than {{max}}' (max is not included in valid range => locale key = "constraint_max") and

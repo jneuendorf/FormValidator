@@ -20,7 +20,9 @@ $(document).ready(function() {
     var form_validator = FormValidator.new(my_form, {
         error_target_getter: function(e, t, i) {
             return e;
-        }
+        },
+        build_mode: FormValidator.BUILD_MODES.SENTENCE,
+        error_mode: FormValidator.ERROR_MODES.SIMPLE,
     });
     $(".error_output_mode").change(function(evt) {
         form_validator.form_modifier.error_output_mode = $(this).find(":selected").val();

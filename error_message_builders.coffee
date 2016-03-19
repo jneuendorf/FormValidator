@@ -1,4 +1,4 @@
-# TODO:190 structure this file for better maintainance
+# TODO:150 structure this file for better maintainance
 # override build_mode_helpers here if needed (same signature as a build_mode_helper). i.e. enumeration could be different in other languages
 locale_build_mode_helpers =
     de: {}
@@ -8,7 +8,7 @@ locale_build_mode_helpers =
 # build-mode helpers (1 for each build mode): they define how parts of an error message are concatenated
 build_mode_helpers = {}
 
-build_mode_helpers[BUILD_MODES.ENUMERATE] = (parts, locale, phase, build_mode) ->
+build_mode_helpers[BUILD_MODES.ENUMERATE] = (parts, locale, phase, build_mode, error_data) ->
     if parts.length > 1
         lang_data = locales[locale]
         new_parts = []
@@ -31,33 +31,70 @@ build_mode_helpers[BUILD_MODES.ENUMERATE] = (parts, locale, phase, build_mode) -
         return ("#{(part.message for part in parts.slice(0, -1)).join(", ")} #{lang_data["and"]} #{parts[parts.length - 1].message}").replace(/\s+/g, " ")
     return ("#{parts[0].prefix} #{parts[0].message} #{parts[0].suffix}").replace(/\s+/g, " ")
 
-build_mode_helpers[BUILD_MODES.SENTENCE] = (parts, locale, build_mode) ->
-    return ("#{part.message[0].toUpperCase()}#{part.message.slice(1)}" for part in parts).join(". ").replace(/\s+/g, " ")
+build_mode_helpers[BUILD_MODES.SENTENCE] = (parts, locale, phase, build_mode, error_data) ->
+    phase = VALIDATION_PHASES_SINGULAR[phase].toLowerCase()
+    prefix = locales[locale]["#{phase}_#{build_mode}_prefix".toLowerCase()] or ""
+    suffix = locales[locale]["#{phase}_#{build_mode}_suffix".toLowerCase()] or ""
+    # capitalize first letter iff. prefix is a string, prefix != "", and prefix does not start with a variable value
+    first_to_upper = prefix and prefix not instanceof Function and prefix[0] isnt "{"
+    prefix = part_evaluator(prefix, error_data)
+    suffix = part_evaluator(suffix, error_data)
+    for part, i in parts
+        part = "#{prefix} #{part.prefix} #{part.message} #{part.suffix} #{suffix}".trim()
+        if first_to_upper
+            parts[i] = "#{part[0].toUpperCase()}#{part.slice(1)}"
+        else
+            parts[i] = part
+    return parts.join(". ").replace(/\s+/g, " ") + "."
 
-build_mode_helpers[BUILD_MODES.LIST] = (parts, locale, build_mode) ->
-    # TODO:90 extract .message from part like above
-    return "<ul><li>#{parts.join("</li><li>")}</li></ul>"
+build_mode_helpers[BUILD_MODES.LIST] = (parts, locale, phase, build_mode, error_data) ->
+    return "<ul><li>#{(part.message for part in parts).join("</li><li>")}</li></ul>"
 
 
 # this function concatenates the prefix, mid part (== joined parts), and the suffix (used in the error message builders)
 # key = locale key used to find pre- and suffix
 # prefix, suffix = either a (ready) string (which won't be modified) or a function that generates the prefix or suffix respectively
 #   signature: (String locale_key, String locale, ) -> String
-default_message_builder = (key, phase, build_mode, locale, parts, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
+default_message_builder = (key, phase, build_mode, locale, parts, error_data, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
     prefix = prefix or locales[locale]["#{key}_prefix"] or ""
     suffix = suffix or locales[locale]["#{key}_suffix"] or ""
     if parts instanceof Array
-        message = locale_build_mode_helpers[locale][build_mode]?(parts, locale, phase, build_mode) or build_mode_helpers[build_mode](parts, locale, phase, build_mode)
-    else #if typeof parts is "string"
+        message = locale_build_mode_helpers[locale][build_mode]?(parts, locale, phase, build_mode) or build_mode_helpers[build_mode](parts, locale, phase, build_mode, error_data)
+    else # if typeof parts is "string"
         message = parts
+
+    result = []
 
     if prefix
         if prefix instanceof Function
             prefix = prefix()
-        message = prefix + prefix_delimiter + message
+        result.push prefix, prefix_delimiter
+        # message = prefix + prefix_delimiter + message
+    result.push message
     if suffix
-        message += suffix_delimiter + suffix
-    return message
+        # message += suffix_delimiter + suffix
+        result.push suffix_delimiter, suffix
+    # return message
+    return result
+
+enumerate_message_builder = (key, phase, build_mode, locale, parts, error_data, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
+    return default_message_builder(key, phase, build_mode, locale, parts, error_data, prefix, suffix, prefix_delimiter, suffix_delimiter).join("")
+
+sentence_message_builder = (key, phase, build_mode, locale, parts, error_data, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
+    parts = default_message_builder(key, phase, build_mode, locale, parts, error_data, prefix, suffix, prefix_delimiter, suffix_delimiter)
+    # remove prefix for sentence build mode because the default_message_builder will automatically add it to the front but the sentence_message_builder adds it to each sentence anyways
+    if parts.length > 1
+        return parts.slice(1).join("")
+    return parts.join("")
+
+list_message_builder = (key, phase, build_mode, locale, parts, error_data, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
+
+message_builders =
+    enumerate: enumerate_message_builder
+    sentence: sentence_message_builder
+    list: list_message_builder
+
+
 
 # use this function to parse mustache-like strings or evaluate functions (used in the error message builders)
 part_evaluator = (part, values...) ->
@@ -94,7 +131,7 @@ error_message_builders[VALIDATION_PHASES.DEPENDENCIES] = (errors, phase, build_m
         key = VALIDATION_PHASES_SINGULAR[phase].toLowerCase()
         if parts.length is 1
             key += "_singular"
-        return default_message_builder(key, phase, build_mode, locale, parts)
+        return message_builders[build_mode.toLowerCase()](key, phase, build_mode, locale, parts)
     return locales[locale]["#{VALIDATION_PHASES_SINGULAR[phase].toLowerCase()}_general"]
 
 
@@ -107,7 +144,7 @@ error_message_builders[VALIDATION_PHASES.VALUE] = (errors, phase, build_mode, lo
         message: part_evaluator(locales[locale][key], error)
         prefix: ""
         suffix: ""
-    return default_message_builder(key, phase, BUILD_MODES.ENUMERATE, locale, [part])
+    return message_builders[build_mode.toLowerCase()](key, phase, BUILD_MODES.ENUMERATE, locale, [part])
 
 
 error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mode, locale) ->
@@ -117,7 +154,7 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
     ungrouped_errors = []
     for error in errors
         error_in_group = false
-        # TODO:140 make constraint_validator_groups accessible from class and use this ref here
+        # TODO:120 make constraint_validator_groups accessible from class and use this ref here
         for group, i in constraint_validator_groups
             if error.type in group
                 error_in_group = true
@@ -164,12 +201,15 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
     # replace {{value}} with the actual value
     prefix = part_evaluator("#{locales[locale]["#{key}_prefix"]}", errors[0])
 
-    return default_message_builder(
+    error_data = $.extend([{}].concat(errors)...)
+
+    return message_builders[build_mode.toLowerCase()](
         key
         phase
         build_mode
         locale
         parts
+        error_data
         prefix
     )
 

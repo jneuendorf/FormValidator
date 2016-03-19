@@ -11,11 +11,10 @@
 #       -> error_message_type: String (required)
 #       -> properties needed for the according error message (-> parameters)
 #       -> properties needed for other validators (as they will be able to access other validators' results)
-# TODO:170 remove option parameters (now done by constraint validators)
-# TODO:150 maybe use https://github.com/dropbox/zxcvbn and https://css-tricks.com/password-strength-meter/ for password validation
+# IDEA:130 use https://github.com/dropbox/zxcvbn and https://css-tricks.com/password-strength-meter/ for password validation
 validators =
     # "private" validator (used in other validators)
-    _number: (str, elem, min, max, include_min = true, include_max = true) ->
+    _number: (str, elem) ->
         str = str.replace(/\s/g, "")
         if str[0] is "+"
             str = str.slice(1)
@@ -34,7 +33,7 @@ validators =
                 str = str.slice(0, -1)
 
         n = parseFloat(str)
-        # TODO:210 this doesnt work for inputs like 10e4 or 1e+5
+        # NOTE:200 this doesnt work for inputs like 10e4 or 1e+5
         if isNaN(n) or not isFinite(n) or str isnt "#{n}"
             return {
                 error_message_type: "number"
@@ -47,7 +46,7 @@ validators =
             _number: n
             _string: str
         }
-    _text: (str, elem, min, max) ->
+    _text: (str, elem) ->
         return str.length > 0
     email: (str, elem) ->
         if str.indexOf("@") < 0
@@ -59,7 +58,6 @@ validators =
             return {
                 error_message_type: "email_many_at"
             }
-        # TODO:30 check for trailing dot?
         if parts.length is 2 and parts[0] isnt "" and parts[1] isnt ""
             # check if there is a dot in domain parts
             if str.indexOf(".", str.indexOf("@")) < 0 or str[str.length - 1] is "."
@@ -70,8 +68,8 @@ validators =
         return {
             error_message_type: "email"
         }
-    integer: (str, elem, min, max, include_min, include_max) ->
-        res = @_number(str, elem, min, max, include_min, include_max)
+    integer: (str, elem) ->
+        res = @_number(str, elem)
         if res.valid is true
             if res._number is Math.floor(res._number)
                 return true
@@ -88,8 +86,8 @@ validators =
             }
         res.error_message_type = res.error_message_type.replace("number_", "integer_")
         return res
-    number: (str, elem, min, max, include_min, include_max) ->
-        res = @_number(str, elem, min, max, include_min, include_max)
+    number: (str, elem) ->
+        res = @_number(str, elem)
         if res.valid is true
             return true
         return res
@@ -103,7 +101,7 @@ validators =
                 error_message_type: "phone"
             }
         return true
-    text: (str, elem, min, max) ->
+    text: (str, elem) ->
         return str.length > 0
     # element validators: expect jquery object
     radio: (str, elem) ->

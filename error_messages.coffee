@@ -22,9 +22,12 @@ $.extend locales.de, {
     value_text: "Das Textfeld muss ausgefüllt werden"
     # constraint validators (VALIDATION_PHASES_SINGULAR.CONSTRAINTS = 'constraint')
     # pre-, suffixes (those defaults are used for all constraint_... keys that do not define it's own prefix/suffix)
+    # (undefined affixes default to "")
     constraint_enumerate_prefix: "'{{value}}'"
     # constraint_enumerate_suffix: ""
     constraint_list_prefix: "'{{value}}'"
+    constraint_sentence_prefix: "'{{value}}'"
+    # constraint_sentence_suffix: "."
     # main constraint messages
     constraint_blacklist_prefix: "darf"
     constraint_blacklist: "keines der Zeichen '{{blacklist}}'"
@@ -78,16 +81,18 @@ $.extend locales.en, {
     value_select: "Another option must be selected"
     value_text: "Please fill in this text field"
     # constraint validators (VALIDATION_PHASES_SINGULAR.CONSTRAINTS = 'constraint')
-    # pre-, suffixes
+    # pre-, suffixes (undefined affixes default to "")
     constraint_enumerate_prefix: "'{{value}}'"
     # constraint_enumerate_suffix: ""
     constraint_list_prefix: "'{{value}}'"
+    constraint_sentence_prefix: "'{{value}}'"
+    # constraint_sentence_suffix: "."
     # main constraint messages
     constraint_blacklist_prefix: "must not"
     constraint_blacklist: "contain any of the characters '{{blacklist}}'"
     constraint_blacklist_suffix: ""
     constraint_whitelist_prefix: "must"
-    constraint_whitelist: "contain each of the characters '{{whitelist}}'"
+    constraint_whitelist: "contain all of the characters '{{whitelist}}'"
     constraint_whitelist_suffix: ""
     constraint_max_prefix: "must not"
     constraint_max: "be greater than or equal to {{max}}"
