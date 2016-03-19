@@ -152,15 +152,15 @@ class window.FormValidator
         @form_modifier = new FormModifier(@, options)
 
         # default css error classes. can be overridden by data-fv-error-classes on any error target
-        @error_classes          = options.error_classes or @form.attr("data-fv-error-classes") or ""
-        @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or ""
+        @error_classes = options.error_classes or @form.attr("data-fv-error-classes") or "fv-invalid"
+        @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or "fv-invalid-dependency"
+
         @validators             = $.extend {}, CLASS.validators, options.validators
         @validation_options     = options.validation_options or null
         @constraint_validators  = $.extend {}, CLASS.constraint_validators, options.constraint_validators
         # @error_messages         = options.error_messages
         @build_mode             = options.build_mode or BUILD_MODES.DEFAULT
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
-        # TODO:60 use this!
         @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
         @locale                 = options.locale or "en"
 

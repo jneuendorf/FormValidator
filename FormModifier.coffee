@@ -124,13 +124,13 @@ class FormModifier
                 @_apply_error_classes(
                     elem
                     data.error_targets
-                    data["error_classes"] or form_validator["error_classes"]
+                    data.error_classes or form_validator.error_classes
                     is_valid
                 )
                 @_apply_error_classes(
                     elem
                     data.depends_on
-                    data["dependency_error_classes"] or form_validator["dependency_error_classes"]
+                    data.dependency_error_classes or form_validator.dependency_error_classes
                     valid_dependencies
                 )
 

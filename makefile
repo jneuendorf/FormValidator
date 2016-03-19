@@ -10,13 +10,15 @@ COFFEE_FILES = setup.coffee namespaces.coffee \
 DEBUG_FILE = debug.coffee
 TEST_FILES = test_validators.coffee test_general_behavior.coffee test_dependencies.coffee test_constraints.coffee $(PROJECT_NAME).test.coffee
 
-CSS_FILES = css/FormValidator.sass
+# CSS_FILES = css/FormValidator.sass
+CSS_FILES = theme.default theme.bootstrap theme.bootstrap-icons
 
 
 make:
 	# compile coffee
 	cat $(DEBUG_FILE) $(COFFEE_FILES) | coffee --compile --stdio > $(PROJECT_NAME).js
-	sassc $(CSS_FILES) css/$(PROJECT_NAME).css
+	# sassc $(CSS_FILES) css/$(PROJECT_NAME).css
+	sh ./make_sass.sh $(CSS_FILES)
 
 
 test: make
@@ -26,13 +28,15 @@ min:
 	cat $(COFFEE_FILES) | coffee --compile --stdio > $(PROJECT_NAME).temp.js
 	uglifyjs $(PROJECT_NAME).temp.js -o $(PROJECT_NAME).min.js -c drop_console=true -d DEBUG=false -m
 	rm -f $(PROJECT_NAME).temp.js
-	sassc --style compressed $(CSS_FILES) css/$(PROJECT_NAME).min.css
+	# sassc --style compressed $(CSS_FILES) css/$(PROJECT_NAME).min.css
+	sh ./make_sass_compressed.sh.sh $(CSS_FILES)
 
 dist: make min
 	cp $(PROJECT_NAME).js dist
 	cp $(PROJECT_NAME).min.js dist
-	cp css/$(PROJECT_NAME).css dist
-	cp css/$(PROJECT_NAME).min.css dist
+	# cp css/$(PROJECT_NAME).css dist
+	# cp css/$(PROJECT_NAME).min.css dist
+	sh ./make_dist_copy.sh $(CSS_FILES)
 
 all: make test min
 

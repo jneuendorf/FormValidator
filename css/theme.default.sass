@@ -1,0 +1,45 @@
+$invalid: rgb(255, 0, 0)
+$invalid-border: rgba(210, 0, 0, 0.9)
+$invalid-shadow: rgba(210, 0, 0, .6)
+$gray-shadow: rgba(0, 0, 0, .075)
+
+$invalid-dep: #8a6d3b
+$invalid-dep-border: #faebcc
+$invalid-dep-shadow: rgba(250, 235, 204, .6)
+
+
+.fv-error-message
+    display: inline-block
+
+.fv-invalid
+    color: $invalid !important
+
+input.fv-invalid
+    border-color: $invalid-border
+    outline: 0
+
+input.fv-invalid:focus,
+input[type='checkbox'].fv-invalid,
+input[type='radio'].fv-invalid
+    -webkit-box-shadow: inset 0 1px 1px $gray-shadow, 0 0 8px $invalid-shadow
+    border-color: $invalid-border
+    box-shadow: inset 0 1px 1px $gray-shadow, 0 0 8px $invalid-shadow
+
+.fv-invalid-dependency:not(.fv-invalid)
+    color: $invalid-dep !important
+
+input.fv-invalid-dependency
+    border-color: $invalid-dep-border
+    outline: 0
+
+input.fv-invalid-dependency:focus,
+input[type='checkbox'].fv-invalid-dependency,
+input[type='radio'].fv-invalid-dependency
+    -webkit-box-shadow: inset 0 1px 1px $gray-shadow, 0 0 8px $invalid-dep-shadow
+    border-color: $invalid-dep-border
+    box-shadow: inset 0 1px 1px $gray-shadow, 0 0 8px $invalid-dep-shadow
+
+// <div class="form-group has-warning">
+//   <label class="control-label" for="inputWarning1">Input with warning</label>
+//   <input type="text" class="form-control" id="inputWarning1">
+// </div>

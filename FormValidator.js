@@ -564,7 +564,7 @@
     constraint_blacklist: "contain any of the characters '{{blacklist}}'",
     constraint_blacklist_suffix: "",
     constraint_whitelist_prefix: "must",
-    constraint_whitelist: "contain each of the characters '{{whitelist}}'",
+    constraint_whitelist: "contain all of the characters '{{whitelist}}'",
     constraint_whitelist_suffix: "",
     constraint_max_prefix: "must not",
     constraint_max: "be greater than or equal to {{max}}",
@@ -1052,8 +1052,8 @@
           message = grouped_error.message;
         }
         if (options.apply_error_classes === true) {
-          this._apply_error_classes(elem, data.error_targets, data["error_classes"] || form_validator["error_classes"], is_valid);
-          this._apply_error_classes(elem, data.depends_on, data["dependency_error_classes"] || form_validator["dependency_error_classes"], valid_dependencies);
+          this._apply_error_classes(elem, data.error_targets, data.error_classes || form_validator.error_classes, is_valid);
+          this._apply_error_classes(elem, data.depends_on, data.dependency_error_classes || form_validator.dependency_error_classes, valid_dependencies);
         }
         this._process_error_message(message, elem, data);
       }
@@ -1219,8 +1219,8 @@
       this.form = form;
       this.fields = null;
       this.form_modifier = new FormModifier(this, options);
-      this.error_classes = options.error_classes || this.form.attr("data-fv-error-classes") || "";
-      this.dependency_error_classes = options.dependency_error_classes || this.form.attr("data-fv-dependency-error-classes") || "";
+      this.error_classes = options.error_classes || this.form.attr("data-fv-error-classes") || "fv-invalid";
+      this.dependency_error_classes = options.dependency_error_classes || this.form.attr("data-fv-dependency-error-classes") || "fv-invalid-dependency";
       this.validators = $.extend({}, CLASS.validators, options.validators);
       this.validation_options = options.validation_options || null;
       this.constraint_validators = $.extend({}, CLASS.constraint_validators, options.constraint_validators);
