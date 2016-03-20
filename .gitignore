@@ -1,2 +1,4 @@
 .imdone
 .imdone/*
+*.DS_Store
+.DS_Store

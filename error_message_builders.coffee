@@ -1,4 +1,4 @@
-# TODO:150 structure this file for better maintainance
+# TODO:90 structure this file for better maintainance
 # override build_mode_helpers here if needed (same signature as a build_mode_helper). i.e. enumeration could be different in other languages
 locale_build_mode_helpers =
     de: {}
@@ -154,7 +154,7 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
     ungrouped_errors = []
     for error in errors
         error_in_group = false
-        # TODO:120 make constraint_validator_groups accessible from class and use this ref here
+        # TODO:70 make constraint_validator_groups accessible from class and use this ref here
         for group, i in constraint_validator_groups
             if error.type in group
                 error_in_group = true
@@ -181,7 +181,7 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
         for error in errors
             keys.push error.type
             if error.options?
-                for option, val of error.options when include_constraint_option_in_locale_key(option, val)
+                for option, val of error.options when include_constraint_option_in_locale_key(option, val, locale)
                     keys.push option
 
         key = get_combined_key(keys, locale, key_prefix)

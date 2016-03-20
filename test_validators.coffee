@@ -256,7 +256,7 @@ include_validator_tests = () ->
 
         ############################################################################################################
         # NUMBER
-        # TODO:80 add min and max tests
+        # TODO:60 add min and max tests
         it "number", () ->
             log "number"
             validator = (str, elem) ->

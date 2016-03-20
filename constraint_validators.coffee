@@ -55,8 +55,7 @@ constraint_validator_groups = [
     # ["max_length", "min_length"]
 ]
 
-# define when to include a constraint validator option in the locale key (and when not (if not matching the below value))
-# TODO:100 does this make sense?
+# define when to include a constraint validator option in the locale key (and when not - if not matching the below value)
 # value can also be: function(String locale) -> Mixed value
 # i.e. for include_max a function could be defined if different locales formulate the according error message differently:
 # - EN could be like 'the value is not less than {{max}}' (max is not included in valid range => locale key = "constraint_max") and
@@ -73,5 +72,10 @@ constraint_validator_options_in_locale_key =
     include_max: true
     include_min: true
 
-include_constraint_option_in_locale_key = (option, value) ->
-    return value? and "#{constraint_validator_options_in_locale_key[option]}" is "#{value}"
+include_constraint_option_in_locale_key = (option, value, locale) ->
+    if value?
+        # REVIEW: consider if string matching does the job
+        if not constraint_validator_options_in_locale_key[option] instanceof Function
+            return "#{constraint_validator_options_in_locale_key[option]}" is "#{value}"
+        return "#{constraint_validator_options_in_locale_key[option](locale)}" is "#{value}"
+    return false

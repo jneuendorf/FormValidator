@@ -1,7 +1,6 @@
 class window.FormValidator
-    # TODO:70 add effects for dependencies
-    # TODO:10 create themes
-    # TODO:90 create bootstrap theme that uses bootstrap validation states (+ maybe icons)
+    # TODO:50 add effects for dependencies
+    # TODO:0 create bootstrap theme that uses bootstrap validation states (+ maybe icons)
 
 
     ########################################################################################################################
@@ -116,7 +115,9 @@ class window.FormValidator
         $elem = $(@)
 
         # prevent click in textfields (which also triggers the change event on previously focussed inputs) to trigger validation
-        # TODO:140 negate selector to be like not(input[type=hidden], ...)
+        # TODO:80 negate selector to be like not(input[type=hidden], ...)
+
+        # possible type attribute values are: button, checkbox, color, date, datetime, datetime-local, email, file, hidden, image, month, number, password, radio, range, reset, search, submit, tel, text, time, url, week
         if (evt.type is "click" or evt.type is "change") and $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length is $elem.length
             return true
 
@@ -482,21 +483,19 @@ class window.FormValidator
         phase = VALIDATION_PHASES.VALUE
         if value_has_changed
             if prev_phases_valid or not options.stop_on_error
-                # TODO:110 is this var still needed??
-                current_error = null
                 validation_res = @_validate_value(elem, data, value_info)
                 # element is invalid
                 if validation_res isnt true
                     prev_phases_valid = false
                     data.valid_value = false
-                    current_error =
+                    data.errors[phase] = [{
                         element: elem
                         error_message_type: validation_res.error_message_type
                         phase: phase
                         required: is_required
                         type: type
                         value: value
-                    data.errors[phase] = [current_error]
+                    }]
                     # first_invalid_element ?= elem
                 else
                     data.valid_value = true
@@ -549,22 +548,20 @@ class window.FormValidator
                 @_cache_attribute(elem, data, "output_preprocessed")
                 @_set_element_data(elem, data)
 
-            # replace old value with post processed value
-            if data.postprocess is true
-                value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
+            if data.postprocess is true or data.output_preprocessed is true
+                # replace old value with post processed value
+                if data.postprocess is true
+                    value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
+                # replace old value with pre processed value
+                else if data.output_preprocessed is true
+                    value = @preprocessors[type]?.call(@preprocessors, value, elem, @locale)
+
                 if usedValFunc
                     elem.val value
                 else
                     elem.text value
-                current_error?.value = value
-            # replace old value with pre processed value
-            else if data.output_preprocessed is true
-                value = @preprocessors[type]?.call(@preprocessors, value, elem, @locale)
-                if usedValFunc
-                    elem.val value
-                else
-                    elem.text value
-                current_error?.value = value
+                for error in errors
+                    error.value = value
         else
             if data.valid isnt false
                 data.valid = false

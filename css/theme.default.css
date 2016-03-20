@@ -18,13 +18,13 @@ input[type='radio'].fv-invalid {
 .fv-invalid-dependency:not(.fv-invalid) {
   color: #8a6d3b !important; }
 
-input.fv-invalid-dependency {
+input.fv-invalid-dependency:not(.fv-invalid) {
   border-color: #faebcc;
   outline: 0; }
 
-input.fv-invalid-dependency:focus,
-input[type='checkbox'].fv-invalid-dependency,
-input[type='radio'].fv-invalid-dependency {
+input.fv-invalid-dependency:not(.fv-invalid):focus,
+input[type='checkbox'].fv-invalid-dependency:not(.fv-invalid),
+input[type='radio'].fv-invalid-dependency:not(.fv-invalid) {
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(250, 235, 204, 0.6);
   border-color: #faebcc;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(250, 235, 204, 0.6); }
