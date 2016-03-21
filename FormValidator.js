@@ -468,8 +468,14 @@
     include_min: true
   };
 
-  include_constraint_option_in_locale_key = function(option, value) {
-    return (value != null) && ("" + constraint_validator_options_in_locale_key[option]) === ("" + value);
+  include_constraint_option_in_locale_key = function(option, value, locale) {
+    if (value != null) {
+      if (!constraint_validator_options_in_locale_key[option] instanceof Function) {
+        return ("" + constraint_validator_options_in_locale_key[option]) === ("" + value);
+      }
+      return ("" + (constraint_validator_options_in_locale_key[option](locale))) === ("" + value);
+    }
+    return false;
   };
 
   locales = {
@@ -854,7 +860,7 @@
           ref1 = error.options;
           for (option in ref1) {
             val = ref1[option];
-            if (include_constraint_option_in_locale_key(option, val)) {
+            if (include_constraint_option_in_locale_key(option, val, locale)) {
               keys.push(option);
             }
           }
@@ -1147,7 +1153,7 @@
     };
 
     $(document).on("click", "[data-fv-start]", function() {
-      var $elem, container, error, error1, form_validator, options;
+      var $elem, container, error, error1, error2, form_validator, options;
       $elem = $(this);
       if ((container = $elem.data("_form_validator_container")) == null) {
         container = $elem.closest($elem.attr("data-fv-start"));
@@ -1166,7 +1172,12 @@
             options = JSON.parse(options);
           } catch (error1) {
             error = error1;
-            options = window[options]();
+            try {
+              options = window[options]();
+            } catch (error2) {
+              error = error2;
+              options = {};
+            }
           }
         }
         form_validator = FormValidator["new"](container, options);
@@ -1176,10 +1187,12 @@
       return false;
     });
 
-    $(document).on("change click keyup", "[data-fv-real-time] [data-fv-validate]", function(evt) {
-      var $elem, container, errors, form_validator;
+    $(document).on("change keyup", "[data-fv-real-time] [data-fv-validate]", function(evt) {
+      var $elem, container, form_validator, is_textfield, ref, type;
       $elem = $(this);
-      if ((evt.type === "click" || evt.type === "change") && $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length === $elem.length) {
+      type = ((ref = $elem.attr("type")) != null ? ref.toLowerCase() : void 0) || "";
+      is_textfield = $elem.filter("textarea").length === 1 || $elem.filter("input").length && (type === "button" || type === "checkbox" || type === "color" || type === "file" || type === "image" || type === "radio" || type === "range" || type === "submit");
+      if (evt.type === "change" && is_textfield) {
         return true;
       }
       container = $elem.closest("[data-fv-real-time]");
@@ -1188,9 +1201,14 @@
           form_validator = FormValidator["new"](container);
           container.data("_form_validator", form_validator);
         }
-        errors = form_validator.validate();
-        if (errors.length > 0) {
-          $elem.focus();
+        if (DEBUG) {
+          console.log(form_validator.validate({
+            focus_invalid: false
+          }));
+        } else {
+          form_validator.validate({
+            focus_invalid: false
+          });
         }
       }
       return false;
@@ -1530,7 +1548,7 @@
     };
 
     FormValidator.prototype._validate_element = function(elem, data, value_info, options) {
-      var constraint_name, current_error, dependency_elements, dependency_error, dependency_errors, dependency_mode, errors, is_required, l, len, original_value, phase, prev_phases_valid, ref, ref1, ref2, ref3, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed;
+      var constraint_name, dependency_elements, dependency_error, dependency_errors, dependency_mode, error, errors, is_required, l, len, len1, m, original_value, phase, prev_phases_valid, ref, ref1, ref2, ref3, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed;
       errors = [];
       prev_phases_valid = true;
       is_required = data.required;
@@ -1561,20 +1579,20 @@
       phase = VALIDATION_PHASES.VALUE;
       if (value_has_changed) {
         if (prev_phases_valid || !options.stop_on_error) {
-          current_error = null;
           validation_res = this._validate_value(elem, data, value_info);
           if (validation_res !== true) {
             prev_phases_valid = false;
             data.valid_value = false;
-            current_error = {
-              element: elem,
-              error_message_type: validation_res.error_message_type,
-              phase: phase,
-              required: is_required,
-              type: type,
-              value: value
-            };
-            data.errors[phase] = [current_error];
+            data.errors[phase] = [
+              {
+                element: elem,
+                error_message_type: validation_res.error_message_type,
+                phase: phase,
+                required: is_required,
+                type: type,
+                value: value
+              }
+            ];
           } else {
             data.valid_value = true;
             data.errors[phase] = [];
@@ -1626,25 +1644,20 @@
           this._cache_attribute(elem, data, "output_preprocessed");
           this._set_element_data(elem, data);
         }
-        if (data.postprocess === true) {
-          value = (ref2 = this.postprocessors[type]) != null ? ref2.call(this.postprocessors, value, elem, this.locale) : void 0;
+        if (data.postprocess === true || data.output_preprocessed === true) {
+          if (data.postprocess === true) {
+            value = (ref2 = this.postprocessors[type]) != null ? ref2.call(this.postprocessors, value, elem, this.locale) : void 0;
+          } else if (data.output_preprocessed === true) {
+            value = (ref3 = this.preprocessors[type]) != null ? ref3.call(this.preprocessors, value, elem, this.locale) : void 0;
+          }
           if (usedValFunc) {
             elem.val(value);
           } else {
             elem.text(value);
           }
-          if (current_error != null) {
-            current_error.value = value;
-          }
-        } else if (data.output_preprocessed === true) {
-          value = (ref3 = this.preprocessors[type]) != null ? ref3.call(this.preprocessors, value, elem, this.locale) : void 0;
-          if (usedValFunc) {
-            elem.val(value);
-          } else {
-            elem.text(value);
-          }
-          if (current_error != null) {
-            current_error.value = value;
+          for (m = 0, len1 = errors.length; m < len1; m++) {
+            error = errors[m];
+            error.value = value;
           }
         }
       } else {

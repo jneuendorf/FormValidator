@@ -103,7 +103,10 @@ class window.FormValidator
                 try
                     options = JSON.parse(options)
                 catch error
-                    options = window[options]()
+                    try
+                        options = window[options]()
+                    catch error
+                        options = {}
 
             form_validator = FormValidator.new(container, options)
             container.data("_form_validator", form_validator)
@@ -111,14 +114,14 @@ class window.FormValidator
         return false
 
     # enable real-time validation
-    $(document).on "change click keyup", "[data-fv-real-time] [data-fv-validate]", (evt) ->
+    $(document).on "change keyup", "[data-fv-real-time] [data-fv-validate]", (evt) ->
         $elem = $(@)
-
-        # prevent click in textfields (which also triggers the change event on previously focussed inputs) to trigger validation
-        # TODO:80 negate selector to be like not(input[type=hidden], ...)
-
-        # possible type attribute values are: button, checkbox, color, date, datetime, datetime-local, email, file, hidden, image, month, number, password, radio, range, reset, search, submit, tel, text, time, url, week
-        if (evt.type is "click" or evt.type is "change") and $elem.filter("textarea, input[type='text'], input[type='number'], input[type='date'], input[type='month'], input[type='week'], input[type='time'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='search'], input[type='url']").length is $elem.length
+        # prevent change event for textfields (keyup will trigger validation instead)
+        type = $elem.attr("type")?.toLowerCase() or ""
+        is_textfield = $elem.filter("textarea").length is 1 or $elem.filter("input").length and type in [
+            "button", "checkbox", "color", "file", "image", "radio", "range", "submit"
+        ]
+        if evt.type is "change" and is_textfield
             return true
 
         container = $elem.closest("[data-fv-real-time]")
@@ -126,11 +129,10 @@ class window.FormValidator
             if not (form_validator = container.data("_form_validator"))?
                 form_validator = FormValidator.new(container)
                 container.data("_form_validator", form_validator)
-            errors = form_validator.validate()
-            # if there are errors, keep the focus on the current element because it would otherwise move elsewhere
-            #  without errors we just keep the focus because the form validator would not change it
-            if errors.length > 0
-                $elem.focus()
+            if DEBUG
+                console.log form_validator.validate({focus_invalid: false})
+            else
+                form_validator.validate({focus_invalid: false})
         return false
 
     ########################################################################################################################
