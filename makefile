@@ -29,7 +29,7 @@ min:
 	uglifyjs $(PROJECT_NAME).temp.js -o $(PROJECT_NAME).min.js -c drop_console=true -d DEBUG=false -m
 	rm -f $(PROJECT_NAME).temp.js
 	# sassc --style compressed $(CSS_FILES) css/$(PROJECT_NAME).min.css
-	sh ./make_sass_compressed.sh.sh $(CSS_FILES)
+	sh ./make_sass_compressed.sh $(CSS_FILES)
 
 dist: make min
 	cp $(PROJECT_NAME).js dist
