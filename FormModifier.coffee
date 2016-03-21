@@ -10,7 +10,7 @@ class FormModifier
             @error_output_mode = ERROR_OUTPUT_MODES.DEFAULT
 
     # class_kind is either "error_classes" or "dependency_error_classes"
-    _apply_error_classes: (element, error_targets, classes, is_valid) ->
+    _apply_classes: (element, error_targets, classes, is_valid) ->
         if error_targets?
             targets = @form_validator._find_targets(error_targets, element)
             for target, i in targets
@@ -121,13 +121,19 @@ class FormModifier
                 message = grouped_error.message
 
             if options.apply_error_classes is true
-                @_apply_error_classes(
+                @_apply_classes(
                     elem
                     data.error_targets
                     data.error_classes or form_validator.error_classes
                     is_valid
                 )
-                @_apply_error_classes(
+                @_apply_classes(
+                    elem
+                    data.error_targets
+                    data.success_classes or form_validator.success_classes
+                    not is_valid
+                )
+                @_apply_classes(
                     elem
                     data.depends_on
                     data.dependency_error_classes or form_validator.dependency_error_classes

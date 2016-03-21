@@ -1,6 +1,5 @@
 class window.FormValidator
     # TODO:50 add effects for dependencies
-    # TODO:0 create bootstrap theme that uses bootstrap validation states (+ maybe icons)
 
 
     ########################################################################################################################
@@ -156,6 +155,7 @@ class window.FormValidator
 
         # default css error classes. can be overridden by data-fv-error-classes on any error target
         @error_classes = options.error_classes or @form.attr("data-fv-error-classes") or "fv-invalid"
+        @success_classes = options.success_classes or @form.attr("data-fv-success-classes") or "fv-valid"
         @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or "fv-invalid-dependency"
 
         @validators             = $.extend {}, CLASS.validators, options.validators

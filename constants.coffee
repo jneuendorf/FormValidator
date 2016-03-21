@@ -45,6 +45,7 @@ OPTIONAL_CACHE = [
     # field data
     "dependency_mode"
     "error_classes"
+    "success_classes"
     "dependency_error_classes"
     "error_targets"
     "group"

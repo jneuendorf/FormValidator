@@ -1,0 +1,78 @@
+$valid: #555
+$valid-border: #3c763d
+$valid-border-focus: #2b542c
+$valid-shadow: #67b168
+$valid-inset-shadow: rgba(0, 0, 0, .075)
+
+$invalid: #555
+$invalid-border: #a94442
+$invalid-border-focus: #843534
+$invalid-shadow: #ce8483
+$invalid-inset-shadow: rgba(0, 0, 0, .075)
+
+$invalid-dep: #555
+$invalid-dep-border: #8a6d3b
+$invalid-dep-border-focus: #66512c
+$invalid-dep-shadow: #c0a16b
+$invalid-dep-inset-shadow: rgba(0, 0, 0, .075)
+
+// SUCCESS (VALID)
+.fv-valid
+    color: $valid !important
+
+input.fv-valid
+    border-color: $valid-border
+    outline: 0
+
+input.fv-valid::after
+    content: 'x'
+    height: 20px
+    position: relative
+    width: 20px
+
+input.fv-valid:focus,
+input[type='checkbox'].fv-valid,
+input[type='radio'].fv-valid
+    -webkit-box-shadow: inset 0 1px 1px $valid-inset-shadow, 0 0 8px $valid-shadow
+    border-color: $valid-border-focus
+    box-shadow: inset 0 1px 1px $valid-inset-shadow, 0 0 8px $valid-shadow
+
+// ERROR (INVALID)
+.fv-invalid
+    color: $invalid !important
+
+input.fv-invalid
+    border-color: $invalid-border
+    outline: 0
+
+input.fv-invalid:focus,
+input[type='checkbox'].fv-invalid,
+input[type='radio'].fv-invalid
+    -webkit-box-shadow: inset 0 1px 1px $invalid-inset-shadow, 0 0 8px $invalid-shadow
+    border-color: $invalid-border-focus
+    box-shadow: inset 0 1px 1px $invalid-inset-shadow, 0 0 8px $invalid-shadow
+
+// DEPENDENCY ERROR
+.fv-invalid-dependency:not(.fv-invalid)
+    color: $invalid-dep !important
+
+input.fv-invalid-dependency:not(.fv-invalid)
+    border-color: $invalid-dep-border
+    outline: 0
+
+input.fv-invalid-dependency:not(.fv-invalid):focus,
+input[type='checkbox'].fv-invalid-dependency:not(.fv-invalid),
+input[type='radio'].fv-invalid-dependency:not(.fv-invalid)
+    -webkit-box-shadow: inset 0 1px 1px $invalid-dep-inset-shadow, 0 0 8px $invalid-dep-shadow
+    border-color: $invalid-dep-border-focus
+    box-shadow: inset 0 1px 1px $invalid-dep-inset-shadow, 0 0 8px 2px $invalid-dep-shadow
+
+// <div class="form-group has-warning">
+//   <label class="control-label" for="inputWarning1">Input with warning</label>
+//   <input type="text" class="form-control" id="inputWarning1">
+// </div>
+
+
+// used for error output mode "BELOW"
+.fv-error-message
+    display: inline-block

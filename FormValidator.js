@@ -271,7 +271,7 @@
 
   REQUIRED_CACHE = ["depends_on", "id", "name", "preprocess", "required", "type"];
 
-  OPTIONAL_CACHE = ["dependency_mode", "error_classes", "dependency_error_classes", "error_targets", "group", "output_preprocessed", "postprocess", "constraints", "errors", "valid_constraints", "valid_dependencies", "valid_value", "value"];
+  OPTIONAL_CACHE = ["dependency_mode", "error_classes", "success_classes", "dependency_error_classes", "error_targets", "group", "output_preprocessed", "postprocess", "constraints", "errors", "valid_constraints", "valid_dependencies", "valid_value", "value"];
 
   DEFAULT_ATTR_VALUES = {
     PREPROCESS: true,
@@ -927,7 +927,7 @@
       }
     }
 
-    FormModifier.prototype._apply_error_classes = function(element, error_targets, classes, is_valid) {
+    FormModifier.prototype._apply_classes = function(element, error_targets, classes, is_valid) {
       var i, l, len, target, targets;
       if (error_targets != null) {
         targets = this.form_validator._find_targets(error_targets, element);
@@ -1058,8 +1058,9 @@
           message = grouped_error.message;
         }
         if (options.apply_error_classes === true) {
-          this._apply_error_classes(elem, data.error_targets, data.error_classes || form_validator.error_classes, is_valid);
-          this._apply_error_classes(elem, data.depends_on, data.dependency_error_classes || form_validator.dependency_error_classes, valid_dependencies);
+          this._apply_classes(elem, data.error_targets, data.error_classes || form_validator.error_classes, is_valid);
+          this._apply_classes(elem, data.error_targets, data.success_classes || form_validator.success_classes, !is_valid);
+          this._apply_classes(elem, data.depends_on, data.dependency_error_classes || form_validator.dependency_error_classes, valid_dependencies);
         }
         this._process_error_message(message, elem, data);
       }
@@ -1238,6 +1239,7 @@
       this.fields = null;
       this.form_modifier = new FormModifier(this, options);
       this.error_classes = options.error_classes || this.form.attr("data-fv-error-classes") || "fv-invalid";
+      this.success_classes = options.success_classes || this.form.attr("data-fv-success-classes") || "fv-valid";
       this.dependency_error_classes = options.dependency_error_classes || this.form.attr("data-fv-dependency-error-classes") || "fv-invalid-dependency";
       this.validators = $.extend({}, CLASS.validators, options.validators);
       this.validation_options = options.validation_options || null;
