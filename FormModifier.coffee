@@ -89,8 +89,28 @@ class FormModifier
         else
             error_output_mode = @error_output_mode.toLowerCase()
             @["_set_message_#{error_output_mode}"](message, element, data)
-
         return @
+
+    _process_max_length: (constraint, element, data) ->
+        if constraint.options.enforce_max_length is "true"
+            length = parseInt(constraint.value, 10)
+            val = data.value.slice(0, length)
+            data.value = val
+            element.val(val)
+            return true
+        return false
+
+    _process_min_length: (constraint, element, data) ->
+        if constraint.options.enforce_min_length is "true"
+            length = parseInt(constraint.value, 10)
+            val = data.value + ("." for i in [0...(data.value.length - length)]).join("")
+            data.value = val
+            element.val(val)
+            return true
+        return false
+
+    _process_constraint: (constraint, element, data) ->
+        return @["_process_#{constraint.name}"]?(constraint, element, data) or false
 
     modify: (grouped_errors, options) ->
         form_validator = @form_validator
@@ -115,9 +135,18 @@ class FormModifier
             else
                 is_valid = false
                 valid_dependencies = true
-                for error in grouped_error.errors when error.phase is VALIDATION_PHASES.DEPENDENCIES
-                    valid_dependencies = false
-                    break
+                for error in grouped_error.errors
+                    # set flag for dependency error classes
+                    if error.phase is VALIDATION_PHASES.DEPENDENCIES
+                        valid_dependencies = false
+                    # call according function for processing invalid constraints (i.e. max_length + enforce_max_length)
+                    else if error.phase is VALIDATION_PHASES.CONSTRAINTS
+                        for constraint in data.constraints when constraint.name is error.type
+                            data_has_changed = @_process_constraint(constraint, elem, data)
+                            if data_has_changed
+                                form_validator._set_element_data(elem, data)
+                            break
+
                 message = grouped_error.message
 
             if options.apply_error_classes is true

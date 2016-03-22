@@ -1,7 +1,6 @@
 class window.FormValidator
     # TODO:50 add effects for dependencies
 
-
     ########################################################################################################################
     ########################################################################################################################
     # CONSTANTS
@@ -15,8 +14,6 @@ class window.FormValidator
 
     # defined in constraint_validators.coffee
     @constraint_validators = constraint_validators
-    @constraint_validator_options = constraint_validator_options
-    @constraint_validator_groups = constraint_validator_groups
 
     # defined in validators.coffee
     @validators = validators
@@ -29,13 +26,13 @@ class window.FormValidator
 
     @default_preprocessors =
         number: (str, elem, locale) ->
-            switch locale
+            return switch locale
                 when "de"
                     str.replace(/\,/g, ".")
                 else
                     str
         integer: (str, elem, locale) ->
-            switch locale
+            return switch locale
                 when "de"
                     str.replace(/\,/g, ".")
                 else
@@ -45,6 +42,17 @@ class window.FormValidator
     ########################################################################################################################
     ########################################################################################################################
     # CLASS METHODS
+
+    # can be used to modify unexposed configuration variables
+    @configure: (callback) ->
+        callback {
+            constraint_validator_groups: constraint_validator_groups
+            constraint_validator_options_in_locale_key: constraint_validator_options_in_locale_key
+            constraint_validator_options: constraint_validator_options
+            error_message_builders: error_message_builders
+            locale_build_mode_helpers: locale_build_mode_helpers
+        }
+        return @
 
     # for FormValidator.new see CONSTRUCTORS section
 
@@ -418,7 +426,7 @@ class window.FormValidator
             for constraint_name, constraint_validator of @constraint_validators
                 if (constraint_value = element.attr("data-fv-#{constraint_name.replace(/\_/g, "-")}"))?
                     # get options
-                    if (constraint_validator_options = CLASS.constraint_validator_options[constraint_name])?
+                    if (constraint_validator_options = CONSTRAINT_VALIDATOR_OPTIONS[constraint_name])?
                         options = {}
                         for option in constraint_validator_options
                             options[option] = element.attr("data-fv-#{option.replace(/\_/g, "-")}") or DEFAULT_ATTR_VALUES[option.toUpperCase()]
@@ -710,6 +718,7 @@ class window.FormValidator
                     data = @_cache_attribute elem, data, "error_targets", () ->
                         return @_get_error_targets(elem, type)
                     @_set_element_data(elem, data)
+                # TODO: use form modifier!!
                 @_apply_error_classes(elem, data.error_targets, true)
                 @_apply_dependency_error_classes(elem, data.depends_on, true)
                 continue

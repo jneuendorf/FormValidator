@@ -77,3 +77,27 @@ EXPOSED_CONSTANTS =
     VALIDATION_PHASES: VALIDATION_PHASES
     BUILD_MODES: BUILD_MODES
     ERROR_MESSAGE_CONFIG: ERROR_MESSAGE_CONFIG
+
+# define which constraint-validator options are compatible with a constraint validator
+# they are accessible in the according constraint validator in the options object
+# used in _validate_constraints()
+# => constraint validator options:
+#    - data-fv-include-max
+#    - data-fv-include-min
+#    - data-fv-regex-flags
+CONSTRAINT_VALIDATOR_OPTIONS =
+    max: [
+        "include_max"
+    ]
+    max_length: [
+        "enforce_max_length"
+    ]
+    min: [
+        "include_min"
+    ]
+    min_length: [
+        "enforce_min_length"
+    ]
+    regex: [
+        "regex_flags"
+    ]

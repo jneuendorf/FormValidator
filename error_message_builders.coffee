@@ -3,6 +3,12 @@
 locale_build_mode_helpers =
     de: {}
     en: {}
+locale_build_mode_helpers.de[BUILD_MODES.ENUMERATE] = null
+locale_build_mode_helpers.de[BUILD_MODES.SENTENCE] = null
+locale_build_mode_helpers.de[BUILD_MODES.LIST] = null
+locale_build_mode_helpers.en[BUILD_MODES.ENUMERATE] = null
+locale_build_mode_helpers.en[BUILD_MODES.SENTENCE] = null
+locale_build_mode_helpers.en[BUILD_MODES.LIST] = null
 
 
 # build-mode helpers (1 for each build mode): they define how parts of an error message are concatenated
@@ -88,6 +94,7 @@ sentence_message_builder = (key, phase, build_mode, locale, parts, error_data, p
     return parts.join("")
 
 list_message_builder = (key, phase, build_mode, locale, parts, error_data, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
+    # TODO: implement this
 
 message_builders =
     enumerate: enumerate_message_builder
@@ -154,7 +161,6 @@ error_message_builders[VALIDATION_PHASES.CONSTRAINTS] = (errors, phase, build_mo
     ungrouped_errors = []
     for error in errors
         error_in_group = false
-        # TODO:70 make constraint_validator_groups accessible from class and use this ref here
         for group, i in constraint_validator_groups
             if error.type in group
                 error_in_group = true

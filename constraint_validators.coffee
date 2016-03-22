@@ -23,31 +23,6 @@ constraint_validators =
             return false
         return true
 
-
-# define which constraint-validator options are compatible with a constraint validator
-# they are accessible in the according constraint validator in the options object
-# used in _validate_constraints()
-# => constraint validator options:
-#    - data-fv-include-max
-#    - data-fv-include-min
-#    - data-fv-regex-flags
-constraint_validator_options =
-    max: [
-        "include_max"
-    ]
-    max_length: [
-        "enforce_max_length"
-    ]
-    min: [
-        "include_min"
-    ]
-    min_length: [
-        "enforce_min_length"
-    ]
-    regex: [
-        "regex_flags"
-    ]
-
 # define which constraint validators are logically connected (and thus can potentially be combined to a new error message i.e. max + min => ...is not between... (instead of ...is not greater than or not less than...))
 # the groups must be disjoint (-> equivalence classes)
 constraint_validator_groups = [
@@ -71,11 +46,13 @@ constraint_validator_groups = [
 constraint_validator_options_in_locale_key =
     include_max: true
     include_min: true
+    enforce_max_length: true
+    enforce_min_length: true
 
 include_constraint_option_in_locale_key = (option, value, locale) ->
     if value?
         # REVIEW: consider if string matching does the job
-        if not constraint_validator_options_in_locale_key[option] instanceof Function
+        if constraint_validator_options_in_locale_key[option] not instanceof Function
             return "#{constraint_validator_options_in_locale_key[option]}" is "#{value}"
         return "#{constraint_validator_options_in_locale_key[option](locale)}" is "#{value}"
     return false
