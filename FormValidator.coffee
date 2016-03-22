@@ -1,5 +1,5 @@
 class window.FormValidator
-    # TODO:50 add effects for dependencies
+    # TODO:60 add effects for dependencies
 
     ########################################################################################################################
     ########################################################################################################################
@@ -457,7 +457,7 @@ class window.FormValidator
         return results
 
     _validate_element: (elem, data, value_info, options) ->
-        # TODO:40 use cached errors instead of always creating new ones!
+        # TODO:50 use cached errors instead of always creating new ones!
         errors = []
         # accumulator (AND of each phase's valid state)
         prev_phases_valid = true
@@ -688,7 +688,7 @@ class window.FormValidator
         first_invalid_element = null
 
         # determine validation order according to defined dependencies
-        # TODO:30 make this easier after refactoring toposort
+        # TODO:40 make this easier after refactoring toposort
         dependency_data = {}
         id_to_elem = {}
         for i in [0...fields.length]
@@ -718,7 +718,7 @@ class window.FormValidator
                     data = @_cache_attribute elem, data, "error_targets", () ->
                         return @_get_error_targets(elem, type)
                     @_set_element_data(elem, data)
-                # TODO: use form modifier!!
+                # TODO:10 use form modifier!!
                 @_apply_error_classes(elem, data.error_targets, true)
                 @_apply_dependency_error_classes(elem, data.depends_on, true)
                 continue

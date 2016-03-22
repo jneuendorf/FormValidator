@@ -1,4 +1,4 @@
-# TODO:90 structure this file for better maintainance
+# TODO:80 structure this file for better maintainance
 # override build_mode_helpers here if needed (same signature as a build_mode_helper). i.e. enumeration could be different in other languages
 locale_build_mode_helpers =
     de: {}
@@ -94,7 +94,7 @@ sentence_message_builder = (key, phase, build_mode, locale, parts, error_data, p
     return parts.join("")
 
 list_message_builder = (key, phase, build_mode, locale, parts, error_data, prefix, suffix, prefix_delimiter = " ", suffix_delimiter = " ") ->
-    # TODO: implement this
+    # TODO:0 implement this
 
 message_builders =
     enumerate: enumerate_message_builder
