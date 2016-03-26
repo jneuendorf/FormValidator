@@ -825,6 +825,31 @@
 
   })();
 
+  part_evaluator = function() {
+    var key, part, regex, substr, val, values;
+    part = arguments[0], values = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+    if (values.length === 1) {
+      values = values[0];
+    } else {
+      values = $.extend.apply($, values);
+    }
+    if (typeof part === "string") {
+      for (key in values) {
+        val = values[key];
+        substr = "{{" + key + "}}";
+        if (part.indexOf(substr) >= 0) {
+          regex = new RegExp(substr, "g");
+          part = part.replace(regex, val);
+        }
+      }
+      return part;
+    }
+    if (part instanceof Function) {
+      return part(values);
+    }
+    throw new Error("FormValidator: Error while building an error message. Expected mustache-like string or function but was given:", part, values);
+  };
+
   new MessageDataCreator(VALIDATION_PHASES.DEPENDENCIES, function(errors, phase, build_mode, locale) {
     var error, key, lang_data, name, names, parts, prefix_key, suffix_key;
     names = (function() {
@@ -1060,7 +1085,7 @@
 
   new MessageBuilder(BUILD_MODES.LIST, function(data, phase, build_mode, locale) {
     var sentence, sentences;
-    sentences = sentence_message_builder(data, phase, build_mode, locale);
+    sentences = message_builders[BUILD_MODES.SENTENCE].build_message(data, phase, build_mode, locale);
     if (sentences[sentences.length - 1] === ".") {
       sentences += " ";
     }
@@ -1077,31 +1102,6 @@
       return results1;
     })()).join("</li><li>")) + "</li></ul>";
   });
-
-  part_evaluator = function() {
-    var key, part, regex, substr, val, values;
-    part = arguments[0], values = 2 <= arguments.length ? slice.call(arguments, 1) : [];
-    if (values.length === 1) {
-      values = values[0];
-    } else {
-      values = $.extend.apply($, values);
-    }
-    if (typeof part === "string") {
-      for (key in values) {
-        val = values[key];
-        substr = "{{" + key + "}}";
-        if (part.indexOf(substr) >= 0) {
-          regex = new RegExp(substr, "g");
-          part = part.replace(regex, val);
-        }
-      }
-      return part;
-    }
-    if (part instanceof Function) {
-      return part(values);
-    }
-    throw new Error("FormValidator: Error while building an error message. Expected mustache-like string or function but was given:", part, values);
-  };
 
   FormModifier = (function() {
     function FormModifier(form_validator, options) {

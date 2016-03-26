@@ -105,6 +105,28 @@ class OrderedDict
         return @_order
 
 
+# this function parses and replaces mustache-like strings or evaluate functions
+part_evaluator = (part, values...) ->
+    if values.length is 1
+        values = values[0]
+    else
+        values = $.extend(values...)
+
+    # string => mustache-like
+    if typeof part is "string"
+        for key, val of values
+            substr = "{{#{key}}}"
+            if part.indexOf(substr) >= 0
+                regex = new RegExp(substr, "g")
+                part = part.replace(regex, val)
+        return part
+
+    if part instanceof Function
+        return part(values)
+
+    throw new Error("FormValidator: Error while building an error message. Expected mustache-like string or function but was given:", part, values)
+
+
 ################################################################################################
 # DEFINE MESSAGE BUILDERS (FOR EACH VALIDATION PHASE)
 
@@ -267,32 +289,16 @@ new MessageBuilder BUILD_MODES.ENUMERATE, (data, phase, build_mode, locale) ->
 
     new_parts = new OrderedDict()
     for part, i in parts
-        # # prepend build mode prefix to 1st part
-        # if i is 0 and data.prefix
-        #     part.put("prefix", "#{data.prefix} #{part.get("prefix") or ""}", 0)
-        #     part.put("prefix_delimiter", " ", 1)
-        # prepend "and" to last part and append the build mode suffix to it
+        # prepend "and" to last part
         if i is parts.length - 1
             part.put("prefix", " #{locales[locale]["and"]} #{part.get("prefix") or ""}", 0)
             part.put("prefix_delimiter", " ", 1)
-            # if data.suffix
-            #     part.put("suffix_delimiter", " ", 3)
-            #     part.put("suffix", " ", 4)
         new_parts.put(i, part)
     data.parts = new_parts
     return "#{data.prefix or ""} #{new_parts.join("")} #{data.suffix or ""}".replace(/\s+/g, " ")
 
 new MessageBuilder BUILD_MODES.SENTENCE, (data, phase, build_mode, locale) ->
-    data = message_builder_helper.make(
-        data
-        phase
-        build_mode
-        locale
-        # if data.prefix then data.prefix else ""
-        # if data.suffix then "#{data.suffix}." else "."
-        # ""
-        # "."
-    )
+    data = message_builder_helper.make(data, phase, build_mode, locale)
     data.parts.each (idx, part) ->
         part.put("prefix", " #{data.prefix or ""} #{part.get("prefix") or ""}".trim(), 0)
         part.put("prefix_delimiter", " ", 1)
@@ -302,48 +308,14 @@ new MessageBuilder BUILD_MODES.SENTENCE, (data, phase, build_mode, locale) ->
     parts = []
     for part in data.parts.to_array()
         parts.push part.join()
-        # part = part.to_array()
-        # console.log "part", part
-        # res += part.slice(0, -2).join(" ") + part.slice(-2).join("")
 
-    # return data.parts.join(" ").replace(/\s+/g, " ")
     return parts.join(" ").replace(/\s+/g, " ").trim()
-    # return "#{data.prefix or ""} #{data.parts.join(" ")} #{data.suffix or ""}".replace(/\s+/g, " ")
-
-    # parts = message_builder_helper.make(data, phase, build_mode, locale)
-    # # remove prefix (and prefix_delimiter) for sentence build mode because the message_builder_helper will automatically add it to the front but the sentence_message_builder adds it to each sentence anyways
-    # if parts.length > 1
-    #     parts.order.splice(0, 2)
-    # return (parts).join()
 
 new MessageBuilder BUILD_MODES.LIST, (data, phase, build_mode, locale) ->
-    sentences = sentence_message_builder(data, phase, build_mode, locale)
+    sentences = message_builders[BUILD_MODES.SENTENCE].build_message(data, phase, build_mode, locale)
     if sentences[sentences.length - 1] is "."
         sentences += " "
     return "<ul><li>#{("#{sentence}." for sentence in sentences.split(". ") when sentence).join("</li><li>")}</li></ul>"
-
-
-# use this function to parse mustache-like strings or evaluate functions (used in the error message builders)
-part_evaluator = (part, values...) ->
-    if values.length is 1
-        values = values[0]
-    else
-        values = $.extend(values...)
-
-    # string => mustache-like
-    if typeof part is "string"
-        for key, val of values
-            substr = "{{#{key}}}"
-            if part.indexOf(substr) >= 0
-                regex = new RegExp(substr, "g")
-                part = part.replace(regex, val)
-        return part
-
-    if part instanceof Function
-        return part(values)
-
-    throw new Error("FormValidator: Error while building an error message. Expected mustache-like string or function but was given:", part, values)
-
 
 
 
