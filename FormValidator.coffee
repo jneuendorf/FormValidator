@@ -458,7 +458,6 @@ class window.FormValidator
         return results
 
     _validate_element: (elem, data, value_info, options) ->
-        # TODO:50 use cached errors instead of always creating new ones!
         errors = []
         # accumulator (AND of each phase's valid state)
         prev_phases_valid = true
@@ -487,7 +486,6 @@ class window.FormValidator
             data.errors[phase] = []
         errors = errors.concat data.errors[phase]
 
-
         #########################################################
         # PHASE 2: validate the value
         # validate the current value only if it has changed
@@ -507,7 +505,6 @@ class window.FormValidator
                         type: type
                         value: value
                     }]
-                    # first_invalid_element ?= elem
                 else
                     data.valid_value = true
                     data.errors[phase] = []
@@ -516,9 +513,7 @@ class window.FormValidator
             if prev_phases_valid or not options.stop_on_error
                 if data.valid_value isnt true
                     prev_phases_valid = false
-                    # first_invalid_element ?= elem
         errors = errors.concat data.errors[phase]
-
 
         #########################################################
         # PHASE 3 - validate constraints
@@ -538,26 +533,20 @@ class window.FormValidator
                         value: value
                     }
                 data.errors[phase] = temp
-                # if data.valid_constraints is false
-                    # first_invalid_element ?= elem
         # value has not changed (data is unchanged)
         else
             if prev_phases_valid or not options.stop_on_error
                 if data.valid_constraints isnt true
                     prev_phases_valid = false
-                    # first_invalid_element ?= elem
 
         errors = errors.concat data.errors[phase]
-        # is_valid = data.valid_dependencies and data.valid_value and data.valid_constraints
 
-        # if is_valid
         if data.valid_dependencies and data.valid_value and data.valid_constraints
             # cache uncached data
             if data.valid isnt true or not data.postprocess? or not data.output_preprocessed?
                 data.valid = true
                 @_cache_attribute(elem, data, "postprocess")
                 @_cache_attribute(elem, data, "output_preprocessed")
-                @_set_element_data(elem, data)
 
             if data.postprocess is true or data.output_preprocessed is true
                 # replace old value with post processed value
@@ -576,14 +565,15 @@ class window.FormValidator
         else
             if data.valid isnt false
                 data.valid = false
-                @_set_element_data(elem, data)
 
         # cache error targets because error classes will be applied to them in the next step (form modifcation)
         if options.apply_error_classes is true and not data.error_targets?
             @_cache_attribute elem, data, "error_targets", () ->
                 return @_get_error_targets(elem, type)
-            @_set_element_data(elem, data)
 
+        # make element's data persistent
+        # REVIEW: maybe use localstorage?? this could increase caching abilities a lot! the question is how to clear (when browser recaches js file?!)
+        @_set_element_data(elem, data)
         return errors
     # END - VALIDATION HELPERS
 

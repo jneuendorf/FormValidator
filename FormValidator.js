@@ -1885,7 +1885,6 @@
           data.valid = true;
           this._cache_attribute(elem, data, "postprocess");
           this._cache_attribute(elem, data, "output_preprocessed");
-          this._set_element_data(elem, data);
         }
         if (data.postprocess === true || data.output_preprocessed === true) {
           if (data.postprocess === true) {
@@ -1906,15 +1905,14 @@
       } else {
         if (data.valid !== false) {
           data.valid = false;
-          this._set_element_data(elem, data);
         }
       }
       if (options.apply_error_classes === true && (data.error_targets == null)) {
         this._cache_attribute(elem, data, "error_targets", function() {
           return this._get_error_targets(elem, type);
         });
-        this._set_element_data(elem, data);
       }
+      this._set_element_data(elem, data);
       return errors;
     };
 

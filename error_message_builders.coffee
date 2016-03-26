@@ -325,11 +325,6 @@ new MessageBuilder BUILD_MODES.LIST, (data, phase, build_mode, locale) ->
 
 
 
-
-
-
-
-#
 # #########################################################################################################
 # # WORKFLOW: error_message_builders[VALIDATION_PHASE] -> message builder -> build mode helper
 # locale_message_builders =
@@ -338,7 +333,6 @@ new MessageBuilder BUILD_MODES.LIST, (data, phase, build_mode, locale) ->
 #
 # message_builders = {}
 #
-# # TODO:80 structure this file for better maintainance
 # # override build_mode_helpers here if needed (same signature as a build_mode_helper). i.e. enumeration could be different in other languages
 # locale_build_mode_helpers =
 #     de: {}
