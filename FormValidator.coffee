@@ -21,9 +21,6 @@ class window.FormValidator
     # defined in locales.coffee and error_messages.coffee
     @locales = locales
 
-    # defined in error_message_builders.coffee
-    @error_message_builders = error_message_builders
-
     @default_preprocessors =
         number: (str, elem, locale) ->
             return switch locale
@@ -49,8 +46,9 @@ class window.FormValidator
             constraint_validator_groups: constraint_validator_groups
             constraint_validator_options_in_locale_key: constraint_validator_options_in_locale_key
             constraint_validator_options: constraint_validator_options
-            error_message_builders: error_message_builders
-            locale_build_mode_helpers: locale_build_mode_helpers
+            locale_message_builders: locale_message_builders
+            message_builders: message_builders
+            message_data_creators: message_data_creators
         }
         return @
 
@@ -68,7 +66,10 @@ class window.FormValidator
         return special_type
 
     @_build_error_message: (phase, errors, build_mode, locale) ->
-        return @error_message_builders[phase](errors, phase, build_mode, locale)
+        data = message_data_creators[phase].create_data(errors, phase, build_mode, locale)
+
+        return message_builders[build_mode].build_message(data, phase, build_mode, locale)
+        # return @error_message_builders[phase](errors, phase, build_mode, locale)
 
     # from the list of errors generate an error message for a certain element (this combines the error messages of the errors belonging to the element)
     # message = concatenation of each validation-phase-message string if they are errors for that part (generated independently, defined in ERROR_MESSAGE_CONFIG.ORDER)
@@ -718,9 +719,6 @@ class window.FormValidator
                     data = @_cache_attribute elem, data, "error_targets", () ->
                         return @_get_error_targets(elem, type)
                     @_set_element_data(elem, data)
-                # TODO:10 use form modifier!!
-                @_apply_error_classes(elem, data.error_targets, true)
-                @_apply_dependency_error_classes(elem, data.depends_on, true)
                 continue
 
             elem_errors = @_validate_element(elem, data, value_info, options)

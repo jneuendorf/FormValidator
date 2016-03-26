@@ -222,3 +222,39 @@ set_remove = (s, e) ->
 #
 # targets = parse_deps()
 # console.log toposort targets
+
+
+ #####################################################################################################
+# USED FOR CONSTRAINT ERROR MESSAGES (in error_message_builders.coffee)
+
+# mapping from group to locale key: Set -> String
+# max_min == min_max
+# ==> the order does not matter because its a set (and all permutations of the set map to the same value)
+
+# intially use permutation to find the actually existing locale key for the given set
+# upon a match cache the key. whenever the match becomes invalid (-> returns null) return to the initial state (so permutation is used)
+
+# REVIEW test caching
+_permutation_cache = {}
+get_combined_key = (keys, locale, key_prefix = "", key_suffix = "") ->
+    # clone keys
+    keys = keys.slice(0)
+    # sort because cached keys had been sorted and the convention is that locales are alphabetically sorted (joined with '_')
+    keys.sort()
+    cache_key = keys.join("_")
+
+    # try to get the key from the cache
+    if _permutation_cache[cache_key]?
+        return _permutation_cache[cache_key]
+
+    # no cache hit => try to find a key
+    # get all subsets (by size, from big to small), permute each subset
+    for k in [keys.length...0] by -1
+        for subset in get_subsets(keys, k)
+            for permutation in get_permutations(subset)
+                key = key_prefix + permutation.join("_") + key_suffix
+                if locales[locale][key]?
+                    _permutation_cache[cache_key] = key
+                    return key
+
+    return null

@@ -22,6 +22,8 @@ $(document).ready(function() {
             return e;
         },
         build_mode: FormValidator.BUILD_MODES.SENTENCE,
+        // build_mode: FormValidator.BUILD_MODES.ENUMERATE,
+        // build_mode: FormValidator.BUILD_MODES.LIST,
         error_mode: FormValidator.ERROR_MODES.SIMPLE,
     });
     $(".error_output_mode").change(function(evt) {

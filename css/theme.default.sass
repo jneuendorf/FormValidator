@@ -1,16 +1,37 @@
+$valid: #555
+$valid-border: #3c763d
+$valid-border-focus: #2b542c
+$valid-shadow: #67b168
+$valid-inset-shadow: rgba(0, 0, 0, .075)
+
 $invalid: rgb(255, 0, 0)
 $invalid-border: rgba(210, 0, 0, 0.9)
+$invalid-border-focus: #843534
 $invalid-shadow: rgba(210, 0, 0, .6)
-$gray-shadow: rgba(0, 0, 0, .075)
+$invalid-inset-shadow: rgba(0, 0, 0, .075)
 
 $invalid-dep: #8a6d3b
 $invalid-dep-border: #faebcc
+$invalid-dep-border-focus: rgba(250, 235, 204, .9)
 $invalid-dep-shadow: rgba(250, 235, 204, .6)
+$invalid-dep-inset-shadow: rgba(0, 0, 0, .075)
 
+// SUCCESS (VALID)
+// .fv-valid
+//     color: $valid !important
+//
+// input.fv-valid
+//     border-color: $valid-border
+//     outline: 0
+//
+// input.fv-valid:focus,
+// input[type='checkbox'].fv-valid,
+// input[type='radio'].fv-valid
+//     -webkit-box-shadow: inset 0 1px 1px $valid-inset-shadow, 0 0 8px $valid-shadow
+//     border-color: $valid-border-focus
+//     box-shadow: inset 0 1px 1px $valid-inset-shadow, 0 0 8px $valid-shadow
 
-.fv-error-message
-    display: inline-block
-
+// ERROR (INVALID)
 .fv-invalid
     color: $invalid !important
 
@@ -21,10 +42,11 @@ input.fv-invalid
 input.fv-invalid:focus,
 input[type='checkbox'].fv-invalid,
 input[type='radio'].fv-invalid
-    -webkit-box-shadow: inset 0 1px 1px $gray-shadow, 0 0 8px $invalid-shadow
-    border-color: $invalid-border
-    box-shadow: inset 0 1px 1px $gray-shadow, 0 0 8px $invalid-shadow
+    -webkit-box-shadow: inset 0 1px 1px $invalid-inset-shadow, 0 0 8px $invalid-shadow
+    border-color: $invalid-border-focus
+    box-shadow: inset 0 1px 1px $invalid-inset-shadow, 0 0 8px $invalid-shadow
 
+// DEPENDENCY ERROR
 .fv-invalid-dependency:not(.fv-invalid)
     color: $invalid-dep !important
 
@@ -35,11 +57,16 @@ input.fv-invalid-dependency:not(.fv-invalid)
 input.fv-invalid-dependency:not(.fv-invalid):focus,
 input[type='checkbox'].fv-invalid-dependency:not(.fv-invalid),
 input[type='radio'].fv-invalid-dependency:not(.fv-invalid)
-    -webkit-box-shadow: inset 0 1px 1px $gray-shadow, 0 0 8px $invalid-dep-shadow
-    border-color: $invalid-dep-border
-    box-shadow: inset 0 1px 1px $gray-shadow, 0 0 8px 2px $invalid-dep-shadow
+    -webkit-box-shadow: inset 0 1px 1px $invalid-dep-inset-shadow, 0 0 8px $invalid-dep-shadow
+    border-color: $invalid-dep-border-focus
+    box-shadow: inset 0 1px 1px $invalid-dep-inset-shadow, 0 0 8px 2px $invalid-dep-shadow
 
 // <div class="form-group has-warning">
 //   <label class="control-label" for="inputWarning1">Input with warning</label>
 //   <input type="text" class="form-control" id="inputWarning1">
 // </div>
+
+
+// used for error output mode "BELOW"
+.fv-error-message
+    display: inline-block

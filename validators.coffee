@@ -11,7 +11,7 @@
 #       -> error_message_type: String (required)
 #       -> properties needed for the according error message (-> parameters)
 #       -> properties needed for other validators (as they will be able to access other validators' results)
-# IDEA:130 use https://github.com/dropbox/zxcvbn and https://css-tricks.com/password-strength-meter/ for password validation
+# IDEA:130 use https://github.com/dropbox/zxcvbn and https://css-tricks.com/password-strength-meter/ for password validation (password strength)
 validators =
     # "private" validator (used in other validators)
     _number: (str, elem) ->
