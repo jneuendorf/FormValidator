@@ -6,10 +6,21 @@ ERROR_MODES.DEFAULT = ERROR_MODES.NORMAL
 
 ERROR_OUTPUT_MODES =
     BELOW: "BELOW"
-    TOOLTIP: "TOOLTIP"
-    POPOVER: "POPOVER"
     NONE: "NONE"
+    POPOVER: "POPOVER"
+    TOOLTIP: "TOOLTIP"
 ERROR_OUTPUT_MODES.DEFAULT = ERROR_OUTPUT_MODES.NONE
+
+DEPENDENCY_CHANGE_ACTION =
+    DISPLAY: "DISPLAY"
+    ENABLE: "ENABLE"
+    FADE: "FADE"
+    NONE: "NONE"
+    OPACITY: "OPACITY"
+    SHOW: "SHOW"
+    SLIDE: "SLIDE"
+DEPENDENCY_CHANGE_ACTION.DEFAULT = DEPENDENCY_CHANGE_ACTION.NONE
+DEPENDENCY_CHANGE_ACTION_DURATION = 400 # milliseconds
 
 VALIDATION_PHASES =
     DEPENDENCIES: "DEPENDENCIES"
@@ -21,8 +32,8 @@ VALIDATION_PHASES_SINGULAR =
     CONSTRAINTS: "CONSTRAINT"
 BUILD_MODES =
     ENUMERATE: "ENUMERATE"
-    SENTENCE: "SENTENCE"
     LIST: "LIST"
+    SENTENCE: "SENTENCE"
 BUILD_MODES.DEFAULT = BUILD_MODES.ENUMERATE
 
 ERROR_MESSAGE_CONFIG =
@@ -34,6 +45,7 @@ ERROR_MESSAGE_CONFIG =
 # list of meta data that can be cached right away because each item is needed for a basic validation (all other data will be cached when it is needed)
 # => this is the list of data that is always cached
 REQUIRED_CACHE = [
+    "dependency_change_action"
     "depends_on"
     "id"
     "name"
@@ -59,7 +71,7 @@ OPTIONAL_CACHE = [
     "valid_value"
     "value"
 ]
-# NOTE those are not the values with which the cache is initialized! the following values are set when the field data is cached and an attribute is missing
+# NOTE those are not the values with which the cache is initialized! the following values are set whenever an attribute is cached and and it is missing
 DEFAULT_ATTR_VALUES =
     PREPROCESS: true
     POSTPROCESS: false
@@ -70,13 +82,6 @@ DEFAULT_ATTR_VALUES =
     # CONSTRAINTS
     INCLUDE_MAX: "true"
     INCLUDE_MIN: "true"
-
-EXPOSED_CONSTANTS =
-    ERROR_MODES: ERROR_MODES
-    ERROR_OUTPUT_MODES: ERROR_OUTPUT_MODES
-    VALIDATION_PHASES: VALIDATION_PHASES
-    BUILD_MODES: BUILD_MODES
-    ERROR_MESSAGE_CONFIG: ERROR_MESSAGE_CONFIG
 
 # define which constraint-validator options are compatible with a constraint validator
 # they are accessible in the according constraint validator in the options object
@@ -101,3 +106,12 @@ CONSTRAINT_VALIDATOR_OPTIONS =
     regex: [
         "regex_flags"
     ]
+
+# choose what constants to attach to the FormValidator class
+EXPOSED_CONSTANTS =
+    ERROR_MODES: ERROR_MODES
+    ERROR_OUTPUT_MODES: ERROR_OUTPUT_MODES
+    DEPENDENCY_CHANGE_ACTION: DEPENDENCY_CHANGE_ACTION
+    VALIDATION_PHASES: VALIDATION_PHASES
+    BUILD_MODES: BUILD_MODES
+    ERROR_MESSAGE_CONFIG: ERROR_MESSAGE_CONFIG

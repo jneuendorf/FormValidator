@@ -6,6 +6,7 @@ COFFEE_FILES = setup.coffee namespaces.coffee \
 				validators.coffee constraint_validators.coffee \
 				locales.coffee error_messages.coffee \
 				error_message_builders.coffee \
+				dependency_change_actions.coffee \
 				FormModifier.coffee $(PROJECT_NAME).coffee \
 				event_handlers.coffee
 DEBUG_FILE = debug.coffee

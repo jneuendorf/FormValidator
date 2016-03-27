@@ -18,6 +18,9 @@ class window.FormValidator
     # defined in validators.coffee
     @validators = validators
 
+    # defined in dependency_change_actions.coffee
+    @dependency_change_actions = dependency_change_actions
+
     # defined in locales.coffee and error_messages.coffee
     @locales = locales
 
@@ -111,15 +114,14 @@ class window.FormValidator
         @fields = null
         @form_modifier = new FormModifier(@, options)
 
-        # default css error classes. can be overridden by data-fv-error-classes on any error target
         @error_classes = options.error_classes or @form.attr("data-fv-error-classes") or "fv-invalid"
         @success_classes = options.success_classes or @form.attr("data-fv-success-classes") or "fv-valid"
         @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or "fv-invalid-dependency"
+        @dependency_change_action = options.dependency_change_action or @form.attr("data-fv-dependency-change-action") or DEPENDENCY_CHANGE_ACTION.DEFAULT
 
         @validators             = $.extend {}, CLASS.validators, options.validators
         @validation_options     = options.validation_options or null
         @constraint_validators  = $.extend {}, CLASS.constraint_validators, options.constraint_validators
-        # @error_messages         = options.error_messages
         @build_mode             = options.build_mode or BUILD_MODES.DEFAULT
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
         @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
@@ -133,13 +135,26 @@ class window.FormValidator
         @postprocessors         = options.postprocessors or {}
 
         @group                  = options.group or null
-        # in place modifcation of the errors possible before they are applied to DOM
+        # modification of the errors possible before they are applied to DOM
         @process_errors         = options.process_errors or null
 
 
     ########################################################################################################################
     ########################################################################################################################
     # PRIVATE
+
+    _get_fields: (form) ->
+        return @field_getter?(form) or form.find("[data-fv-validate]").filter (idx, elem) ->
+            return $(elem).closest("[data-fv-ignore-children]").length is 0
+
+    _get_required: (fields) ->
+        return @required_field_getter?(fields) or fields.not("[data-fv-optional='true']")
+
+    _dependency_change: (action, element, valid) ->
+        CLASS = @constructor
+        CLASS.dependency_change_actions[action]?.call(CLASS.dependency_change_actions, element, valid)
+        return @
+
 
     ########################################################################################################################
     # CACHING
@@ -198,13 +213,6 @@ class window.FormValidator
         return data
 
     # END - CACHING
-
-    _get_fields: (form) ->
-        return @field_getter?(form) or form.find("[data-fv-validate]").filter (idx, elem) ->
-            return $(elem).closest("[data-fv-ignore-children]").length is 0
-
-    _get_required: (fields) ->
-        return @required_field_getter?(fields) or fields.not("[data-fv-optional='true']")
 
     _get_value_info: (element, data) ->
         {type, preprocess} = data
@@ -420,8 +428,9 @@ class window.FormValidator
         {dependency_errors, dependency_elements, dependency_mode, valid_dependencies} = @_validate_dependencies(elem, data, options)
         if not valid_dependencies
             prev_phases_valid = false
+            if data.valid_dependencies isnt false
+                @_dependency_change(data.dependency_change_action, elem, false)
             data.valid_dependencies = false
-            console.log dependency_errors
             $.extend(dependency_error, {
                 element:    elem
                 required:   is_required
@@ -433,6 +442,8 @@ class window.FormValidator
         else
             data.valid_dependencies = true
             data.errors[phase] = []
+            if data.valid_dependencies isnt true
+                @_dependency_change(data.dependency_change_action, elem, true)
         errors = errors.concat data.errors[phase]
 
         #########################################################
@@ -580,8 +591,11 @@ class window.FormValidator
                 data[key] = @_get_attribute_value_for_key(elem, key)
             # already parse the list of dependencies as list of jquery elements ("" => [], null => []), delimiter = ';'
             data.depends_on = @_find_targets(data.depends_on, elem, /^\s*\;\s*$/g)
-            data.id = i;
-
+            # needed for toposort (see TODOs)
+            data.id = i
+            # fallback to global change action
+            if not data.dependency_change_action?
+                data.dependency_change_action = @dependency_change_action
             # set keys that are cached later (lazily) to null (which means unknow)
             for key in OPTIONAL_CACHE
                 data[key] = null
