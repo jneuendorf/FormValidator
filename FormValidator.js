@@ -1394,68 +1394,6 @@
       return error_message_parts.join(delimiter);
     };
 
-    $(document).on("click", "[data-fv-start]", function() {
-      var $elem, container, error, error1, error2, form_validator, options;
-      $elem = $(this);
-      if ((container = $elem.data("_form_validator_container")) == null) {
-        container = $elem.closest($elem.attr("data-fv-start"));
-        if (container.length === 0) {
-          container = $($elem.attr("data-fv-start"));
-        }
-        $elem.data("_form_validator_container", container);
-      }
-      if (DEBUG && container.length === 0) {
-        throw new Error("FormValidator (in validation on click triggered by 'data-fv-start'): No container found. Check the value of the 'data-fv-start' attribute (so it matches a closest element or any element in the document)!");
-      }
-      if ((form_validator = container.data("_form_validator")) == null) {
-        options = $elem.attr("data-fv-start-options");
-        if (options != null) {
-          try {
-            options = JSON.parse(options);
-          } catch (error1) {
-            error = error1;
-            try {
-              options = window[options]();
-            } catch (error2) {
-              error = error2;
-              options = {};
-            }
-          }
-        }
-        form_validator = FormValidator["new"](container, options);
-        container.data("_form_validator", form_validator);
-      }
-      form_validator.validate();
-      return false;
-    });
-
-    $(document).on("change keyup", "[data-fv-real-time] [data-fv-validate]", function(evt) {
-      var $elem, container, form_validator, is_textfield, ref, type;
-      $elem = $(this);
-      type = ((ref = $elem.attr("type")) != null ? ref.toLowerCase() : void 0) || "";
-      is_textfield = $elem.filter("textarea").length === 1 || $elem.filter("input").length && (type === "button" || type === "checkbox" || type === "color" || type === "file" || type === "image" || type === "radio" || type === "range" || type === "submit");
-      if (evt.type === "change" && is_textfield) {
-        return true;
-      }
-      container = $elem.closest("[data-fv-real-time]");
-      if (container.length === 1) {
-        if ((form_validator = container.data("_form_validator")) == null) {
-          form_validator = FormValidator["new"](container);
-          container.data("_form_validator", form_validator);
-        }
-        if (DEBUG) {
-          console.log(form_validator.validate({
-            focus_invalid: false
-          }));
-        } else {
-          form_validator.validate({
-            focus_invalid: false
-          });
-        }
-      }
-      return false;
-    });
-
     FormValidator["new"] = function(form, options) {
       if (DEBUG && !(form instanceof jQuery)) {
         throw new Error("FormValidator::constructor: Invalid form given (must be a jQuery object)!");
@@ -2148,5 +2086,69 @@
     return FormValidator;
 
   })();
+
+  $(document).ready(function() {
+    $(document).on("click", "[data-fv-start]", function() {
+      var $elem, container, error, error1, error2, form_validator, options;
+      $elem = $(this);
+      if ((container = $elem.data("_form_validator_container")) == null) {
+        container = $elem.closest($elem.attr("data-fv-start"));
+        if (container.length === 0) {
+          container = $($elem.attr("data-fv-start"));
+        }
+        $elem.data("_form_validator_container", container);
+      }
+      if (DEBUG && container.length === 0) {
+        throw new Error("FormValidator (in validation on click triggered by 'data-fv-start'): No container found. Check the value of the 'data-fv-start' attribute (so it matches a closest element or any element in the document)!");
+      }
+      if ((form_validator = container.data("_form_validator")) == null) {
+        options = $elem.attr("data-fv-start-options");
+        if (options != null) {
+          try {
+            options = JSON.parse(options);
+          } catch (error1) {
+            error = error1;
+            try {
+              options = window[options]();
+            } catch (error2) {
+              error = error2;
+              options = {};
+            }
+          }
+        }
+        form_validator = FormValidator["new"](container, options);
+        container.data("_form_validator", form_validator);
+      }
+      form_validator.validate();
+      return false;
+    });
+    $(document).on("change keyup", "[data-fv-real-time] [data-fv-validate]", function(evt) {
+      var $elem, container, form_validator, is_textfield, ref, type;
+      $elem = $(this);
+      type = ((ref = $elem.attr("type")) != null ? ref.toLowerCase() : void 0) || "";
+      is_textfield = $elem.filter("textarea").length === 1 || $elem.filter("input").length && (type === "button" || type === "checkbox" || type === "color" || type === "file" || type === "image" || type === "radio" || type === "range" || type === "submit");
+      if (evt.type === "change" && is_textfield) {
+        return true;
+      }
+      container = $elem.closest("[data-fv-real-time]");
+      if (container.length === 1) {
+        if ((form_validator = container.data("_form_validator")) == null) {
+          form_validator = FormValidator["new"](container);
+          container.data("_form_validator", form_validator);
+        }
+        if (DEBUG) {
+          console.log(form_validator.validate({
+            focus_invalid: false
+          }));
+        } else {
+          form_validator.validate({
+            focus_invalid: false
+          });
+        }
+      }
+      return false;
+    });
+    return true;
+  });
 
 }).call(this);

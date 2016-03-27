@@ -14,7 +14,7 @@ get_permutations = (arr) ->
 
 
 # from https://github.com/blazs/subsets
-# TODO:20 add credit
+# TODO:40 add credit
 get_subsets = (set, k) ->
     subsets = []
     n = set.length
@@ -112,7 +112,7 @@ group_arr_by = (arr, get_prop) ->
 #     for tuple in tuples
 #         console.log "WARNING: node is part of cyclical dependency:", tuple
 #     return result
-# TODO:30 make this better (tried above but above is not working)
+# TODO:10 make this better (tried above but above is not working)
 toposort = (targets) ->
     targets = parse_deps(targets)
     # targets is hash of sets, where keys are parent nodes and

@@ -568,7 +568,6 @@ new MessageBuilder BUILD_MODES.LIST, (data, phase, build_mode, locale) ->
 # # intially use permutation to find the actually existing locale key for the given set
 # # upon a match cache the key. whenever the match becomes invalid (-> returns null) return to the initial state (so permutation is used)
 #
-# # REVIEW test caching
 # permutation_cache = {}
 #
 # get_combined_key = (keys, locale, key_prefix = "", key_suffix = "") ->
