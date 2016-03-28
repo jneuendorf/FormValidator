@@ -289,8 +289,8 @@ new MessageBuilder BUILD_MODES.ENUMERATE, (data, phase, build_mode, locale) ->
 
     new_parts = new OrderedDict()
     for part, i in parts
-        # prepend "and" to last part
-        if i is parts.length - 1
+        # prepend "and" to last part (if it's not the only part)
+        if i is parts.length - 1 and i > 0
             part.put("prefix", " #{locales[locale]["and"]} #{part.get("prefix") or ""}", 0)
             part.put("prefix_delimiter", " ", 1)
         new_parts.put(i, part)

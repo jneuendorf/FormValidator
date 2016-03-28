@@ -19,18 +19,27 @@ $(document).ready(function() {
 
     var form_validator = FormValidator.new(my_form, {
         error_target_getter: function(e, t, i) {
+            var name = e.attr("name");
+            if (name) {
+                var group = $("[name='" + name + "']");
+                if (group.length > 1) {
+                    return group;
+                }
+            }
             return e;
         },
-        build_mode: FormValidator.BUILD_MODES.SENTENCE,
-        // build_mode: FormValidator.BUILD_MODES.ENUMERATE,
-        // build_mode: FormValidator.BUILD_MODES.LIST,
         error_mode: FormValidator.ERROR_MODES.SIMPLE,
+        dependency_change_action: FormValidator.DEPENDENCY_CHANGE_ACTIONS.SHOW
     });
     $(".error_output_mode").change(function(evt) {
         form_validator.form_modifier.error_output_mode = $(this).find(":selected").val();
         $field.tooltip("destroy").popover("destroy");
         return true;
     }).val("BELOW").change();
+    $(".build_mode").change(function(evt) {
+        form_validator.build_mode = $(this).find(":selected").val();
+        return true;
+    }).val("ENUMERATE").change();
     // validation
     $(".btn.validate").click(function(evt) {
         form_validator.locale = $(".locale option:selected").val();

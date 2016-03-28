@@ -112,6 +112,15 @@ class FormModifier
     _process_constraint: (constraint, element, data) ->
         return @["_process_#{constraint.name}"]?(constraint, element, data) or false
 
+    _on_dependency_change: (action, element, data, valid) ->
+        CLASS = FormValidator
+        if data.depends_on.length > 0 and data.error_targets?
+            if @form_validator.dependency_change_action not instanceof Function
+                CLASS.dependency_change_actions[action]?.call(CLASS.dependency_change_actions, data.error_targets, valid)
+            else
+                @form_validator.dependency_change_action(element, valid)
+        return @
+
     modify: (grouped_errors, options) ->
         form_validator = @form_validator
         fields = form_validator.fields.all
@@ -129,12 +138,10 @@ class FormModifier
             # no grouped_error => elem is valid
             if not grouped_error?
                 is_valid = true
-                valid_dependencies = true
                 message = ""
             # grouped_error => elem is invalid
             else
                 is_valid = false
-                valid_dependencies = true
                 for error in grouped_error.errors
                     # set flag for dependency error classes
                     if error.phase is VALIDATION_PHASES.DEPENDENCIES
@@ -148,6 +155,9 @@ class FormModifier
                             break
 
                 message = grouped_error.message
+
+            if data.dependency_changed
+                @_on_dependency_change(data.dependency_change_action, elem, data, data.valid_dependencies)
 
             if options.apply_error_classes is true
                 @_apply_classes(
@@ -166,7 +176,7 @@ class FormModifier
                     elem
                     data.depends_on
                     data.dependency_error_classes or form_validator.dependency_error_classes
-                    valid_dependencies
+                    data.valid_dependencies
                 )
 
             @_process_error_message(message, elem, data)

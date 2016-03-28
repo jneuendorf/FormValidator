@@ -150,12 +150,6 @@ class window.FormValidator
     _get_required: (fields) ->
         return @required_field_getter?(fields) or fields.not("[data-fv-optional='true']")
 
-    _dependency_change: (action, element, valid) ->
-        CLASS = @constructor
-        CLASS.dependency_change_actions[action]?.call(CLASS.dependency_change_actions, element, valid)
-        return @
-
-
     ########################################################################################################################
     # CACHING
 
@@ -238,7 +232,7 @@ class window.FormValidator
             value_has_changed: value_has_changed
         }
 
-    _find_targets: (targets, element, delimiter = /\s+/g) ->
+    _find_targets: (targets, element, delimiter = /\;\s+/g) ->
         if typeof targets is "string"
             return (@_find_target(target, element) for target in targets.split(delimiter))
         return targets or []
@@ -428,9 +422,6 @@ class window.FormValidator
         {dependency_errors, dependency_elements, dependency_mode, valid_dependencies} = @_validate_dependencies(elem, data, options)
         if not valid_dependencies
             prev_phases_valid = false
-            if data.valid_dependencies isnt false
-                @_dependency_change(data.dependency_change_action, elem, false)
-            data.valid_dependencies = false
             $.extend(dependency_error, {
                 element:    elem
                 required:   is_required
@@ -440,10 +431,14 @@ class window.FormValidator
             }) for dependency_error in dependency_errors
             data.errors[phase] = dependency_errors
         else
-            data.valid_dependencies = true
             data.errors[phase] = []
-            if data.valid_dependencies isnt true
-                @_dependency_change(data.dependency_change_action, elem, true)
+        # TODO: apparently this is not kept in the cache beyond this function call
+        data.dependency_changed = valid_dependencies isnt data.valid_dependencies
+        data.valid_dependencies = valid_dependencies
+        # cache error targets for applying dependency change action
+        if data.dependency_changed and not data.error_targets?
+            @_cache_attribute elem, data, "error_targets", () ->
+                return @_get_error_targets(elem, type)
         errors = errors.concat data.errors[phase]
 
         #########################################################
