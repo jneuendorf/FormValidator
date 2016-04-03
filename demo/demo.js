@@ -43,7 +43,8 @@ $(document).ready(function() {
     // validation
     $(".btn.validate").click(function(evt) {
         form_validator.locale = $(".locale option:selected").val();
-        console.log(form_validator.validate({recache: true}));
+        // console.log(form_validator.validate({recache: true}));
+        console.log(form_validator.validate({recache: $(this).hasClass("recache") ? true : false}));
         return false;
     });
 

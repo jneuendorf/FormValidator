@@ -187,7 +187,7 @@
     for (k in data) {
       v = data[k];
       targets[k] = set();
-      children = v.split(' ');
+      children = v;
       for (l = 0, len = children.length; l < len; l++) {
         child = children[l];
         if (child === '') {
@@ -1515,6 +1515,7 @@
       this.form = form;
       this.fields = null;
       this.form_modifier = new FormModifier(this, options);
+      this.last_validation = null;
       this.error_classes = options.error_classes || this.form.attr("data-fv-error-classes") || "fv-invalid";
       this.success_classes = options.success_classes || this.form.attr("data-fv-success-classes") || "fv-valid";
       this.dependency_error_classes = options.dependency_error_classes || this.form.attr("data-fv-dependency-error-classes") || "fv-invalid-dependency";
@@ -1533,6 +1534,7 @@
       this.postprocessors = options.postprocessors || {};
       this.group = options.group || null;
       this.process_errors = options.process_errors || null;
+      this._field_order = null;
     }
 
     FormValidator.prototype._get_fields = function(form) {
@@ -1829,6 +1831,9 @@
 
     FormValidator.prototype._validate_element = function(elem, data, value_info, options) {
       var constraint_name, dependency_elements, dependency_error, dependency_errors, dependency_mode, error, errors, is_required, l, len, len1, m, original_value, phase, prev_phases_valid, ref, ref1, ref2, ref3, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed;
+      if (data.last_validation === this.last_validation) {
+        return data.errors[VALIDATION_PHASES.DEPENDENCIES].concat(data.errors[VALIDATION_PHASES.VALUE], data.errors[VALIDATION_PHASES.CONSTRAINTS]);
+      }
       errors = [];
       prev_phases_valid = true;
       is_required = data.required;
@@ -1953,6 +1958,7 @@
           return this._get_error_targets(elem, type);
         });
       }
+      data.last_validation = this.last_validation;
       this._set_element_data(elem, data);
       return errors;
     };
@@ -1996,12 +2002,10 @@
     };
 
     FormValidator.prototype.cache = function() {
-      var data, elem, fields, i, key, l, len, len1, m, o, ref;
+      var data, dep, dependency_data, elem, fields, i, id, id_to_elem, key, l, len, len1, m, o, ref;
       fields = this._get_fields(this.form);
-      this.fields = {
-        all: fields,
-        required: this._get_required(fields)
-      };
+      dependency_data = {};
+      id_to_elem = {};
       for (i = l = 0, ref = fields.length; 0 <= ref ? l < ref : l > ref; i = 0 <= ref ? ++l : --l) {
         elem = fields.eq(i);
         data = {};
@@ -2023,7 +2027,33 @@
         data.errors[VALIDATION_PHASES.VALUE] = [];
         data.errors[VALIDATION_PHASES.CONSTRAINTS] = [];
         this._set_element_data(elem, data);
+        id_to_elem[data.id] = elem;
+        dependency_data[data.id] = (function() {
+          var len2, q, ref1, results1;
+          ref1 = data.depends_on;
+          results1 = [];
+          for (q = 0, len2 = ref1.length; q < len2; q++) {
+            dep = ref1[q];
+            results1.push(this._get_element_data(dep).id);
+          }
+          return results1;
+        }).call(this);
       }
+      this.fields = {
+        all: fields,
+        required: this._get_required(fields),
+        ordered: (function() {
+          var len2, q, ref1, results1;
+          ref1 = toposort(dependency_data);
+          results1 = [];
+          for (q = 0, len2 = ref1.length; q < len2; q++) {
+            id = ref1[q];
+            results1.push(id_to_elem[id]);
+          }
+          return results1;
+        })()
+      };
+      console.log("validation order:", toposort(dependency_data));
       return this;
     };
 
@@ -2044,7 +2074,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, data, default_options, dep, dep_data, dependency_data, deps, elem, elem_errors, errors, fields, first_invalid_element, grouped_errors, i, id, id_to_elem, is_required, l, len, len1, m, o, original_value, ref, ref1, required, type, usedValFunc, value, value_has_changed, value_info;
+      var CLASS, data, default_options, elem, elem_errors, errors, fields, first_invalid_element, grouped_errors, is_required, l, len, original_value, type, usedValFunc, value, value_has_changed, value_info;
       if (options == null) {
         options = {};
       }
@@ -2060,40 +2090,14 @@
       if ((this.fields == null) || options.recache === true) {
         this.cache();
       }
+      this.last_validation = Date.now();
       CLASS = this.constructor;
       errors = [];
       usedValFunc = false;
-      required = this.fields.required;
-      fields = this.fields.all;
+      fields = this.fields.ordered;
       first_invalid_element = null;
-      dependency_data = {};
-      id_to_elem = {};
-      for (i = l = 0, ref = fields.length; 0 <= ref ? l < ref : l > ref; i = 0 <= ref ? ++l : --l) {
-        elem = fields.eq(i);
-        data = this._get_element_data(elem);
-        id_to_elem[data.id] = elem;
-        deps = [];
-        ref1 = data.depends_on;
-        for (m = 0, len = ref1.length; m < len; m++) {
-          dep = ref1[m];
-          dep_data = this._get_element_data(dep);
-          deps.push(dep_data.id);
-        }
-        dependency_data[data.id] = deps.join(" ");
-      }
-      fields = (function() {
-        var len1, o, ref2, results1;
-        ref2 = toposort(dependency_data);
-        results1 = [];
-        for (o = 0, len1 = ref2.length; o < len1; o++) {
-          id = ref2[o];
-          results1.push(id_to_elem[id]);
-        }
-        return results1;
-      })();
-      console.log(fields);
-      for (o = 0, len1 = fields.length; o < len1; o++) {
-        elem = fields[o];
+      for (l = 0, len = fields.length; l < len; l++) {
+        elem = fields[l];
         data = this._get_element_data(elem);
         is_required = data.required;
         type = data.type, name = data.name;

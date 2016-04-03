@@ -1,5 +1,4 @@
 class window.FormValidator
-    # TODO:0 add effects for dependencies
 
     ########################################################################################################################
     ########################################################################################################################
@@ -113,6 +112,7 @@ class window.FormValidator
         @form = form
         @fields = null
         @form_modifier = new FormModifier(@, options)
+        @last_validation = null
 
         @error_classes = options.error_classes or @form.attr("data-fv-error-classes") or "fv-invalid"
         @success_classes = options.success_classes or @form.attr("data-fv-success-classes") or "fv-valid"
@@ -137,6 +137,8 @@ class window.FormValidator
         @group                  = options.group or null
         # modification of the errors possible before they are applied to DOM
         @process_errors         = options.process_errors or null
+
+        @_field_order = null
 
 
     ########################################################################################################################
@@ -409,6 +411,13 @@ class window.FormValidator
         return results
 
     _validate_element: (elem, data, value_info, options) ->
+        # if this function has been called before in the recursion (i.e. when validating dependencies)
+        if data.last_validation is @last_validation
+            return data.errors[VALIDATION_PHASES.DEPENDENCIES].concat(
+                data.errors[VALIDATION_PHASES.VALUE]
+                data.errors[VALIDATION_PHASES.CONSTRAINTS]
+            )
+
         errors = []
         # accumulator (AND of each phase's valid state)
         prev_phases_valid = true
@@ -432,7 +441,7 @@ class window.FormValidator
             data.errors[phase] = dependency_errors
         else
             data.errors[phase] = []
-        # TODO: apparently this is not kept in the cache beyond this function call
+
         data.dependency_changed = valid_dependencies isnt data.valid_dependencies
         data.valid_dependencies = valid_dependencies
         # cache error targets for applying dependency change action
@@ -497,7 +506,7 @@ class window.FormValidator
         errors = errors.concat data.errors[phase]
 
         if data.valid_dependencies and data.valid_value and data.valid_constraints
-            # cache uncached data
+            # update data.valid and cache uncached data
             if data.valid isnt true or not data.postprocess? or not data.output_preprocessed?
                 data.valid = true
                 @_cache_attribute(elem, data, "postprocess")
@@ -525,6 +534,8 @@ class window.FormValidator
         if options.apply_error_classes is true and not data.error_targets?
             @_cache_attribute elem, data, "error_targets", () ->
                 return @_get_error_targets(elem, type)
+
+        data.last_validation = @last_validation
 
         # make element's data persistent
         @_set_element_data(elem, data)
@@ -574,10 +585,8 @@ class window.FormValidator
     # can be used to eagerly load all data
     cache: () ->
         fields = @_get_fields(@form)
-        @fields =
-            all: fields
-            required: @_get_required(fields)
-
+        dependency_data = {}
+        id_to_elem = {}
         for i in [0...fields.length]
             elem = fields.eq(i)
             data = {}
@@ -600,6 +609,23 @@ class window.FormValidator
             data.errors[VALIDATION_PHASES.CONSTRAINTS] = []
 
             @_set_element_data(elem, data)
+
+            # determine validation order according to defined dependencies
+            id_to_elem[data.id] = elem
+            # deps = []
+            # for dep in data.depends_on
+            #     dep_data = @_get_element_data(dep)
+            #     deps.push dep_data.id
+            # dependency_data[data.id] = deps
+            dependency_data[data.id] = (@_get_element_data(dep).id for dep in data.depends_on)
+
+        @fields =
+            all: fields
+            required: @_get_required(fields)
+            ordered: (id_to_elem[id] for id in toposort(dependency_data))
+
+        console.log "validation order:", toposort(dependency_data)
+
         return @
 
     ###*
@@ -628,29 +654,13 @@ class window.FormValidator
         if not @fields? or options.recache is true
             @cache()
 
+        @last_validation = Date.now()
+
         CLASS = @constructor
         errors = []
         usedValFunc = false
-        required = @fields.required
-        fields = @fields.all
+        fields = @fields.ordered
         first_invalid_element = null
-
-        # determine validation order according to defined dependencies
-        # TODO:20 make this easier after refactoring toposort
-        dependency_data = {}
-        id_to_elem = {}
-        for i in [0...fields.length]
-            elem = fields.eq(i)
-            data = @_get_element_data(elem)
-            id_to_elem[data.id] = elem
-            deps = []
-            for dep in data.depends_on
-                dep_data = @_get_element_data(dep)
-                deps.push dep_data.id
-            dependency_data[data.id] = deps.join(" ")
-
-        fields = (id_to_elem[id] for id in toposort(dependency_data))
-        console.log fields
 
         for elem in fields
             data = @_get_element_data(elem)

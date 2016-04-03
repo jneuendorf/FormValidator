@@ -60,9 +60,6 @@ group_arr_by = (arr, get_prop) ->
 
 
 
-
-
-
 # taken from http://rosettacode.org/wiki/Topological_sort#CoffeeScript
 # toposort = (tuples) ->
 #     # tuples is a list of tuples, where the 1st tuple elems are parent nodes and
@@ -167,7 +164,7 @@ parse_deps = (data) ->
     deps = set()
     for k, v of data
         targets[k] = set()
-        children = v.split(' ')
+        children = v#.split(' ')
         for child in children
             if child is ''
                 continue
@@ -223,6 +220,67 @@ set_remove = (s, e) ->
 # targets = parse_deps()
 # console.log toposort targets
 
+# class GraphNode
+#
+#     # CONSTRUCTOR
+#     constructor: () ->
+#         @incoming_edges = []
+#
+#     has_edge: () ->
+#
+# class Graph
+#
+#     # CONSTRUCTOR
+#     constructor: () ->
+#         @nodes = []
+#
+#     has_edges: () ->
+#         for node in @nodes when node.incoming_edges.length > 0
+#             return true
+#         return false
+#
+#     add_edge: (from, to) ->
+#
+#
+#     remove_edge: (from, to) ->
+#
+# # L ← Empty list that will contain the sorted elements
+# # S ← Set of all nodes with no incoming edges
+# # while S is non-empty do
+# #     remove a node n from S
+# #     add n to tail of L
+# #     for each node m with an edge e from n to m do
+# #         remove edge e from the graph
+# #         if m has no other incoming edges then
+# #             insert m into S
+# # if graph has edges then
+# #     return error (graph has at least one cycle)
+# # else
+# #     return L (a topologically sorted order)
+# toposort = (fields) ->
+#     # build graph
+#     graph = []
+#     for elem in fields
+#         data = @_get_element_data(elem)
+#
+#         graph.push {
+#             field: elem
+#             incoming_edges: []
+#         }
+#
+#     # do topological sort
+#     L = []
+#     S = []
+#     while S.length > 0
+#         n = S.pop()
+#         L.push n
+#         for m in graph when (e = m.has_edge(n, m))
+#             graph.remove_edge(e)
+#             if m.incoming_edges.length is 1
+#                 S.push m
+#     if not graph.has_edges()
+#         return L
+#     throw new Error()
 
  #####################################################################################################
 # USED FOR CONSTRAINT ERROR MESSAGES (in error_message_builders.coffee)
