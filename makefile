@@ -17,7 +17,10 @@ CSS_FILES = theme.default theme.bootstrap
 
 make:
 	# compile coffee
-	cat $(DEBUG_FILE) $(COFFEE_FILES) | coffee --compile --stdio > $(PROJECT_NAME).js
+	# compile coffee with --bare because we add our own function wrapper for jQuery namespace
+	cat $(DEBUG_FILE) $(COFFEE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).js
+	echo '(function($$){' | cat - $(PROJECT_NAME).js > temp && mv temp $(PROJECT_NAME).js
+	echo '})(jQuery)' >> $(PROJECT_NAME).js
 	sh ./make_sass.sh $(CSS_FILES)
 
 
@@ -25,7 +28,9 @@ test: make
 	cat $(TEST_FILES) | coffee --compile --stdio > $(PROJECT_NAME).test.js
 
 min:
-	cat $(COFFEE_FILES) | coffee --compile --stdio > $(PROJECT_NAME).temp.js
+	cat $(COFFEE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).temp.js
+	echo '(function($$){' | cat - $(PROJECT_NAME).temp.js > temp && mv temp $(PROJECT_NAME).temp.js
+	echo '})(jQuery)' >> $(PROJECT_NAME).temp.js
 	uglifyjs $(PROJECT_NAME).temp.js -o $(PROJECT_NAME).min.js -c drop_console=true -d DEBUG=false -m
 	rm -f $(PROJECT_NAME).temp.js
 	sh ./make_sass_compressed.sh $(CSS_FILES)
