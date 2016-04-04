@@ -125,6 +125,7 @@ class FormModifier
         form_validator = @form_validator
         fields = form_validator.fields.all
         error_output_mode = form_validator.error_output_mode
+        first_invalid_element = null
 
         for i in [0...fields.length]
             elem = fields.eq(i)
@@ -142,6 +143,7 @@ class FormModifier
             # grouped_error => elem is invalid
             else
                 is_valid = false
+                first_invalid_element ?= elem
                 for error in grouped_error.errors
                     # set flag for dependency error classes
                     if error.phase is VALIDATION_PHASES.DEPENDENCIES
@@ -180,5 +182,8 @@ class FormModifier
                 )
 
             @_process_error_message(message, elem, data)
+
+        if options.focus_invalid is true
+            first_invalid_element?.focus()
 
         return @

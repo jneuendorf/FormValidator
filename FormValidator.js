@@ -1340,10 +1340,11 @@
     };
 
     FormModifier.prototype.modify = function(grouped_errors, options) {
-      var constraint, data, data_has_changed, elem, err, error, error_output_mode, fields, form_validator, grouped_error, i, is_valid, l, len, len1, len2, m, message, o, q, ref, ref1, ref2, valid_dependencies;
+      var constraint, data, data_has_changed, elem, err, error, error_output_mode, fields, first_invalid_element, form_validator, grouped_error, i, is_valid, l, len, len1, len2, m, message, o, q, ref, ref1, ref2, valid_dependencies;
       form_validator = this.form_validator;
       fields = form_validator.fields.all;
       error_output_mode = form_validator.error_output_mode;
+      first_invalid_element = null;
       for (i = l = 0, ref = fields.length; 0 <= ref ? l < ref : l > ref; i = 0 <= ref ? ++l : --l) {
         elem = fields.eq(i);
         data = form_validator._get_element_data(elem);
@@ -1361,6 +1362,9 @@
           message = "";
         } else {
           is_valid = false;
+          if (first_invalid_element == null) {
+            first_invalid_element = elem;
+          }
           ref1 = grouped_error.errors;
           for (o = 0, len1 = ref1.length; o < len1; o++) {
             error = ref1[o];
@@ -1392,6 +1396,11 @@
           this._apply_classes(elem, data.depends_on, data.dependency_error_classes || form_validator.dependency_error_classes, data.valid_dependencies);
         }
         this._process_error_message(message, elem, data);
+      }
+      if (options.focus_invalid === true) {
+        if (first_invalid_element != null) {
+          first_invalid_element.focus();
+        }
       }
       return this;
     };
@@ -1493,10 +1502,21 @@
     };
 
     FormValidator["new"] = function(form, options) {
+      var form_modifier, form_validator;
       if (DEBUG && !(form instanceof jQuery)) {
         throw new Error("FormValidator::constructor: Invalid form given (must be a jQuery object)!");
       }
-      return new this(form, options);
+      form_validator = new this(form, null, options);
+      form_modifier = new FormModifier(form_validator, options);
+      form_validator.form_modifier = form_modifier;
+      return form_validator;
+    };
+
+    FormValidator.new_without_modifier = function(form, options) {
+      if (DEBUG && !(form instanceof jQuery)) {
+        throw new Error("FormValidator::constructor: Invalid form given (must be a jQuery object)!");
+      }
+      return new this(form, null, options);
     };
 
 
@@ -1506,7 +1526,7 @@
     *
      */
 
-    function FormValidator(form, options) {
+    function FormValidator(form, form_modifier, options) {
       var CLASS;
       if (options == null) {
         options = {};
@@ -1514,7 +1534,7 @@
       CLASS = this.constructor;
       this.form = form;
       this.fields = null;
-      this.form_modifier = new FormModifier(this, options);
+      this.form_modifier = form_modifier;
       this.last_validation = null;
       this.error_classes = options.error_classes || this.form.attr("data-fv-error-classes") || "fv-invalid";
       this.success_classes = options.success_classes || this.form.attr("data-fv-success-classes") || "fv-valid";
@@ -1592,6 +1612,9 @@
         value = element.attr("data-fv-" + (key.replace(/\_/g, "-")));
       } else if (value instanceof Function) {
         value = value.call(this);
+      }
+      if (value == null) {
+        value = DEFAULT_ATTR_VALUES[key.toUpperCase()];
       }
       data[key] = value;
       return data;
@@ -1691,7 +1714,7 @@
     };
 
     FormValidator.prototype._group_errors = function(errors, options) {
-      var CLASS, elem, elem_errors, error, fields, i, l, message, ref, result;
+      var CLASS, elem, elem_errors, error, fields, grouped_by_phase, i, l, message, phase, phase_errors, ref, ref1, result;
       CLASS = this.constructor;
       result = [];
       fields = this.fields.all;
@@ -1708,6 +1731,16 @@
           }
           return results1;
         })();
+        grouped_by_phase = group_arr_by(elem_errors, function(error) {
+          return error.phase;
+        });
+        for (phase in VALIDATION_PHASES) {
+          if (!(((ref1 = (phase_errors = grouped_by_phase[phase])) != null ? ref1.length : void 0) > 0)) {
+            continue;
+          }
+          elem_errors = phase_errors;
+          break;
+        }
         if (elem_errors.length > 0) {
           if (options.messages === true) {
             message = CLASS.get_error_message_for_element(elem, elem_errors, this.build_mode, this.locale);
@@ -1767,7 +1800,7 @@
         }
       }
       if (data.dependency_mode == null) {
-        data.dependency_mode = element.attr("data-fv-dependency-mode") || DEFAULT_ATTR_VALUES.DEPENDENCY_MODE;
+        this._cache_attribute(element, data, "dependency_mode");
         this._set_element_data(element, data);
       }
       if (data.dependency_mode === "any") {
@@ -1794,12 +1827,12 @@
         ref = this.constraint_validators;
         for (constraint_name in ref) {
           constraint_validator = ref[constraint_name];
-          if ((constraint_value = element.attr("data-fv-" + (constraint_name.replace(/\_/g, "-")))) != null) {
+          if ((constraint_value = this._get_attribute_value_for_key(element, constraint_name)) != null) {
             if ((constraint_validator_options = CONSTRAINT_VALIDATOR_OPTIONS[constraint_name]) != null) {
               options = {};
               for (l = 0, len = constraint_validator_options.length; l < len; l++) {
                 option = constraint_validator_options[l];
-                options[option] = element.attr("data-fv-" + (option.replace(/\_/g, "-"))) || DEFAULT_ATTR_VALUES[option.toUpperCase()];
+                options[option] = this._get_attribute_value_for_key(element, option) || DEFAULT_ATTR_VALUES[option.toUpperCase()];
               }
             } else {
               options = null;
@@ -1830,7 +1863,7 @@
     };
 
     FormValidator.prototype._validate_element = function(elem, data, value_info, options) {
-      var constraint_name, dependency_elements, dependency_error, dependency_errors, dependency_mode, error, errors, is_required, l, len, len1, m, original_value, phase, prev_phases_valid, ref, ref1, ref2, ref3, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed;
+      var constraint_name, dependency_elements, dependency_error, dependency_errors, dependency_mode, error, errors, is_required, l, len, len1, m, original_value, phase, prev_phases_valid, ref, ref1, ref2, result, temp, type, usedValFunc, valid_dependencies, validation_res, value, value_has_changed;
       if (data.last_validation === this.last_validation) {
         return data.errors[VALIDATION_PHASES.DEPENDENCIES].concat(data.errors[VALIDATION_PHASES.VALUE], data.errors[VALIDATION_PHASES.CONSTRAINTS]);
       }
@@ -1866,8 +1899,8 @@
       }
       errors = errors.concat(data.errors[phase]);
       phase = VALIDATION_PHASES.VALUE;
-      if (value_has_changed) {
-        if (prev_phases_valid || !options.stop_on_error) {
+      if (prev_phases_valid || !options.stop_on_error) {
+        if (value_has_changed || (data.dependency_changed && data.valid_dependencies && data.errors[phase].length === 0)) {
           validation_res = this._validate_value(elem, data, value_info);
           if (validation_res !== true) {
             prev_phases_valid = false;
@@ -1886,11 +1919,11 @@
             data.valid_value = true;
             data.errors[phase] = [];
           }
-        }
-      } else {
-        if (prev_phases_valid || !options.stop_on_error) {
-          if (data.valid_value !== true) {
-            prev_phases_valid = false;
+        } else if (!value_has_changed) {
+          if (prev_phases_valid || !options.stop_on_error) {
+            if (data.valid_value !== true) {
+              prev_phases_valid = false;
+            }
           }
         }
       }
@@ -1936,7 +1969,9 @@
           if (data.postprocess === true) {
             value = (ref2 = this.postprocessors[type]) != null ? ref2.call(this.postprocessors, value, elem, this.locale) : void 0;
           } else if (data.output_preprocessed === true) {
-            value = (ref3 = this.preprocessors[type]) != null ? ref3.call(this.preprocessors, value, elem, this.locale) : void 0;
+            if (this.preprocessors[type] != null) {
+              value = this.preprocessors[type].call(this.preprocessors, value, elem, this.locale);
+            }
           }
           if (usedValFunc) {
             elem.val(value);
@@ -2064,6 +2099,7 @@
     * Default is this.validation_option. Otherwise:
     * Valid options are:
     *  - all:                   {Boolean} (default is false)
+    *    -> force validation on optional fields
     *  - apply_error_classes:   {Boolean} (default is true)
     *  - focus_invalid:         {Boolean} (default is true)
     *  - messages:              {Boolean} (default is true)
@@ -2074,7 +2110,7 @@
      */
 
     FormValidator.prototype.validate = function(options) {
-      var CLASS, data, default_options, elem, elem_errors, errors, fields, first_invalid_element, grouped_errors, is_required, l, len, original_value, type, usedValFunc, value, value_has_changed, value_info;
+      var CLASS, data, default_options, elem, elem_errors, errors, fields, grouped_errors, is_required, l, len, original_value, ref, type, usedValFunc, value, value_has_changed, value_info;
       if (options == null) {
         options = {};
       }
@@ -2095,7 +2131,6 @@
       errors = [];
       usedValFunc = false;
       fields = this.fields.ordered;
-      first_invalid_element = null;
       for (l = 0, len = fields.length; l < len; l++) {
         elem = fields[l];
         data = this._get_element_data(elem);
@@ -2114,22 +2149,16 @@
         }
         elem_errors = this._validate_element(elem, data, value_info, options);
         if (elem_errors.length > 0) {
-          if (first_invalid_element == null) {
-            first_invalid_element = elem;
-          }
           errors = errors.concat(elem_errors);
-        }
-      }
-      if (options.focus_invalid === true) {
-        if (first_invalid_element != null) {
-          first_invalid_element.focus();
         }
       }
       grouped_errors = this._group_errors(errors, options);
       if (typeof this.process_errors === "function") {
         this.process_errors(grouped_errors);
       }
-      this.form_modifier.modify(grouped_errors, options);
+      if ((ref = this.form_modifier) != null) {
+        ref.modify(grouped_errors, options);
+      }
       return grouped_errors;
     };
 

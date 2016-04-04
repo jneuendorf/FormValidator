@@ -124,7 +124,8 @@ toposort = (targets) ->
                 independents.push k
     # console.log independents
 
-    # Note reverse dependencies for theoretical O(M+N) efficiency.
+    # NOTE: reverse dependencies for theoretical O(M+N) efficiency.
+    # REVIEW: does this actually improved anything? and if so is it worth reversing everything?
     reverse_deps = []
     do ->
         for k of targets

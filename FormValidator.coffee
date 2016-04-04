@@ -100,18 +100,27 @@ class window.FormValidator
     @new: (form, options) ->
         if DEBUG and form not instanceof jQuery
             throw new Error("FormValidator::constructor: Invalid form given (must be a jQuery object)!")
-        return new @(form, options)
+        form_validator = new @(form, null, options)
+        form_modifier = new FormModifier(form_validator, options)
+        form_validator.form_modifier = form_modifier
+        return form_validator
+
+    @new_without_modifier: (form, options) ->
+        if DEBUG and form not instanceof jQuery
+            throw new Error("FormValidator::constructor: Invalid form given (must be a jQuery object)!")
+        return new @(form, null, options)
 
     ###*
     * @param form {Form}
     * @param options {Object}
     *###
-    constructor: (form, options = {}) ->
+    constructor: (form, form_modifier, options = {}) ->
         CLASS = @constructor
 
         @form = form
         @fields = null
-        @form_modifier = new FormModifier(@, options)
+        # @form_modifier = new FormModifier(@, options)
+        @form_modifier = form_modifier
         @last_validation = null
 
         @error_classes = options.error_classes or @form.attr("data-fv-error-classes") or "fv-invalid"
@@ -205,6 +214,9 @@ class window.FormValidator
         else if value instanceof Function
             value = value.call(@)
 
+        if not value?
+            value = DEFAULT_ATTR_VALUES[key.toUpperCase()]
+
         data[key] = value
         return data
 
@@ -289,6 +301,12 @@ class window.FormValidator
         for i in [0...fields.length]
             elem = fields.eq(i)
             elem_errors = (error for error in errors when error.element.is(elem))
+            # filter errors of 1st invalid phase
+            grouped_by_phase = group_arr_by elem_errors, (error) ->
+                return error.phase
+            for phase of VALIDATION_PHASES when (phase_errors = grouped_by_phase[phase])?.length > 0
+                elem_errors = phase_errors
+                break
 
             if elem_errors.length > 0
                 if options.messages is true
@@ -351,7 +369,8 @@ class window.FormValidator
 
         # cache dependency mode
         if not data.dependency_mode?
-            data.dependency_mode = element.attr("data-fv-dependency-mode") or DEFAULT_ATTR_VALUES.DEPENDENCY_MODE
+            # data.dependency_mode = element.attr("data-fv-dependency-mode") or DEFAULT_ATTR_VALUES.DEPENDENCY_MODE
+            @_cache_attribute(element, data, "dependency_mode")
             @_set_element_data(element, data)
 
         # at least 1 dependency is valid <=> valid
@@ -378,12 +397,12 @@ class window.FormValidator
             CLASS = @constructor
             constraints = []
             for constraint_name, constraint_validator of @constraint_validators
-                if (constraint_value = element.attr("data-fv-#{constraint_name.replace(/\_/g, "-")}"))?
+                if (constraint_value = @_get_attribute_value_for_key(element, constraint_name))?
                     # get options
                     if (constraint_validator_options = CONSTRAINT_VALIDATOR_OPTIONS[constraint_name])?
                         options = {}
                         for option in constraint_validator_options
-                            options[option] = element.attr("data-fv-#{option.replace(/\_/g, "-")}") or DEFAULT_ATTR_VALUES[option.toUpperCase()]
+                            options[option] = @_get_attribute_value_for_key(element, option) or DEFAULT_ATTR_VALUES[option.toUpperCase()]
                     else
                         options = null
                     constraints.push {
@@ -454,8 +473,10 @@ class window.FormValidator
         # PHASE 2: validate the value
         # validate the current value only if it has changed
         phase = VALIDATION_PHASES.VALUE
-        if value_has_changed
-            if prev_phases_valid or not options.stop_on_error
+        # validate if: value has changed OR (dependency has changed from invalid to valid AND no errors have been generated before) OR not stop on error
+        if prev_phases_valid or not options.stop_on_error
+            # NOTE: the 2nd part of the disjunction is implied by "dependency has changed from invalid to valid AND no errors have been generated before". but we cannot know if errors where generated before so we use length == 0 to get as close as possible...
+            if value_has_changed or (data.dependency_changed and data.valid_dependencies and data.errors[phase].length is 0)
                 validation_res = @_validate_value(elem, data, value_info)
                 # element is invalid
                 if validation_res isnt true
@@ -472,11 +493,36 @@ class window.FormValidator
                 else
                     data.valid_value = true
                     data.errors[phase] = []
-        # value has not changed (data is unchanged)
-        else
-            if prev_phases_valid or not options.stop_on_error
-                if data.valid_value isnt true
-                    prev_phases_valid = false
+            # value has not changed (data is unchanged)
+            else if not value_has_changed
+                if prev_phases_valid or not options.stop_on_error
+                    if data.valid_value isnt true
+                        prev_phases_valid = false
+
+        # if value_has_changed
+        #     if prev_phases_valid or not options.stop_on_error
+        #         validation_res = @_validate_value(elem, data, value_info)
+        #         # element is invalid
+        #         if validation_res isnt true
+        #             prev_phases_valid = false
+        #             data.valid_value = false
+        #             data.errors[phase] = [{
+        #                 element: elem
+        #                 error_message_type: validation_res.error_message_type
+        #                 phase: phase
+        #                 required: is_required
+        #                 type: type
+        #                 value: value
+        #             }]
+        #         else
+        #             data.valid_value = true
+        #             data.errors[phase] = []
+        # # value has not changed (data is unchanged)
+        # else
+        #     if prev_phases_valid or not options.stop_on_error
+        #         if data.valid_value isnt true
+        #             prev_phases_valid = false
+
         errors = errors.concat data.errors[phase]
 
         #########################################################
@@ -518,7 +564,8 @@ class window.FormValidator
                     value = @postprocessors[type]?.call(@postprocessors, value, elem, @locale)
                 # replace old value with pre processed value
                 else if data.output_preprocessed is true
-                    value = @preprocessors[type]?.call(@preprocessors, value, elem, @locale)
+                    if @preprocessors[type]?
+                        value = @preprocessors[type].call(@preprocessors, value, elem, @locale)
 
                 if usedValFunc
                     elem.val value
@@ -634,6 +681,7 @@ class window.FormValidator
     * Default is this.validation_option. Otherwise:
     * Valid options are:
     *  - all:                   {Boolean} (default is false)
+    *    -> force validation on optional fields
     *  - apply_error_classes:   {Boolean} (default is true)
     *  - focus_invalid:         {Boolean} (default is true)
     *  - messages:              {Boolean} (default is true)
@@ -660,7 +708,7 @@ class window.FormValidator
         errors = []
         usedValFunc = false
         fields = @fields.ordered
-        first_invalid_element = null
+        # first_invalid_element = null
 
         for elem in fields
             data = @_get_element_data(elem)
@@ -680,15 +728,12 @@ class window.FormValidator
 
             elem_errors = @_validate_element(elem, data, value_info, options)
             if elem_errors.length > 0
-                first_invalid_element ?= elem
+                # first_invalid_element ?= elem
                 errors = errors.concat elem_errors
-
-        if options.focus_invalid is true
-            first_invalid_element?.focus()
 
         grouped_errors =  @_group_errors(errors, options)
         @process_errors?(grouped_errors)
-        @form_modifier.modify(grouped_errors, options)
+        @form_modifier?.modify(grouped_errors, options)
         return grouped_errors
 
     # TODO:30 counting

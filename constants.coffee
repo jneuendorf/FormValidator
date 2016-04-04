@@ -71,7 +71,7 @@ OPTIONAL_CACHE = [
     "valid_value"
     "value"
 ]
-# NOTE those are not the values with which the cache is initialized! the following values are set whenever an attribute is cached and and it is missing
+# NOTE: those are not the values with which the cache is initialized! the following values are set lazily (whenever an attribute is cached and it's missing)
 DEFAULT_ATTR_VALUES =
     PREPROCESS: true
     POSTPROCESS: false
