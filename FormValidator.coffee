@@ -69,14 +69,12 @@ class window.FormValidator
 
     @_build_error_message: (phase, errors, build_mode, locale) ->
         data = message_data_creators[phase].create_data(errors, phase, build_mode, locale)
-
         return message_builders[build_mode].build_message(data, phase, build_mode, locale)
-        # return @error_message_builders[phase](errors, phase, build_mode, locale)
 
     # from the list of errors generate an error message for a certain element (this combines the error messages of the errors belonging to the element)
     # message = concatenation of each validation-phase-message string if they are errors for that part (generated independently, defined in ERROR_MESSAGE_CONFIG.ORDER)
     # each part of the message can be generated differently (defined in ERROR_MESSAGE_CONFIG.BUILD_MODE)
-    @get_error_message_for_element: (element, errors, build_mode, locale, delimiter = " ") ->
+    @_get_error_message_for_element: (element, errors, build_mode, locale, delimiter = " ") ->
         error_message_parts = []
         grouped_errors = {}
         # group by errors by .phase
@@ -119,7 +117,6 @@ class window.FormValidator
 
         @form = form
         @fields = null
-        # @form_modifier = new FormModifier(@, options)
         @form_modifier = form_modifier
         @last_validation = null
 
@@ -310,7 +307,7 @@ class window.FormValidator
 
             if elem_errors.length > 0
                 if options.messages is true
-                    message = CLASS.get_error_message_for_element(elem, elem_errors, @build_mode, @locale)
+                    message = CLASS._get_error_message_for_element(elem, elem_errors, @build_mode, @locale)
                 else
                     message = ""
 
@@ -471,9 +468,7 @@ class window.FormValidator
 
         #########################################################
         # PHASE 2: validate the value
-        # validate the current value only if it has changed
         phase = VALIDATION_PHASES.VALUE
-        # validate if: value has changed OR (dependency has changed from invalid to valid AND no errors have been generated before) OR not stop on error
         if prev_phases_valid or not options.stop_on_error
             # NOTE: the 2nd part of the disjunction is implied by "dependency has changed from invalid to valid AND no errors have been generated before". but we cannot know if errors where generated before so we use length == 0 to get as close as possible...
             if value_has_changed or (data.dependency_changed and data.valid_dependencies and data.errors[phase].length is 0)
@@ -498,30 +493,6 @@ class window.FormValidator
                 if prev_phases_valid or not options.stop_on_error
                     if data.valid_value isnt true
                         prev_phases_valid = false
-
-        # if value_has_changed
-        #     if prev_phases_valid or not options.stop_on_error
-        #         validation_res = @_validate_value(elem, data, value_info)
-        #         # element is invalid
-        #         if validation_res isnt true
-        #             prev_phases_valid = false
-        #             data.valid_value = false
-        #             data.errors[phase] = [{
-        #                 element: elem
-        #                 error_message_type: validation_res.error_message_type
-        #                 phase: phase
-        #                 required: is_required
-        #                 type: type
-        #                 value: value
-        #             }]
-        #         else
-        #             data.valid_value = true
-        #             data.errors[phase] = []
-        # # value has not changed (data is unchanged)
-        # else
-        #     if prev_phases_valid or not options.stop_on_error
-        #         if data.valid_value isnt true
-        #             prev_phases_valid = false
 
         errors = errors.concat data.errors[phase]
 
@@ -594,41 +565,6 @@ class window.FormValidator
     ########################################################################################################################
     # PUBLIC
 
-    # GETTERS + SETTERS
-
-    register_validator: (type, validator, error_message_types) ->
-        # check validator in dev mode
-        if DEBUG
-            if validator.call instanceof Function and typeof(validator.call(@validators, "", $())) is "boolean" and validator.error_message_types instanceof Array
-                @validators[type] = validator
-            else
-                console.warn "FormValidator::register_validator: Invalid validator given (has no call method or not returning a boolean)!"
-        else
-            @validators[type] = validator
-        return @
-
-    deregister_validator: (type) ->
-        delete @validators[type]
-        return @
-
-    register_preprocessor: (type, processor) ->
-        @preprocessors[type] = processor
-        return @
-
-    deregister_preprocessor: (type) ->
-        delete @preprocessors
-        return @
-
-    register_postprocessor: (type, processor) ->
-        @postprocessors[type] = processor
-        return @
-
-    deregister_postprocessor: (type) ->
-        delete @postprocessors[type]
-        return @
-
-    # ACTUAL FUNCTIONALITY
-
     # can be used to eagerly load all data
     cache: () ->
         fields = @_get_fields(@form)
@@ -659,11 +595,6 @@ class window.FormValidator
 
             # determine validation order according to defined dependencies
             id_to_elem[data.id] = elem
-            # deps = []
-            # for dep in data.depends_on
-            #     dep_data = @_get_element_data(dep)
-            #     deps.push dep_data.id
-            # dependency_data[data.id] = deps
             dependency_data[data.id] = (@_get_element_data(dep).id for dep in data.depends_on)
 
         @fields =

@@ -108,7 +108,6 @@ CONSTRAINT_VALIDATOR_OPTIONS =
     ]
 
 
-
 # choose what constants to attach to the FormValidator class
 EXPOSED_CONSTANTS =
     ERROR_MODES: ERROR_MODES

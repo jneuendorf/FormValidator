@@ -1,5 +1,6 @@
 dependency_change_actions = {}
 
+
 dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.DISPLAY] = (element, valid) ->
     if not valid
         element.data "_fv_orig_display", element.css("display")
@@ -9,8 +10,10 @@ dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.DISPLAY] = (element, valid) 
             element.css "display", orig_display
     return element
 
+
 dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.ENABLE] = (element, valid) ->
     return element.prop("disabled", not valid)
+
 
 dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.FADE] = (element, valid) ->
     if valid
@@ -18,6 +21,7 @@ dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.FADE] = (element, valid) ->
     else
         element.fadeOut DEPENDENCY_CHANGE_ACTION_DURATION
     return element
+
 
 dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.OPACITY] = (element, valid) ->
     if not valid
@@ -28,12 +32,14 @@ dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.OPACITY] = (element, valid) 
             element.animate {opacity: orig_opacity, DEPENDENCY_CHANGE_ACTION_DURATION}
     return element
 
+
 dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.SHOW] = (element, valid) ->
     if valid
         element.show DEPENDENCY_CHANGE_ACTION_DURATION
     else
         element.hide DEPENDENCY_CHANGE_ACTION_DURATION
     return element
+
 
 dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.SLIDE] = (element, valid) ->
     if valid
