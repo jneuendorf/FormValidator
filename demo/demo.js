@@ -45,6 +45,7 @@ $(document).ready(function() {
         form_validator.locale = $(".locale option:selected").val();
         // console.log(form_validator.validate({recache: true}));
         console.log(form_validator.validate({recache: $(this).hasClass("recache") ? true : false}));
+        console.log("progress =", form_validator.get_progress());
         return false;
     });
 

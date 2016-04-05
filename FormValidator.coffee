@@ -13,16 +13,12 @@ class window.FormValidator
 
     # defined in constraint_validators.coffee
     @constraint_validators = constraint_validators
-
     # defined in validators.coffee
     @validators = validators
-
     # defined in dependency_change_actions.coffee
     @dependency_change_actions = dependency_change_actions
-
     # defined in locales.coffee and error_messages.coffee
     @locales = locales
-
     @default_preprocessors =
         number: (str, elem, locale) ->
             return switch locale
@@ -85,12 +81,6 @@ class window.FormValidator
             error_message_parts.push @_build_error_message(phase, grouped_errors[phase], build_mode, locale)
 
         return error_message_parts.join(delimiter)
-
-
-    ########################################################################################################################
-    ########################################################################################################################
-    # INIT
-
 
     ########################################################################################################################
     ########################################################################################################################
@@ -278,7 +268,7 @@ class window.FormValidator
             data = @_get_element_data(elem)
 
             if not data.group?
-                data.group = elem.attr("data-fv-group") or data.name
+                data.group = elem.attr("data-fv-group") or elem.attr("name") or ""
                 @_set_element_data(elem, data)
 
             group_name = data.group
@@ -639,7 +629,6 @@ class window.FormValidator
         errors = []
         usedValFunc = false
         fields = @fields.ordered
-        # first_invalid_element = null
 
         for elem in fields
             data = @_get_element_data(elem)
@@ -659,56 +648,76 @@ class window.FormValidator
 
             elem_errors = @_validate_element(elem, data, value_info, options)
             if elem_errors.length > 0
-                # first_invalid_element ?= elem
                 errors = errors.concat elem_errors
 
         grouped_errors =  @_group_errors(errors, options)
         @process_errors?(grouped_errors)
-        @form_modifier?.modify(grouped_errors, options)
+        if options.modify isnt false
+            @form_modifier?.modify(grouped_errors, options)
         return grouped_errors
 
-    # TODO:30 counting
-    get_progress: (options = {as_percentage: false, recache: false}) ->
+    get_progress: (options = {mode: PROGRESS_MODES.DEFAULT, recache: false}) ->
         if not @fields? or options.recache is true
             @cache()
 
         fields = @fields.all
-        required = @fields.required
         groups = @group?(fields) or @_group(fields)
-
-        total = groups.length
-        count = 0
+        result = []
 
         errors = @validate({
-            apply_error_classes: false
             all: true
+            messages: false
+            modify: false
+            recache: false
+            stop_on_error: true
         })
 
-        # count only those groups that do not have any errors
+        {mode} = options
+
         for group, i in groups
-            all_optional = true
+            console.log "group:", group
+            num_required = 0
+            num_optional = 0
+            num_valid_required = 0
+            num_valid_optional = 0
             for elem in group
-                elem = $(elem)
-                if required.index(elem) >= 0
-                    all_optional = false
-                    break
+                data = @_get_element_data(elem)
+                if data.required is true
+                    num_required++
+                    if data.valid is true
+                        num_valid_required++
+                else
+                    num_optional++
+                    if data.valid is true
+                        num_valid_optional++
 
-            found_error = false
-            # NOTE:20 elem is either a jQuery object or a DOM element (but $.fn.is() can handle both!)
-            for elem in group
-                elem = $(elem)
+            # at least 1 required field
+            if num_required > 0
+                if mode is PROGRESS_MODES.PERCENTAGE
+                    result.push num_valid_required / num_required
+                else if mode is PROGRESS_MODES.ABSOLUTE
+                    result.push {
+                        count: num_valid_required
+                        total: num_required
+                    }
+            # optionals only
+            else if num_optional > 0
+                if num_valid_optional > 0
+                    if mode is PROGRESS_MODES.PERCENTAGE
+                        result.push 1
+                    else if mode is PROGRESS_MODES.ABSOLUTE
+                        result.push {
+                            count: num_valid_optional
+                            total: num_valid_optional
+                        }
+            # empty group
+            else
+                result.push null
 
-                for error in errors when error.element.is(elem)
-                    found_error = true
-                    break
-                if found_error
-                    break
-            if not found_error
-                count++
-
-        if not options.as_percentage
-            return {
-                count: count
-                total: total
-            }
-        return count / total
+        sum = 0
+        n = 0
+        for r in result when r?
+            sum += r
+            n++
+        result.average = sum / n
+        return result

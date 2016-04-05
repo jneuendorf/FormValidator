@@ -154,7 +154,6 @@ toposort = (targets) ->
 
 parse_deps = (data) ->
     # parse string data, remove self-deps, and fill in gaps
-    #
     # e.g. this would transform {a: "a b c", d: "e"} to this:
     #   a: set(b, c)
     #   b: set()
@@ -165,7 +164,7 @@ parse_deps = (data) ->
     deps = set()
     for k, v of data
         targets[k] = set()
-        children = v#.split(' ')
+        children = v
         for child in children
             if child is ''
                 continue
@@ -185,18 +184,12 @@ set = () ->
     }
 
 set_add = (s, e) ->
-    # return if s.v[e]
-    # s.cnt += 1
-    # s.v[e] = true
     if not s.v[e]
         s.cnt += 1
         s.v[e] = true
     return s
 
 set_remove = (s, e) ->
-    # return if not s.v[e]
-    # s.cnt -= 1
-    # delete s.v[e]
     if s.v[e]
         s.cnt -= 1
         delete s.v[e]
