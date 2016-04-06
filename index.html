@@ -414,7 +414,7 @@
                 var form = $("#example3").closest("form"),
                     error, div, text, i, j, target, hide_field;
                 var validator = FormValidator.new(form, {
-                    error_target_getter: function(type, element, index) {
+                    error_target_getter: function(element, type) {
                         return element.closest(".row").find(".error_state");
                     },
                     locale: form.find(".example3.locale option:selected").val()
@@ -454,7 +454,7 @@
                 var form = $(&quot;#example3&quot;).closest(&quot;form&quot;),
                     error, div, text, i, j, target, hide_field;
                 var validator = FormValidator.new(form, {
-                    error_target_getter: function(type, element, index) {
+                    error_target_getter: function(element, type) {
                         return element.closest(&quot;.row&quot;).find(&quot;.error_state&quot;);
                     },
                     locale: form.find(&quot;.example3.locale option:selected&quot;).val()
