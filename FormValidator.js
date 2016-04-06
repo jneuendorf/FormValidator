@@ -1158,6 +1158,9 @@ dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.SLIDE] = function(element, v
 
 FormModifier = (function() {
   function FormModifier(form_validator, options) {
+    if (options == null) {
+      options = {};
+    }
     this.form_validator = form_validator;
     if ((ERROR_OUTPUT_MODES[options.error_output_mode] != null) || options.error_output_mode instanceof Function) {
       this.error_output_mode = options.error_output_mode;

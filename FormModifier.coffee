@@ -2,7 +2,7 @@
 class FormModifier
 
     # CONSTRUCTOR
-    constructor: (form_validator, options) ->
+    constructor: (form_validator, options = {}) ->
         @form_validator = form_validator
         if ERROR_OUTPUT_MODES[options.error_output_mode]? or options.error_output_mode instanceof Function
             @error_output_mode = options.error_output_mode
