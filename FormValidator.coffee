@@ -113,7 +113,7 @@ class window.FormValidator
         @error_classes = options.error_classes or @form.attr("data-fv-error-classes") or "fv-invalid"
         @success_classes = options.success_classes or @form.attr("data-fv-success-classes") or "fv-valid"
         @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or "fv-invalid-dependency"
-        @dependency_change_action = options.dependency_change_action or @form.attr("data-fv-dependency-change-action") or DEPENDENCY_CHANGE_ACTION.DEFAULT
+        @dependency_change_action = options.dependency_change_action or @form.attr("data-fv-dependency-change-action") or DEPENDENCY_CHANGE_ACTIONS.DEFAULT
 
         @validators             = $.extend {}, CLASS.validators, options.validators
         @validation_options     = options.validation_options or null
@@ -209,31 +209,67 @@ class window.FormValidator
 
     # END - CACHING
 
-    _get_value_info: (element, data) ->
-        {type, preprocess} = data
+    _get_value: (element, data) ->
+        {type} = data
         usedValFunc = true
-        value = element.val()
+        if type is "checkbox" or type is "radio"
+            value = if element.prop("checked") is true then "checked" else "unchecked"
+            method = "checkbox"
+        else if type is "select"
+            value = element.children(":selected").val()
+            method = "val"
+        else
+            value = element.val()
+            method = "val"
+
         if not value?
             usedValFunc = false
             value = element.text()
+            method = "text"
 
-        original_value = value
-        value_has_changed = original_value isnt data.value
+        return {
+            method: method
+            value: value
+        }
 
+    _set_value: (element, data, method, value) ->
+        if method is "checkbox"
+            element.prop("checked", if value is "checked" then true else false)
+        else if method is "val"
+            element.val(value)
+        # text
+        else
+            element.text(value)
+        return @
+
+    _get_value_info: (element, data) ->
+        {type, preprocess} = data
+        # usedValFunc = true
+        # if type isnt "checkbox" and type isnt "radio"
+        #     value = element.val()
+        # else
+        #     if type isnt "checkbox" or type isnt "radio"
+        #         value = if element.prop("checked") is true then "checked" else "unchecked"
+        #
+        # if not value?
+        #     usedValFunc = false
+        #     value = element.text()
+        {method, value} = @_get_value(element, data)
+
+        value_has_changed = value isnt data.value
         # cache latest element's value
-        data.value = original_value
+        data.value = value
 
         if @preprocessors[type]? and preprocess isnt false
             value = @preprocessors[type].call(@preprocessors, value, element, @locale)
 
         return {
-            usedValFunc: usedValFunc
+            method: method
             value: value
-            original_value: original_value
             value_has_changed: value_has_changed
         }
 
-    _find_targets: (targets, element, delimiter = /\;\s+/g) ->
+    _find_targets: (targets, element, delimiter = /\s*\;\s*/g) ->
         if typeof targets is "string"
             return (@_find_target(target, element) for target in targets.split(delimiter))
         return targets or []
@@ -261,6 +297,7 @@ class window.FormValidator
             DEFAULT_ATTR_VALUES.ERROR_TARGETS
 
     # create list of sets where each set is 1 unit for counting progress
+    # returns: 1. array of arrays, 2. jquery set, or 3. array of jquery
     _group: (fields) ->
         dict = {}
         for i in [0...fields.length]
@@ -429,7 +466,7 @@ class window.FormValidator
         prev_phases_valid = true
         is_required = data.required
         {type} = data
-        {value, original_value, value_has_changed, usedValFunc} = value_info
+        {value, value_has_changed, method} = value_info
 
         #########################################################
         # PHASE 1: validate dependencies (no matter if the value has changed because dependencies could have changed)
@@ -528,10 +565,8 @@ class window.FormValidator
                     if @preprocessors[type]?
                         value = @preprocessors[type].call(@preprocessors, value, elem, @locale)
 
-                if usedValFunc
-                    elem.val value
-                else
-                    elem.text value
+                @_set_value(elem, data, method, value)
+
                 for error in errors
                     error.value = value
         else
@@ -635,10 +670,9 @@ class window.FormValidator
             is_required = data.required
             {type, name} = data
             value_info = @_get_value_info(elem, data)
-            {value, original_value, value_has_changed, usedValFunc} = value_info
 
             # skip empty optional elements
-            if options.all is false and not is_required and (value.length is 0 or type is "radio" or type is "checkbox")
+            if options.all is false and not is_required and (value_info.value.length is 0 or type is "radio" or type is "checkbox")
                 # NOTE:40 if an optional value was invalid and was emptied the error target's error classes should be removed
                 if not data.error_targets?
                     data = @_cache_attribute elem, data, "error_targets", () ->
@@ -661,6 +695,7 @@ class window.FormValidator
             @cache()
 
         fields = @fields.all
+        # TODO: cache groups
         groups = @group?(fields) or @_group(fields)
         result = []
 
@@ -675,12 +710,14 @@ class window.FormValidator
         {mode} = options
 
         for group, i in groups
-            console.log "group:", group
+            console.log "group ##{i+1}:", group
             num_required = 0
             num_optional = 0
             num_valid_required = 0
             num_valid_optional = 0
-            for elem in group
+            for elem, j in group
+                if elem not instanceof jQuery
+                    elem = group.eq?(j) or $(elem)
                 data = @_get_element_data(elem)
                 if data.required is true
                     num_required++
@@ -707,8 +744,16 @@ class window.FormValidator
                         result.push 1
                     else if mode is PROGRESS_MODES.ABSOLUTE
                         result.push {
-                            count: num_valid_optional
-                            total: num_valid_optional
+                            count: num_optional
+                            total: num_optional
+                        }
+                else
+                    if mode is PROGRESS_MODES.PERCENTAGE
+                        result.push 0
+                    else if mode is PROGRESS_MODES.ABSOLUTE
+                        result.push {
+                            count: 0
+                            total: num_optional
                         }
             # empty group
             else
