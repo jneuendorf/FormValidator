@@ -92,7 +92,7 @@ $filenames = [
         </div>
 
         <footer class="site-footer">
-            <span class="site-footer-owner"><a href="https://github.com/jneuendorf/FormValidator">Formvalidator</a> is maintained by <a href="https://github.com/jneuendorf">jneuendorf</a>.</span>
+            <span class="site-footer-owner"><a href="https://github.com/jneuendorf/FormValidator">FormValidator</a> is maintained by <a href="https://github.com/jneuendorf">jneuendorf</a>.</span>
 
             <span class="site-footer-credits">This page is based on the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
         </footer>

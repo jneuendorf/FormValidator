@@ -5,11 +5,20 @@
     <dt>Simple type-based validation</dt>
     <dd>Validate forms simply by using some HTML attributes.</dd>
 
+    <dt>Constraints</dt>
+    <dd>
+        Easily define constraints on form fields in addition to their validation kind.<br>
+        Any constraint can be added to any field.
+    </dd>
+
     <dt>Required and optional fields</dt>
     <dd>Define what fields are optional by using a predefined attribute on the according elements.</dd>
 
     <dt>Easy theming</dt>
-    <dd>Since CSS classes are applied to invalid elements, creating custom themes is easy.</dd>
+    <dd>
+        Since CSS classes are applied to invalid elements, creating custom themes is easy.<br>
+        The FormValidator ships with some themes that flawlessly integrate into a page using Bootstrap.
+    </dd>
 
     <dt>Dependencies</dt>
     <dd>
@@ -20,7 +29,7 @@
 
     <dt>Detailed errors</dt>
     <dd>
-        Invalid fields produce user friendly errors.<br />
+        Invalid fields produce user friendly errors in various formats.<br />
         And it's possible to customize the degree of detail!
     </dd>
 
