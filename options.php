@@ -1,70 +1,46 @@
 <div class="row">
     <p class="col-xs-12">
-        The following options can be passed to a new FormValidator object like so:
+        The following options can be passed to a new FormValidator as parameter like so:
         <br />
-        <code>new FormValidator(form, options)</code>
+        <code>FormValidator.new(form, options)</code> or <code>FormValidator.new_without_modifier(form, options)</code>
     </p>
 
     <div class="col-xs-12">
         <h4>Error handling</h4>
         <dl class="">
-            <dt>create_dependency_error_message</dt>
+            <!-- build_mode -->
+            <!-- constraint_validators -->
+
+            <dt>build_mode</dt>
             <dd>
-                <code>Function(String locale, Array (of Object) dependency_errors) -> String</code>
-                <br> Can be used to customize what dependency error messages look like.
-                <br> The default message is whatever error message is defined for the current locale at the key <code>dependency</code>.<br>
-                Take a look at example 3 on the <a class="goto" href="#" data-href="#demos">demos</a> page to see how dependencies work.
+                <code>String</code>
+                <br> Defines how error message are created.
+                <br> Must be either the options defined in <code>FormValidator.BUILD_MODES</code>.
+                <br> Default is <code>FormValidator.BUILD_MODES.DEFAULT</code>.
+            </dd>
+
+            <dt>constraint_validators</dt>
+            <dd>
+                <code>Object</code>
+                <br> Can be used to add or override constraint validators to the predefined set.
+                <br> See <a class="goto" href="#" data-href="#constraints">constraints</a> for more details.
             </dd>
 
             <dt>dependency_error_classes</dt>
             <dd>
-                <code>String</code> (CSS class names, space separated)
-                <br> Can be used to customize which CSS classes will be applied to the error target(s) of the fields the current field depends on (if any of the dependencies are invalid).
+                <code>String</code> (CSS class names, semicolon separated)
+                <br> Defines what CSS classes will be applied to the error target(s) of the fields the current field depends on (if any of the dependencies are invalid).
                 <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).<br>
                 Take a look at example 3 on the <a class="goto" href="#" data-href="#demos">demos</a> page to see how dependencies work.
             </dd>
 
+            <!-- dependency_change_action -->
+
             <dt>error_classes</dt>
             <dd>
-                <code>String</code> (CSS class names, space separated)
+                <code>String</code> (CSS class names, semicolon separated)
                 <br> Defines what CSS classes will be applied to the error target(s) of an invalid field.
                 <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).
-            </dd>
-
-            <dt>error_styles</dt>
-            <dd>
-                <code>String</code> (CSS styles)
-                <br> Defines what CSS styles will be applied to the error target(s) of an invalid field. Preferably, <code>data-fv-error-classes</code> should be used though.
-                <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).
-            </dd>
-
-            <dt>error_messages</dt>
-            <dd>
-                <code>Object</code>. It looks like this:
-                <br>
-                <pre class="brush: js">
-                    {
-                        locale1: {
-                            error_type1: MESSAGE_1_1,
-                            ...,
-                            error_typeN: MESSAGE_1_N
-                        },
-                        locale2: {...}
-                    }
-                </pre> where <code>MESSAGE_X_Y</code> is either a <code>String</code> or a <code>Function(String locale, Object parameters) -> String</code>.
-                Can be used to override the default messages object (at <code>FormValidator.error_messages</code>). The object is merged into the predefined so customizing single message types (even for different locales) is possible.<br>
-                The <code>parameters</code> argument depends on the error returned by the validator. The return value has at least these properties:<br>
-                <pre class="brush: js">
-                    {
-                        element: validated_field,
-                        index: element_index (incl. optional fields),
-                        index_of_type: index_of_validation_type,
-                        name: validated_field.attr("data-fv-name"),
-                        previous_name: name_of_previously_validated_field,
-                        value: postprocessed_validated_field_value || preprocessed_validated_field_value || validated_field_value
-                    }
-                </pre>
-                Additional properties may be provided by the validator. Those could either properties describing the <a class="goto" href="#" data-href="#constraint_attributes">constraint attributes</a> or "private" properties (that should be the case only if the validator is "private"...see <a class="goto" href="#" data-href="#validators">validators</a> for more details).
             </dd>
 
             <dt>error_mode</dt>
@@ -123,6 +99,9 @@
                 <br> If a <code>jQuery</code> set is returned all the contained elements will be the targets.
                 <br> If a <code>String</code> is returned it is parsed the same as if it was set using the <code>data-fv-error-targets</code> attribute. See <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
             </dd>
+
+            <!-- process_errors -->
+            <!-- success_classes -->
         </dl>
     </div>
 
@@ -134,6 +113,14 @@
                 <code>Function(jQuery form) -> jQuery</code>
                 <br> Can be used to define the set of form fields that are relevant to the FormValidator.
             </dd>
+
+            <dt>group</dt>
+            <dd>
+                <code>Function(jQuery fields) -> Array (of Array of jQuery)</code>
+                <br> Creates groups from all form fields. Can be used for advanced progress counting.
+                <!-- TODO: add detailed explanation -->
+            </dd>
+
             <dt>locale</dt>
             <dd>
                 Define what locale is used. This property is relevant for:
@@ -147,28 +134,6 @@
             <dd>
                 <code>Function(jQuery fields) -> jQuery</code>
                 <br> Can be used to define the subset of all fields (see <code>field_getter</code>) that contains all the fields that are optional. Those fields will only be validated if they are non-empty.
-            </dd>
-
-            <dt>group</dt>
-            <dd>
-                <code>Function(jQuery fields) -> Array (of Array of jQuery)</code>
-                <br> Creates groups from all form fields. Can be used for advanced progress counting.
-                <!-- TODO: add detailed explanation -->
-            </dd>
-
-            <dt>preprocessors</dt>
-            <dd>
-                <code>Object</code>. It looks like this:
-                <br>
-                <pre class="brush: js">
-                    {
-                        validation_type1: PREPROCESSOR_1,
-                        ...,
-                        validation_typeN: PREPROCESSOR_N
-                    }
-                </pre> where <code>PREPROCESSOR_N</code> is a <code>Function(String value, jQuery element, String locale) -> String</code>.
-                <br> Can be used to override or define preprocessors. They are used modify the form field's value before the validation happens.<br>
-                The predefined preprocessors currently exist for <code>number</code> and <code>integer</code>. Currently, for both types the comma will be interpreted as decimal points when the locale <code>de</code> is used.
             </dd>
 
             <dt>postprocessors</dt>
@@ -185,6 +150,21 @@
                 <br> Can be used to override or define postprocessors. They are used modify the form field's value after the validation happened. The <code>value</code> is either the input's original or preprocessed value.<br>
                 For example, a value could be auto-corrected i.e. the numeric string <code>" 1.34  "</code> would become <code>"1.34"</code> in the according field (when valid).
             </dd>
+            </dd>
+
+            <dt>preprocessors</dt>
+            <dd>
+                <code>Object</code>. It looks like this:
+                <br>
+                <pre class="brush: js">
+                    {
+                        validation_type1: PREPROCESSOR_1,
+                        ...,
+                        validation_typeN: PREPROCESSOR_N
+                    }
+                </pre> where <code>PREPROCESSOR_N</code> is a <code>Function(String value, jQuery element, String locale) -> String</code>.
+                <br> Can be used to override or define preprocessors. They are used modify the form field's value before the validation happens.<br>
+                The predefined preprocessors currently exist for <code>number</code> and <code>integer</code>. Currently, for both types the comma will be interpreted as decimal points when the locale <code>de</code> is used.
             </dd>
 
             <dt>required_field_getter</dt>

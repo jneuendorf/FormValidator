@@ -4,9 +4,10 @@ $tab_names = [
     'features',
     'how to use',
     'demos',
-    'options',
     'validators',
+    'constraints',
     'dependencies',
+    'ctor options',
     'methods',
     'attributes'
 ];
@@ -14,9 +15,10 @@ $filenames = [
     'features',
     'usage',
     'demos',
-    'options',
     'validators',
+    'constraints',
     'dependencies',
+    'options',
     'methods',
     'attributes'
 ];
@@ -28,7 +30,7 @@ $filenames = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Formvalidator by jneuendorf</title>
+    <title>FormValidator by jneuendorf</title>
 
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>

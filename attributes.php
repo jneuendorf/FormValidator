@@ -128,7 +128,7 @@
             <li><code>phone</code></li>
             <li><code>radio</code></li>
             <li><code>select</code></li>
-            <li><code>text</code></li>
+            <li><code>text</code> (also see <code>data-fv-minlength</code> and <code>data-fv-maxlength</code>)</li>
         </ul>
         For more details see <a class="goto" href="#" data-href="#validators">validators</a>.
     </dd>
