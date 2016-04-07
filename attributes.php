@@ -1,8 +1,9 @@
 <dl>
-    <dt><code>data-fv-name</code></dt>
+    <dt><code>data-fv-blacklist</code></dt>
     <dd>
-        <code>String</code> (no space allowed)<br>
-        Add a name property to the current element. It can be used for being identified as a target (see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>) and for supplying a <code>name</code> variable in the error message.
+        <code>String</code><br>
+        Define a set of characters that the element's validation value must not contain.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
     </dd>
 
     <dt><code>data-fv-dependency-error-classes</code></dt>
@@ -24,6 +25,23 @@
     <dd>
         <code>String</code> (selectors and/or target names, semicolon separated)<br>
         Defines what targets have to be valid for the current element to be valid (additionally to the actual validation). To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
+    </dd>
+
+    <dt><code>data-fv-enforce-max-length</code></dt>
+    <dd>
+        <code>Boolean</code><br>
+        An option for <code>data-fv-max-length</code>.
+        Define the whether to shorten the validation value of an element if it exceeds the defined maximum length.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
+    </dd>
+
+    <dt><code>data-fv-enforce-min-length</code></dt>
+    <dd>
+        <code>Boolean</code><br>
+        An option for <code>data-fv-min-length</code>.
+        Define the whether to extend the validation value of an element if it's shorter than the defined minimum length.
+        A <code>.</code> will be used to fill up the value to the according length.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
     </dd>
 
     <dt><code>data-fv-error-classes</code></dt>
@@ -57,27 +75,55 @@
     <dt><code>data-fv-include-max</code></dt>
     <dd>
         <code>Boolean</code><br>
-        Define whether to include the defined <code>data-fv-max</code> or not.
+        An option for <code>data-fv-max</code>.
+        Define whether to include the defined <code>data-fv-max</code> or not.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
     </dd>
 
     <dt><code>data-fv-include-min</code></dt>
     <dd>
         <code>Boolean</code><br>
-        Define whether to include the defined <code>data-fv-min</code> or not.
+        An option for <code>data-fv-min</code>.
+        Define whether to include the defined <code>data-fv-min</code> or not.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
     </dd>
 
     <dt><code>data-fv-max</code></dt>
     <dd>
         <code>Number</code><br>
-        Define either the maximum value for an element with the validation type <code>number</code> or <code>integer</code>, or the maximum length for an element with the validation type <code>phone</code>, <code>select</code>, or <code>text</code>).<br>
-        By default this value will be the greatest valid value. To exclude the maximum see <code>data-fv-include-max</code>.
+        Define the maximum value for an element.<br>
+        By default this value will be the greatest valid value. To exclude the maximum see <code>data-fv-include-max</code>.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
+    </dd>
+
+    <dt><code>data-fv-max-length</code></dt>
+    <dd>
+        <code>Number</code><br>
+        Define the maximum length for the validation value of an element.<br>
+        This value will be the greatest valid value.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
     </dd>
 
     <dt><code>data-fv-min</code></dt>
     <dd>
         <code>Number</code><br>
-        Define either the minimum value for an element with the validation type <code>number</code> or <code>integer</code>, or the minimum length for an element with the validation type <code>phone</code>, <code>select</code>, or <code>text</code>).<br>
-        By default this value will be the smallest valid value. To exclude the minimum see <code>data-fv-include-min</code>.
+        Define the minimum value for an element.<br>
+        By default this value will be the smallest valid value. To exclude the minimum see <code>data-fv-include-min</code>.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
+    </dd>
+
+    <dt><code>data-fv-min-length</code></dt>
+    <dd>
+        <code>Number</code><br>
+        Define the minimum length for the validation value of an element.<br>
+        This value will be the smallest valid value.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
+    </dd>
+
+    <dt><code>data-fv-name</code></dt>
+    <dd>
+        <code>String</code> (no space allowed)<br>
+        Add a name property to the current element. It can be used for being identified as a target (see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>) and for supplying a <code>name</code> variable in the error message.
     </dd>
 
     <dt><code>data-fv-optional</code></dt>
@@ -110,6 +156,20 @@
         This attribute can be used <i>without a value</i>. This attribute can be defined on the form element which is supposed to be validated. All descendants of the form with a <code>data-fv-validate</code> attribute will be validated on the fly whenever something changes (on change, click, and keyup).
     </dd>
 
+    <dt><code>data-fv-regex</code></dt>
+    <dd>
+        <code>String</code><br>
+        Define a regular expression that the element's validation value must not match.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
+    </dd>
+
+    <dt><code>data-fv-regex-flags</code></dt>
+    <dd>
+        <code>String</code><br>
+        An option for <code>data-fv-regex</code>. Define a what flags to use for the defined regular expression.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
+    </dd>
+
     <dt><code>data-fv-start</code></dt>
     <dd>
         <code>String</code> (target)<br>
@@ -123,13 +183,20 @@
         <ul>
             <li><code>checkbox</code></li>
             <li><code>email</code></li>
-            <li><code>integer</code> (also see <code>data-fv-include-max</code>, <code>data-fv-include-min</code>, <code>data-fv-max</code>, and <code>data-fv-min</code>)</li>
-            <li><code>number</code> (also see <code>data-fv-include-max</code>, <code>data-fv-include-min</code>, <code>data-fv-max</code>, and <code>data-fv-min</code>)</li>
+            <li><code>integer</code></li>
+            <li><code>number</code></li>
             <li><code>phone</code></li>
             <li><code>radio</code></li>
             <li><code>select</code></li>
-            <li><code>text</code> (also see <code>data-fv-minlength</code> and <code>data-fv-maxlength</code>)</li>
+            <li><code>text</code> (also see <code>data-fv-min-length</code> and <code>data-fv-max-length</code>)</li>
         </ul>
         For more details see <a class="goto" href="#" data-href="#validators">validators</a>.
+    </dd>
+
+    <dt><code>data-fv-whitelist</code></dt>
+    <dd>
+        <code>String</code><br>
+        Define a set of characters that the element's validation value must contain.<br>
+        For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
     </dd>
 </dl>
