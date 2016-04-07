@@ -1525,7 +1525,6 @@ window.FormValidator = (function() {
     this.error_target_getter = options.error_target_getter || null;
     this.field_getter = options.field_getter || null;
     this.required_field_getter = options.required_field_getter || null;
-    this.create_dependency_error_message = options.create_dependency_error_message || null;
     this.preprocessors = $.extend(CLASS.default_preprocessors, options.preprocessors || {});
     this.postprocessors = options.postprocessors || {};
     this.group = options.group || null;

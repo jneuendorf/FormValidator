@@ -126,7 +126,6 @@ class window.FormValidator
         @error_target_getter    = options.error_target_getter or null
         @field_getter           = options.field_getter or null
         @required_field_getter  = options.required_field_getter or null
-        @create_dependency_error_message = options.create_dependency_error_message or null
         @preprocessors          = $.extend CLASS.default_preprocessors, options.preprocessors or {}
         @postprocessors         = options.postprocessors or {}
 
