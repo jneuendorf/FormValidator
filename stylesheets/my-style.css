@@ -23,6 +23,9 @@ ul.spaced li {
     margin-top: 6px;
     margin-bottom: 6px;
 }
+.label-option {
+    background-color: #159957;
+}
 
 
 h3.project-tagline {
