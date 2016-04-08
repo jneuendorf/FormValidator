@@ -9,6 +9,7 @@ $tab_names = [
     'dependencies',
     'ctor options',
     'methods',
+    'configuration',
     'attributes'
 ];
 $filenames = [
@@ -20,6 +21,7 @@ $filenames = [
     'dependencies',
     'options',
     'methods',
+    'configuration',
     'attributes'
 ];
 

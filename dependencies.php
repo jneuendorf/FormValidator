@@ -18,36 +18,36 @@
             Whether <strong>all</strong> or <strong>any</strong> is evaluated can be defined with the <code>data-fv-dependency-mode</code> attribute (either of <code>["all", "any"]</code>, default is <code>all</code>).
         </p>
         <p>
-            The change action can be anything if you use JavaScript.<br>
+            The change action can be anything if you use JavaScript with the <code>dependency_change_action</code> option.<br>
             However, usually you want to toggle the state of <var>F</var> on each event. So there is a list of predefined toggling changes. The naming for the actions is based on <i>"do something whenever the dependencies are fulfilled - otherwise reverse whatever has been done before"</i>. Here we go:
             <ul>
                 <li>
-                    <code>fade</code> *<br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.FADE</code> *<br>
                     Fade the element in (on <code>onDependenciesValid</code>) or out (on <code>onDependenciesInvalid</code>).<br>
                     See jQuery's <code>fadeIn</code> and <code>fadeOut</code>.
                 </li>
                 <li>
-                    <code>opacity</code> *<br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.OPACITY</code> *<br>
                     Same as fade but the <code>display</code> style is not changed.
                 </li>
                 <li>
-                    <code>show</code> *<br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.SHOW</code> *<br>
                     See jQuery's <code>show</code> and <code>hide</code>.
                 </li>
                 <li>
-                    <code>slide</code> *<br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.SLIDE</code> *<br>
                     See jQuery's <code>slideDown</code> and <code>slideUp</code>.
                 </li>
                 <li>
-                    <code>enable</code><br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.ENABLE</code><br>
                     Change the <code>disabled</code> attribute (<code>disabled</code> on <code>onDependenciesInvalid</code>).
                 </li>
                 <li>
-                    <code>display</code><br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.DISPLAY</code><br>
                     The same as <code>show</code> but without animnation (changes the <code>display</code> style).
                 </li>
             </ul>
-            * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change automatically if jQuery changes it.
+            * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change if jQuery changes it.
         </p>
 
         <h4>Cycle detection</h4>

@@ -68,6 +68,9 @@
                         <a href="#methods" aria-controls="methods" role="tab" data-toggle="tab">methods</a>
                     </li>
                                         <li role="presentation" class="">
+                        <a href="#configuration" aria-controls="configuration" role="tab" data-toggle="tab">configuration</a>
+                    </li>
+                                        <li role="presentation" class="">
                         <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">attributes</a>
                     </li>
                             </ul>
@@ -764,36 +767,36 @@ If you define a constraint to a validator so that the combination does not make 
             Whether <strong>all</strong> or <strong>any</strong> is evaluated can be defined with the <code>data-fv-dependency-mode</code> attribute (either of <code>["all", "any"]</code>, default is <code>all</code>).
         </p>
         <p>
-            The change action can be anything if you use JavaScript.<br>
+            The change action can be anything if you use JavaScript with the <code>dependency_change_action</code> option.<br>
             However, usually you want to toggle the state of <var>F</var> on each event. So there is a list of predefined toggling changes. The naming for the actions is based on <i>"do something whenever the dependencies are fulfilled - otherwise reverse whatever has been done before"</i>. Here we go:
             <ul>
                 <li>
-                    <code>fade</code> *<br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.FADE</code> *<br>
                     Fade the element in (on <code>onDependenciesValid</code>) or out (on <code>onDependenciesInvalid</code>).<br>
                     See jQuery's <code>fadeIn</code> and <code>fadeOut</code>.
                 </li>
                 <li>
-                    <code>opacity</code> *<br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.OPACITY</code> *<br>
                     Same as fade but the <code>display</code> style is not changed.
                 </li>
                 <li>
-                    <code>show</code> *<br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.SHOW</code> *<br>
                     See jQuery's <code>show</code> and <code>hide</code>.
                 </li>
                 <li>
-                    <code>slide</code> *<br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.SLIDE</code> *<br>
                     See jQuery's <code>slideDown</code> and <code>slideUp</code>.
                 </li>
                 <li>
-                    <code>enable</code><br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.ENABLE</code><br>
                     Change the <code>disabled</code> attribute (<code>disabled</code> on <code>onDependenciesInvalid</code>).
                 </li>
                 <li>
-                    <code>display</code><br>
+                    <code>DEPENDENCY_CHANGE_ACTIONS.DISPLAY</code><br>
                     The same as <code>show</code> but without animnation (changes the <code>display</code> style).
                 </li>
             </ul>
-            * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change automatically if jQuery changes it.
+            * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change if jQuery changes it.
         </p>
 
         <h4>Cycle detection</h4>
@@ -1020,81 +1023,82 @@ If you define a constraint to a validator so that the combination does not make 
             Most of the functionality can be used equally by passing options to the FormValidator's constructor which is recommended for most use cases.
         </div>
         <dl>
-            <dt><code>Function deregister_preprocessor(String validation_type) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>Removes the preprocessor for the given <code>validation_type</code> from the set of preprocessors.</dd>
-
-            <dt><code>Function deregister_postprocessor(String validation_type) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>Removes the postprocessor for the given <code>validation_type</code> from the set of postprocessors.</dd>
-
-            <dt><code>Function deregister_validator(String validation_type) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>Removes the validator for the given <code>validation_type</code> from the set of validators.</dd>
-
-            <dt><code>Function get_progress(as_percentage=false) -> Object | Number</code></dt>
+            <dt><code>Function cache() -> FormValidator</code> <span class="label label-option">chainable</span></dt>
             <dd>
-                Calculate how much the form has been filled in.
+                Cache all kinds of stuff that is needed for validation. Some caching will be done lazily (even after calling this method). Using this method makes sense for real time validation because that way the form data can be cached e.g. right after the has loaded so all validations will be equally fast.
             </dd>
 
-            <dt><code>Function register_preprocessor(String validation_type, Function preprocessor) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
+            <dt><code>Function get_progress(Object options={mode: PROGRESS_MODES.DEFAULT, recache: false}) -> Array (of Number | Object)</code></dt>
             <dd>
-                Adds the preprocessor for the given <code>validation_type</code> to the set of preprocessors.<br>
-                The <code>preprocessor</code> parameter has this signature: <code>Function(String value, jQuery element, String locale) -> String</code>. In this function <code>this</code> refers to the preprocessor object so other preprocessors can easily be called from within each preprocessor.
+                This method calculates how much the form has been filled in. The returned array contains the progress for each group (defined with the <code>group</code> option or defined using the <code>data-fv-group</code> attribute). The array also has a property called <code>average</code> that equals the overall form progress.<br>
+                Depending on the <code>mode</code> the array elements are either <code>Numbers</code> or <code>Objects</code>. The <code>PROGRESS_MODES.PERCENTAGE</code> version uses decimals between 0 and 1, the objects in the <code>PROGRESS_MODES.ABSOLUTE</code> look like <code>{count: x, total: y}</code>.<br>
+                <br>
+                This is how the calculation works. It depends on the 3 kinds of groups:
+                <ol>
+                    <li>
+                        containing only required fields<br>
+                        <var>progress = valid_fields / num_fields</var>
+                    </li>
+                    <li>
+                        containing only optional fields<br>
+                        <var>progress = either 1 if at least 1 field is valid, 0 otherwise</var>
+                    </li>
+                    <li>
+                        containing both kinds of fields<br>
+                        <var>progress = valid_required_fields / num_required_fields</var><br>
+                        (so this is essentially equal to 1.)
+                    </li>
+                </ol>
             </dd>
 
-            <dt><code>Function register_postprocessor(String validation_type, Function postprocessor) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                Adds the postprocessor for the given <code>validation_type</code> to the set of postprocessors.<br>
-                The <code>postprocessor</code> parameter has this signature: <code>Function(String value, jQuery element, String locale) -> String</code>. In this function <code>this</code> refers to the postprocessor object so other preprocessors can easily be called from within each postprocessor.
-            </dd>
-
-            <dt><code>Function register_validator(String validation_type, Function validator) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                Adds the validator for the given <code>validation_type</code> to the set of validators.<br>
-                The <code>validator</code> parameter has this signature: <code>Function(String value, jQuery element) -> Boolean | String | Object</code>. In this function <code>this</code> refers to the validator object so other validators can easily be called from within each validator.
-            </dd>
-
-            <dt><code>Function set_error_target_getter(Function error_target_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                The <code>error_target_getter</code> parameter defines the error target for each validated element. The signature is <code>Function(String validation_type, jQuery element, Number index) -> jQuery</code>.<br>
-                By default the form validator instance will check the <code>data-fv-error-targets</code> attribute.
-            </dd>
-
-            <dt><code>Function set_field_getter(Function field_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                The <code>field_getter</code> parameter defines what elements (in the form) will be validated. The signature is <code>Function(jQuery form) -> jQuery</code>.<br>
-                If you want the <code>data-fv-ignore-children</code> attribute to have an effect use it here.<br>
-                By default all fields with a <code>data-fv-validate</code> attribute will be validated - excluding the ignored children.
-            </dd>
-
-            <dt><code>Function set_optional_field_getter(Function optional_field_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                The <code>optional_field_getter</code> parameter defines what fields of all fields (defined by the <code>field_getter</code>) are optional. The signature is <code>Function(jQuery fields) -> jQuery</code>.
-            </dd>
-
-            <dt><code>Function set_optional_field_getter(Function required_field_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                The <code>required_field_getter</code> parameter defines what fields of all fields (defined by the <code>field_getter</code>) are required (...mandatory == non-optional). The signature is <code>Function(jQuery fields) -> jQuery</code>.
-            </dd>
-
-            <div style="border-radius: 4px; box-shadow: 0px 0px 20px #c1c1c1; margin-top: 30px; padding: 1px 25px 10px 25px;">
-                <dt><code>Function validate(Object validation_options={all: false, apply_error_styles: true, focus_invalid: true}) -> Array (of Object)</code></dt>
+            <div style="border-radius: 4px; box-shadow: 0px 0px 10px 2px #159957; margin-top: 30px; padding: 1px 25px 10px 25px;">
+                <dt><code>Function validate(Object validation_options={all: false, apply_error_classes: true, focus_invalid: true, messages: true, stop_on_error: true, recache: false}) -> Array (of Object)</code></dt>
                 <dd>
                     Validates the form and returns a list of errors. Each error looks like this:
                     <pre class="brush: js">
                         {
                             element: validated_element (jQuery),
-                            message: error_message (String),
-                            required: is_required (Boolean),
-                            type: validation_type (String),
-                            validator: validator (Function),
-                            value: value (String)
+                            errors: list_of_errors (Array of Object),
+                            message: error_message (String)
                         }
                     </pre>
-                    The <code>validator</code> and <code>value</code> properties are not present in dependency errors.<br><br>
-                    The <code>validation_options</code> has the following properties:
+                    Each of the error objects looks like:
+                    <pre class="brush: js">
+                        {
+                            element: validated_element (jQuery),
+                            error_message_type: error_message_type (String),
+                            phase: validation_phase (String),
+                            required: is_required (Boolean),
+                            type: validation_type (String),
+                            value: value (String)
+                            // if dependency error
+                            mode: dependency_mode (String),
+                            // if constraint error
+                            &lt;constraint_name&gt;: constraint_value (String),
+                            options: constraint_options (Object)
+                        }
+                    </pre>
+                    <br>
+                    The <code>validation_options</code> has the following properties (for default values see function signature):
                     <ul>
-                        <li><code>Boolean all</code>: if <code>true</code> force validation on all fields (even if they are declared optional)</li>
-                        <li><code>Boolean apply_error_styles</code>: if <code>true</code> add <code>error_classes</code> to and remove them from invalid elements' error targets (otherwise the targets won't be changed)</li>
-                        <li><code>Boolean focus_invalid</code>: if <code>true</code> focus the first invalid element (otherwise the focus won't be changed)</li>
+                        <li>
+                            <code>Boolean all</code>: if <code>true</code> force validation on all fields (even if they are declared optional)
+                        </li>
+                        <li>
+                            <code>Boolean apply_error_classes</code>: if <code>true</code> adds <code>error_classes</code> to invalid and removes them from valid elements' error targets, if <code>false</code> nothing will be changed
+                        </li>
+                        <li>
+                            <code>Boolean focus_invalid</code>: if <code>true</code> focus the first invalid element (otherwise the focus won't be changed)
+                        </li>
+                        <li>
+                            <code>Boolean message</code>: if <code>true</code> error messages will be created
+                        </li>
+                        <li>
+                            <code>Boolean stop_on_error</code>: if <code>true</code> the validation of an element will be stopped as early as possible - after the first error occured
+                        </li>
+                        <li>
+                            <code>Boolean recache</code>: if <code>true</code> the cache will be emptied and refilled
+                        </li>
                     </ul>
                 </dd>
             </div>
@@ -1109,12 +1113,119 @@ If you define a constraint to a validator so that the combination does not make 
         <dl>
             <dt><code>Function FormValidator.new(jQuery form, Object options)</code></dt>
             <dd>
-                Returns a new instance of the FormValidator class. Right now using this method is equal to creating a new instance with <code>new</code>.<br>
-                It may provide additional functionality in future versions so using this method is recommended.
+                Returns a new instance of the FormValidator class. This is the recommended way of instantiating a FormValidator object.<br>
+                For more details on th eoptions object see <a class="goto" href="#" data-href="#options">options</a>.
+            </dd>
+
+            <dt><code>Function FormValidator.new_without_modifier(jQuery form, Object options)</code></dt>
+            <dd>
+                Returns a new instance of the FormValidator class but wihtout a FormModifier (which is used internally). The modifier takes care of applying styles and effects. So if you know that you want to take care of visual effects yourself you can skip all the unnecessary code for better performance (this might be especially interesting for real time validation).<br>
+                For more details on th eoptions object see <a class="goto" href="#" data-href="#options">options</a>.
             </dd>
         </dl>
     </div>
 </div>
+                    </div>
+                                        <div role="tabpanel" class="tab-pane " id="configuration">
+                        <h4>List of constants</h4>
+The following configuration constants are attached to the <code>FormValidator</code> class.<br>
+Each of them has a <code>DEFAULT</code> property.
+
+<dl>
+    <dt><code>ERROR_MODES</code></dt>
+    <dd>
+        Defines the degree of detail for error messages.
+        <ul class="spaced">
+            <li>
+                <code>NORMAL</code> (default)<br>
+                The message is created based on the <code>error_message_type</code> returned by the validator.
+            </li>
+            <li>
+                <code>SIMPLE</code><br>
+                The message is based on the base type of the <code>error_message_type</code> returned by the validator. E.g. invalid e-mail values will always produce the same message (like 'invalid e-mail address') instaed of an exact message (like 'missing @ symbol').
+            </li>
+        </ul>
+    </dd>
+
+    <dt><code>ERROR_OUTPUT_MODES</code></dt>
+    <dd>
+        Defines how error message are visualized.
+        <ul class="spaced">
+            <li>
+                <code>BELOW</code><br>
+                Creates a container <code>&lt;div class=&quot;fv-error-message&quot; /&gt;</code> containing the message right behind the element (in the DOM).
+            </li>
+            <li>
+                <code>NONE</code> (default)<br>
+                Well...nothing is put into the DOM. That way you can take of everything yourself.
+            </li>
+            <li>
+                <code>POPOVER</code> (required Bootstrap)<br>
+                Shows a <a href="http://getbootstrap.com/javascript/#popovers">Bootstrap popover</a> on focus, hides it on blur and toggles it on click.
+            </li>
+            <li>
+                <code>TOOLTIP</code> (required Bootstrap)<br>
+                Show a <a href="http://getbootstrap.com/javascript/#tooltips">Bootstrap tooltip</a> on hover.
+            </li>
+        </ul>
+    </dd>
+
+    <dt><code>DEPENDENCY_CHANGE_ACTIONS</code></dt>
+    <dd>
+        Defines how a change of the validation state of a dependency is visualized.<br>
+        For the details see <a class="goto" href="#" data-href="#dependencies">dependencies</a>.
+        <ul class="spaced">
+            <li>
+                <code>DISPLAY</code>
+            </li>
+            <li>
+                <code>ENABLE</code>
+            </li>
+            <li>
+                <code>FADE</code>
+            </li>
+            <li>
+                <code>NONE</code> (default)<br>
+                No animation.
+            </li>
+            <li>
+                <code>OPACITY</code>
+            </li>
+            <li>
+                <code>SHOW</code>
+            </li>
+            <li>
+                <code>SLIDE</code>
+            </li>
+        </ul>
+    </dd>
+
+    <dt><code>BUILD_MODES</code></dt>
+    <dd>
+        Defines how error message are created.
+        <ul class="spaced">
+            <li>
+                <code>ENUMERATE</code> (default)<br>
+            </li>
+            <li>
+                <code>LIST</code><br>
+            </li>
+            <li>
+                <code>SENTENCE</code><br>
+            </li>
+        </ul>
+    </dd>
+
+<!--
+EXPOSED_CONSTANTS = {
+  VALIDATION_PHASES: VALIDATION_PHASES,
+  BUILD_MODES: BUILD_MODES,
+  ERROR_MESSAGE_CONFIG: ERROR_MESSAGE_CONFIG,
+  PROGRESS_MODES: PROGRESS_MODES
+};
+ -->
+
+</dl>
                     </div>
                                         <div role="tabpanel" class="tab-pane " id="attributes">
                         <dl>

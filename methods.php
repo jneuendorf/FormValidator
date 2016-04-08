@@ -6,81 +6,82 @@
             Most of the functionality can be used equally by passing options to the FormValidator's constructor which is recommended for most use cases.
         </div>
         <dl>
-            <dt><code>Function deregister_preprocessor(String validation_type) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>Removes the preprocessor for the given <code>validation_type</code> from the set of preprocessors.</dd>
-
-            <dt><code>Function deregister_postprocessor(String validation_type) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>Removes the postprocessor for the given <code>validation_type</code> from the set of postprocessors.</dd>
-
-            <dt><code>Function deregister_validator(String validation_type) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>Removes the validator for the given <code>validation_type</code> from the set of validators.</dd>
-
-            <dt><code>Function get_progress(as_percentage=false) -> Object | Number</code></dt>
+            <dt><code>Function cache() -> FormValidator</code> <span class="label label-option">chainable</span></dt>
             <dd>
-                Calculate how much the form has been filled in.
+                Cache all kinds of stuff that is needed for validation. Some caching will be done lazily (even after calling this method). Using this method makes sense for real time validation because that way the form data can be cached e.g. right after the has loaded so all validations will be equally fast.
             </dd>
 
-            <dt><code>Function register_preprocessor(String validation_type, Function preprocessor) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
+            <dt><code>Function get_progress(Object options={mode: PROGRESS_MODES.DEFAULT, recache: false}) -> Array (of Number | Object)</code></dt>
             <dd>
-                Adds the preprocessor for the given <code>validation_type</code> to the set of preprocessors.<br>
-                The <code>preprocessor</code> parameter has this signature: <code>Function(String value, jQuery element, String locale) -> String</code>. In this function <code>this</code> refers to the preprocessor object so other preprocessors can easily be called from within each preprocessor.
+                This method calculates how much the form has been filled in. The returned array contains the progress for each group (defined with the <code>group</code> option or defined using the <code>data-fv-group</code> attribute). The array also has a property called <code>average</code> that equals the overall form progress.<br>
+                Depending on the <code>mode</code> the array elements are either <code>Numbers</code> or <code>Objects</code>. The <code>PROGRESS_MODES.PERCENTAGE</code> version uses decimals between 0 and 1, the objects in the <code>PROGRESS_MODES.ABSOLUTE</code> look like <code>{count: x, total: y}</code>.<br>
+                <br>
+                This is how the calculation works. It depends on the 3 kinds of groups:
+                <ol>
+                    <li>
+                        containing only required fields<br>
+                        <var>progress = valid_fields / num_fields</var>
+                    </li>
+                    <li>
+                        containing only optional fields<br>
+                        <var>progress = either 1 if at least 1 field is valid, 0 otherwise</var>
+                    </li>
+                    <li>
+                        containing both kinds of fields<br>
+                        <var>progress = valid_required_fields / num_required_fields</var><br>
+                        (so this is essentially equal to 1.)
+                    </li>
+                </ol>
             </dd>
 
-            <dt><code>Function register_postprocessor(String validation_type, Function postprocessor) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                Adds the postprocessor for the given <code>validation_type</code> to the set of postprocessors.<br>
-                The <code>postprocessor</code> parameter has this signature: <code>Function(String value, jQuery element, String locale) -> String</code>. In this function <code>this</code> refers to the postprocessor object so other preprocessors can easily be called from within each postprocessor.
-            </dd>
-
-            <dt><code>Function register_validator(String validation_type, Function validator) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                Adds the validator for the given <code>validation_type</code> to the set of validators.<br>
-                The <code>validator</code> parameter has this signature: <code>Function(String value, jQuery element) -> Boolean | String | Object</code>. In this function <code>this</code> refers to the validator object so other validators can easily be called from within each validator.
-            </dd>
-
-            <dt><code>Function set_error_target_getter(Function error_target_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                The <code>error_target_getter</code> parameter defines the error target for each validated element. The signature is <code>Function(String validation_type, jQuery element, Number index) -> jQuery</code>.<br>
-                By default the form validator instance will check the <code>data-fv-error-targets</code> attribute.
-            </dd>
-
-            <dt><code>Function set_field_getter(Function field_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                The <code>field_getter</code> parameter defines what elements (in the form) will be validated. The signature is <code>Function(jQuery form) -> jQuery</code>.<br>
-                If you want the <code>data-fv-ignore-children</code> attribute to have an effect use it here.<br>
-                By default all fields with a <code>data-fv-validate</code> attribute will be validated - excluding the ignored children.
-            </dd>
-
-            <dt><code>Function set_optional_field_getter(Function optional_field_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                The <code>optional_field_getter</code> parameter defines what fields of all fields (defined by the <code>field_getter</code>) are optional. The signature is <code>Function(jQuery fields) -> jQuery</code>.
-            </dd>
-
-            <dt><code>Function set_optional_field_getter(Function required_field_getter) -> FormValidator</code> <span class="label label-default">chainable</span></dt>
-            <dd>
-                The <code>required_field_getter</code> parameter defines what fields of all fields (defined by the <code>field_getter</code>) are required (...mandatory == non-optional). The signature is <code>Function(jQuery fields) -> jQuery</code>.
-            </dd>
-
-            <div style="border-radius: 4px; box-shadow: 0px 0px 20px #c1c1c1; margin-top: 30px; padding: 1px 25px 10px 25px;">
-                <dt><code>Function validate(Object validation_options={all: false, apply_error_styles: true, focus_invalid: true}) -> Array (of Object)</code></dt>
+            <div style="border-radius: 4px; box-shadow: 0px 0px 10px 2px #159957; margin-top: 30px; padding: 1px 25px 10px 25px;">
+                <dt><code>Function validate(Object validation_options={all: false, apply_error_classes: true, focus_invalid: true, messages: true, stop_on_error: true, recache: false}) -> Array (of Object)</code></dt>
                 <dd>
                     Validates the form and returns a list of errors. Each error looks like this:
                     <pre class="brush: js">
                         {
                             element: validated_element (jQuery),
-                            message: error_message (String),
-                            required: is_required (Boolean),
-                            type: validation_type (String),
-                            validator: validator (Function),
-                            value: value (String)
+                            errors: list_of_errors (Array of Object),
+                            message: error_message (String)
                         }
                     </pre>
-                    The <code>validator</code> and <code>value</code> properties are not present in dependency errors.<br><br>
-                    The <code>validation_options</code> has the following properties:
+                    Each of the error objects looks like:
+                    <pre class="brush: js">
+                        {
+                            element: validated_element (jQuery),
+                            error_message_type: error_message_type (String),
+                            phase: validation_phase (String),
+                            required: is_required (Boolean),
+                            type: validation_type (String),
+                            value: value (String)
+                            // if dependency error
+                            mode: dependency_mode (String),
+                            // if constraint error
+                            &lt;constraint_name&gt;: constraint_value (String),
+                            options: constraint_options (Object)
+                        }
+                    </pre>
+                    <br>
+                    The <code>validation_options</code> has the following properties (for default values see function signature):
                     <ul>
-                        <li><code>Boolean all</code>: if <code>true</code> force validation on all fields (even if they are declared optional)</li>
-                        <li><code>Boolean apply_error_styles</code>: if <code>true</code> add <code>error_classes</code> to and remove them from invalid elements' error targets (otherwise the targets won't be changed)</li>
-                        <li><code>Boolean focus_invalid</code>: if <code>true</code> focus the first invalid element (otherwise the focus won't be changed)</li>
+                        <li>
+                            <code>Boolean all</code>: if <code>true</code> force validation on all fields (even if they are declared optional)
+                        </li>
+                        <li>
+                            <code>Boolean apply_error_classes</code>: if <code>true</code> adds <code>error_classes</code> to invalid and removes them from valid elements' error targets, if <code>false</code> nothing will be changed
+                        </li>
+                        <li>
+                            <code>Boolean focus_invalid</code>: if <code>true</code> focus the first invalid element (otherwise the focus won't be changed)
+                        </li>
+                        <li>
+                            <code>Boolean message</code>: if <code>true</code> error messages will be created
+                        </li>
+                        <li>
+                            <code>Boolean stop_on_error</code>: if <code>true</code> the validation of an element will be stopped as early as possible - after the first error occured
+                        </li>
+                        <li>
+                            <code>Boolean recache</code>: if <code>true</code> the cache will be emptied and refilled
+                        </li>
                     </ul>
                 </dd>
             </div>
@@ -95,8 +96,14 @@
         <dl>
             <dt><code>Function FormValidator.new(jQuery form, Object options)</code></dt>
             <dd>
-                Returns a new instance of the FormValidator class. Right now using this method is equal to creating a new instance with <code>new</code>.<br>
-                It may provide additional functionality in future versions so using this method is recommended.
+                Returns a new instance of the FormValidator class. This is the recommended way of instantiating a FormValidator object.<br>
+                For more details on th eoptions object see <a class="goto" href="#" data-href="#options">options</a>.
+            </dd>
+
+            <dt><code>Function FormValidator.new_without_modifier(jQuery form, Object options)</code></dt>
+            <dd>
+                Returns a new instance of the FormValidator class but wihtout a FormModifier (which is used internally). The modifier takes care of applying styles and effects. So if you know that you want to take care of visual effects yourself you can skip all the unnecessary code for better performance (this might be especially interesting for real time validation).<br>
+                For more details on th eoptions object see <a class="goto" href="#" data-href="#options">options</a>.
             </dd>
         </dl>
     </div>
