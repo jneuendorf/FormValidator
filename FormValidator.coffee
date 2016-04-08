@@ -243,16 +243,6 @@ class window.FormValidator
 
     _get_value_info: (element, data) ->
         {type, preprocess} = data
-        # usedValFunc = true
-        # if type isnt "checkbox" and type isnt "radio"
-        #     value = element.val()
-        # else
-        #     if type isnt "checkbox" or type isnt "radio"
-        #         value = if element.prop("checked") is true then "checked" else "unchecked"
-        #
-        # if not value?
-        #     usedValFunc = false
-        #     value = element.text()
         {method, value} = @_get_value(element, data)
 
         value_has_changed = value isnt data.value
