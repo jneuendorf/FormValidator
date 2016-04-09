@@ -288,7 +288,7 @@ class window.FormValidator
         return @_find_targets(target_list, element)
 
     # how to find the correct data-fv-error-targets attribute for an element
-    _get_dependency_change_targets: (element, type) ->
+    _get_dependency_action_targets: (element, type) ->
         target_list = @dependency_action_target_getter?(element, type) or
             element.attr("data-fv-dependency-action-targets") or
             element.closest("[data-fv-dependency-action-targets]").attr("data-fv-dependency-action-targets") or
@@ -486,10 +486,7 @@ class window.FormValidator
 
         data.dependency_changed = valid_dependencies isnt data.valid_dependencies
         data.valid_dependencies = valid_dependencies
-        # cache error targets for applying dependency change action
-        if data.dependency_changed and not data.error_targets?
-            @_cache_attribute elem, data, "error_targets", () ->
-                return @_get_error_targets(elem, type)
+
         errors = errors.concat data.errors[phase]
 
         #########################################################
@@ -572,9 +569,10 @@ class window.FormValidator
             if data.valid isnt false
                 data.valid = false
 
-        if data.dependency_changed and not data.dependency_change_targets?
-            @_cache_attribute elem, data, "dependency_change_targets", () ->
-                return @_get_dependency_change_targets(elem, type)
+        if not data.dependency_action_targets?
+            @_cache_attribute elem, data, "dependency_action_targets", () ->
+                return @_get_dependency_action_targets(elem, type)
+            @_cache_attribute(elem, data, "dependency_action_duration")
 
         # cache error targets because error classes will be applied to them in the next step (form modifcation)
         if options.apply_error_classes is true and not data.error_targets?

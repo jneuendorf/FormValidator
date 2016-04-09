@@ -113,12 +113,13 @@ class FormModifier
         return @["_process_#{constraint.name}"]?(constraint, element, data) or false
 
     _on_dependency_change: (action, element, data, valid) ->
-        if data.depends_on.length > 0 and data.dependency_change_targets?
+        if data.depends_on.length > 0 and data.dependency_action_targets?
             if @form_validator.dependency_change_action not instanceof Function
                 FormValidator.dependency_change_actions[action]?.call(
                     FormValidator.dependency_change_actions
-                    $_from_arr(data.dependency_change_targets)
+                    $_from_arr(data.dependency_action_targets)
                     valid
+                    data.dependency_action_duration
                 )
             else
                 @form_validator.dependency_change_action(element, valid)
