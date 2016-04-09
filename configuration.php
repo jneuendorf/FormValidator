@@ -63,6 +63,7 @@ If it has a <code>DEFAULT</code> property it points to the according constant ma
             <li>
                 <code>SIMPLE</code><br>
                 The message is based on the base type of the <code>error_message_type</code> returned by the validator. E.g. invalid e-mail values will always produce the same message (like 'invalid e-mail address') instaed of an exact message (like 'missing @ symbol').
+                <!-- This mode transforms all <code>error_message_types</code> (returned from the validator) to the simplest corresponding error message. That means that the messages are independent of any<code>constraint attributes</code>. For example, if a field is validated as <code>number</code> and is invalid (no matter what combination of <code>constraint attributes</code> it has) the <code>error_message_type</code> will be <code>"number"</code> (even if it techniqually valid but violates constraints). -->
             </li>
         </ul>
     </dd>

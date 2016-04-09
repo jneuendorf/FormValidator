@@ -7,16 +7,14 @@
 
     <div class="col-xs-12">
         <h4>Error handling</h4>
-        <dl class="">
-            <!-- build_mode -->
-            <!-- constraint_validators -->
-
+        <dl>
             <dt>build_mode</dt>
             <dd>
                 <code>String</code>
                 <br> Defines how error message are created.
                 <br> Must be either the options defined in <code>FormValidator.BUILD_MODES</code>.
                 <br> Default is <code>FormValidator.BUILD_MODES.DEFAULT</code>.
+                <br> See <a class="goto" href="#" data-href="#configuration">configuration</a> for more details.
             </dd>
 
             <dt>constraint_validators</dt>
@@ -26,38 +24,37 @@
                 <br> See <a class="goto" href="#" data-href="#constraints">constraints</a> for more details.
             </dd>
 
+            <dt>dependency_change_action</dt>
+            <dd>
+                <code>String</code>
+                <br> Defines what effect is applied to the <code>data-fv-dependency-action-targets</code>.
+                <br> Must be either the options defined in <code>FormValidator.DEPENDENCY_CHANGE_ACTIONS</code>.
+                <br> Default is <code>FormValidator.DEPENDENCY_CHANGE_ACTIONS.DEFAULT</code>.
+                <br> See <a class="goto" href="#" data-href="#configuration">configuration</a> for more details.
+            </dd>
+
             <dt>dependency_error_classes</dt>
             <dd>
                 <code>String</code> (CSS class names, semicolon separated)
                 <br> Defines what CSS classes will be applied to the error target(s) of the fields the current field depends on (if any of the dependencies are invalid).
-                <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).<br>
-                Take a look at example 3 on the <a class="goto" href="#" data-href="#demos">demos</a> page to see how dependencies work.
+                <br> Default is <code>&quot;fv-invalid-dependency&quot;</code>.<br>
+                Take a look at example 3 on the <a class="goto" href="#" data-href="#demos">demos</a> tab to see how dependencies work.
             </dd>
-
-            <!-- dependency_change_action -->
 
             <dt>error_classes</dt>
             <dd>
                 <code>String</code> (CSS class names, semicolon separated)
                 <br> Defines what CSS classes will be applied to the error target(s) of an invalid field.
-                <br> Default is <code>&quot;&quot;</code> (which means invalid fields won't be changed).
+                <br> Default is <code>&quot;fv-invalid&quot;</code>.
             </dd>
 
             <dt>error_mode</dt>
             <dd>
                 <code>FormValidator.ERROR_MODES (String)</code>
-                <br> Defines how error messages are generated in general. Can be either of these values:
-                <ul>
-                    <li>
-                        <code>FormValidator.ERROR_MODES.SIMPLE</code><br>
-                        This mode transforms all <code>error_message_types</code> (returned from the validator) to the simplest corresponding error message. That means that the messages are independent of any<code>constraint attributes</code>. For example, if a field is validated as <code>number</code> and is invalid (no matter what combination of <code>constraint attributes</code> it has) the <code>error_message_type</code> will be <code>"number"</code> (even if it techniqually valid but violates constraints).
-                    </li>
-                    <li>
-                        <code>FormValidator.ERROR_MODES.NORMAL</code><br>
-                        The <code>error_message_type</code> (returned from the validator) is untouched.
-                    </li>
-                    <li><code>FormValidator.ERROR_MODES.DEFAULT (== FormValidator.ERROR_MODES.NORMAL)</code> (this value is the default obviously)</li>
-                </ul>
+                <br> Defines how error messages are generated in general.
+                <br> Must be either the options defined in <code>FormValidator.ERROR_MODES</code>.
+                <br> Default is <code>FormValidator.ERROR_MODES.DEFAULT</code>.
+                <br> See <a class="goto" href="#" data-href="#configuration">configuration</a> for more details.
             </dd>
 
             <dt>error_output_mode</dt>
@@ -100,8 +97,18 @@
                 <br> If a <code>String</code> is returned it is parsed the same as if it was set using the <code>data-fv-error-targets</code> attribute. See <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
             </dd>
 
-            <!-- process_errors -->
-            <!-- success_classes -->
+            <dt>process_errors</dt>
+            <dd>
+                <code>Function(Array (of Object) grouped_errors) -> void</code>
+                <br> This function can be used to modify the validation errors in place before they are passed anywhere else (but after the error message have (potentially) been created).
+            </dd>
+
+            <dt>success_classes</dt>
+            <dd>
+                <code>String</code> (CSS class names, space separated)
+                <br> Defines what CSS classes will be applied to the error target(s) of a valid field.
+                <br> Default is <code>&quot;fv-valid&quot;</code>.
+            </dd>
         </dl>
     </div>
 
@@ -118,7 +125,7 @@
             <dd>
                 <code>Function(jQuery fields) -> Array (of Array of jQuery)</code>
                 <br> Creates groups from all form fields. Can be used for advanced progress counting.
-                <!-- TODO: add detailed explanation -->
+                <br> See <a class="goto" href="#" data-href="#methods">methods</a> (<code>get_progress</code> method) for more details.
             </dd>
 
             <dt>locale</dt>

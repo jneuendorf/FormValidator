@@ -6,11 +6,17 @@
         For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
     </dd>
 
-    <dt><code>data-fv-dependency-error-classes</code></dt>
+    <dt><code>data-fv-dependency-action-targets</code></dt>
     <dd>
-        <code>String</code> (CSS class names, space separated)
+        <code>String</code> (targets, space separated)
         <br> Can be used to customize which CSS classes will be applied to the error target(s) of a field with dependencies (if any of the dependencies are invalid).
         <br> Default is whatever is defined for the <code>error_classes</code> property.
+    </dd>
+
+    <dt><code>data-fv-dependency-error-classes</code></dt>
+    <dd>
+        <code>String</code> (selectors and/or target names, semicolon separated)
+        <br> Defines a list of targets which will be affected by the <code>dependency_action</code> option. To find out how a target can be defined see <a href="#" data-toggle="modal" data-target="#target_finding_modal">target finding</a>.
     </dd>
 
     <dt><code>data-fv-dependency-mode</code></dt>
