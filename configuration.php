@@ -1,6 +1,7 @@
-<h4>List of constants</h4>
+<h4>List of configuration constants</h4>
 The following configuration constants are attached to the <code>FormValidator</code> class.<br>
-If it has a <code>DEFAULT</code> property it points to the according constant marked with <span class="label label-option">default</span>.
+If it has a <code>DEFAULT</code> property it points to the according constant marked with <span class="label label-option">default</span>.<br>
+Most of them simulate <code>enum</code> of other languages but some of them can be used as variables. Those are marked with <span class="label label-var">variable</span>.
 
 <dl>
     <dt><code>BUILD_MODES</code></dt>
@@ -50,6 +51,12 @@ If it has a <code>DEFAULT</code> property it points to the according constant ma
                 <code>SLIDE</code>
             </li>
         </ul>
+    </dd>
+
+    <dt><code>DEPENDENCY_CHANGE_ACTION_DURATION</code> <span class="label label-var">variable</span></dt>
+    <dd>
+        Defines the global duration for all dependency change actions. This value can be overriden for each field using the <code>data-fv-dependency-action-duration</code> attribute.<br>
+        The value of this variable is <code>400 ms</code>.
     </dd>
 
     <dt><code>ERROR_MODES</code></dt>
