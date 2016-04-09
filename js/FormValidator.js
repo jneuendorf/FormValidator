@@ -312,6 +312,7 @@ DEFAULT_ATTR_VALUES = {
   DEPENDENCY_MODE: "all",
   ERROR_TARGETS: "",
   DEPENDENCY_ACTION_TARGETS: "",
+  DEPENDENCY_ACTION_DURATION: DEPENDENCY_CHANGE_ACTION_DURATION,
   INCLUDE_MAX: "true",
   INCLUDE_MIN: "true"
 };
@@ -327,6 +328,7 @@ CONSTRAINT_VALIDATOR_OPTIONS = {
 EXPOSED_CONSTANTS = {
   BUILD_MODES: BUILD_MODES,
   DEPENDENCY_CHANGE_ACTIONS: DEPENDENCY_CHANGE_ACTIONS,
+  DEPENDENCY_CHANGE_ACTION_DURATION: DEPENDENCY_CHANGE_ACTION_DURATION,
   ERROR_MODES: ERROR_MODES,
   ERROR_OUTPUT_MODES: ERROR_OUTPUT_MODES,
   PROGRESS_MODES: PROGRESS_MODES,
@@ -1102,7 +1104,7 @@ new MessageBuilder(BUILD_MODES.LIST, function(data, phase, build_mode, locale) {
 
 dependency_change_actions = {};
 
-dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.DISPLAY] = function(element, valid) {
+dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.DISPLAY] = function(element, valid, duration) {
   var orig_display;
   if (!valid) {
     element.data("_fv_orig_display", element.css("display"));
@@ -1115,52 +1117,52 @@ dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.DISPLAY] = function(element,
   return element;
 };
 
-dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.ENABLE] = function(element, valid) {
+dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.ENABLE] = function(element, valid, duration) {
   return element.prop("disabled", !valid);
 };
 
-dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.FADE] = function(element, valid) {
+dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.FADE] = function(element, valid, duration) {
   if (valid) {
-    element.fadeIn(DEPENDENCY_CHANGE_ACTION_DURATION);
+    element.fadeIn(duration);
   } else {
-    element.fadeOut(DEPENDENCY_CHANGE_ACTION_DURATION);
+    element.fadeOut(duration);
   }
   return element;
 };
 
-dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.OPACITY] = function(element, valid) {
+dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.OPACITY] = function(element, valid, duration) {
   var orig_opacity;
   if (!valid) {
     element.data("_fv_orig_opacity", element.css("opacity"));
     element.animate({
       opacity: 0,
-      DEPENDENCY_CHANGE_ACTION_DURATION: DEPENDENCY_CHANGE_ACTION_DURATION
+      duration: duration
     });
   } else {
     if ((orig_opacity = element.data("_fv_orig_opacity")) != null) {
       element.animate({
         opacity: orig_opacity,
-        DEPENDENCY_CHANGE_ACTION_DURATION: DEPENDENCY_CHANGE_ACTION_DURATION
+        duration: duration
       });
     }
   }
   return element;
 };
 
-dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.SHOW] = function(element, valid) {
+dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.SHOW] = function(element, valid, duration) {
   if (valid) {
-    element.show(DEPENDENCY_CHANGE_ACTION_DURATION);
+    element.show(duration);
   } else {
-    element.hide(DEPENDENCY_CHANGE_ACTION_DURATION);
+    element.hide(duration);
   }
   return element;
 };
 
-dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.SLIDE] = function(element, valid) {
+dependency_change_actions[DEPENDENCY_CHANGE_ACTIONS.SLIDE] = function(element, valid, duration) {
   if (valid) {
-    element.slideDown(DEPENDENCY_CHANGE_ACTION_DURATION);
+    element.slideDown(duration);
   } else {
-    element.slideUp(DEPENDENCY_CHANGE_ACTION_DURATION);
+    element.slideUp(duration);
   }
   return element;
 };
@@ -1310,10 +1312,10 @@ FormModifier = (function() {
 
   FormModifier.prototype._on_dependency_change = function(action, element, data, valid) {
     var ref;
-    if (data.depends_on.length > 0 && (data.dependency_change_targets != null)) {
+    if (data.depends_on.length > 0 && (data.dependency_action_targets != null)) {
       if (!(this.form_validator.dependency_change_action instanceof Function)) {
         if ((ref = FormValidator.dependency_change_actions[action]) != null) {
-          ref.call(FormValidator.dependency_change_actions, $_from_arr(data.dependency_change_targets), valid);
+          ref.call(FormValidator.dependency_change_actions, $_from_arr(data.dependency_action_targets), valid, data.dependency_action_duration);
         }
       } else {
         this.form_validator.dependency_change_action(element, valid);
@@ -1701,7 +1703,7 @@ window.FormValidator = (function() {
     return this._find_targets(target_list, element);
   };
 
-  FormValidator.prototype._get_dependency_change_targets = function(element, type) {
+  FormValidator.prototype._get_dependency_action_targets = function(element, type) {
     var target_list;
     target_list = (typeof this.dependency_action_target_getter === "function" ? this.dependency_action_target_getter(element, type) : void 0) || element.attr("data-fv-dependency-action-targets") || element.closest("[data-fv-dependency-action-targets]").attr("data-fv-dependency-action-targets") || DEFAULT_ATTR_VALUES.DEPENDENCY_ACTION_TARGETS;
     return this._find_targets(target_list, element);
@@ -1914,11 +1916,6 @@ window.FormValidator = (function() {
     }
     data.dependency_changed = valid_dependencies !== data.valid_dependencies;
     data.valid_dependencies = valid_dependencies;
-    if (data.dependency_changed && (data.error_targets == null)) {
-      this._cache_attribute(elem, data, "error_targets", function() {
-        return this._get_error_targets(elem, type);
-      });
-    }
     errors = errors.concat(data.errors[phase]);
     phase = VALIDATION_PHASES.VALUE;
     if (prev_phases_valid || !options.stop_on_error) {
@@ -2006,10 +2003,12 @@ window.FormValidator = (function() {
         data.valid = false;
       }
     }
-    if (data.dependency_changed && (data.dependency_change_targets == null)) {
-      this._cache_attribute(elem, data, "dependency_change_targets", function() {
-        return this._get_dependency_change_targets(elem, type);
+    if (data.dependency_action_targets == null) {
+      this._cache_attribute(elem, data, "dependency_action_targets", function() {
+        return this._get_dependency_action_targets(elem, type);
       });
+      this._cache_attribute(elem, data, "dependency_action_duration");
+      data.dependency_action_duration = parseInt(data.dependency_action_duration, 10);
     }
     if (options.apply_error_classes === true && (data.error_targets == null)) {
       this._cache_attribute(elem, data, "error_targets", function() {

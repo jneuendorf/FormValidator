@@ -6,6 +6,14 @@
         For more details see <a class="goto" href="#" data-href="#constraints">constraints</a>.
     </dd>
 
+    <dt><code>data-fv-dependency-action-duration</code></dt>
+    <dd>
+        <code>Number</code> (in milliseconds)
+        <br> Can be used to override the default duration.
+        <br> Default is <code>FormValidator.DEPENDENCY_CHANGE_ACTION_DURATION</code>.
+        <br> See <a class="goto" href="#" data-href="#configuration">configuration</a> for more details.
+    </dd>
+
     <dt><code>data-fv-dependency-action-targets</code></dt>
     <dd>
         <code>String</code> (targets, space separated)

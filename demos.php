@@ -209,7 +209,7 @@
             <div class="row special-fv-row" style="display: none;">
                 <div class="form-group col-xs-6">
                     <label>This number depends on n1 to be valid</label>
-                    <input type="text" class="form-control" data-fv-validate="number" data-fv-depends-on="n1" data-fv-dependency-action-targets=".special-fv-row" />
+                    <input type="text" class="form-control" data-fv-validate="number" data-fv-depends-on="n1" data-fv-dependency-action-targets=".special-fv-row" data-fv-dependency-action-duration="200" />
                 </div>
                 <div class="col-xs-1">
                     <div class="error_state"></div>
@@ -263,23 +263,6 @@
                 form.find(".error_message").empty();
                 for (i = 0; i < errors.length; i++) {
                     error = errors[i];
-
-                    // if ((target = error.element.attr("data-fv-depends-on")) != null) {
-                    //     hide_field = false;
-                    //     for (j = 0; j < errors.length; j++) {
-                    //         if (errors[j].element.attr("data-fv-name") === target) {
-                    //             hide_field = true;
-                    //             break;
-                    //         }
-                    //     }
-                    //     if (hide_field) {
-                    //         error.element.closest(".row").slideUp(100);
-                    //     }
-                    //     else {
-                    //         error.element.closest(".row").slideDown(100);
-                    //     }
-                    // }
-
                     div = error.element.closest(".row").find(".error_message");
                     text = div.text();
                     div.text(text + (text.length > 0 ? "; " : "") + error.message);
@@ -296,6 +279,7 @@
                     error_target_getter: function(element, type) {
                         return element.closest(&quot;.row&quot;).find(&quot;.error_state&quot;);
                     },
+                    dependency_change_action: FormValidator.DEPENDENCY_CHANGE_ACTIONS.SLIDE,
                     locale: form.find(&quot;.example3.locale option:selected&quot;).val()
                 });
                 var errors = validator.validate();
@@ -303,23 +287,6 @@
                 form.find(&quot;.error_message&quot;).empty();
                 for (i = 0; i &lt; errors.length; i++) {
                     error = errors[i];
-
-                    if ((target = error.element.attr(&quot;data-fv-depends-on&quot;)) != null) {
-                        hide_field = false;
-                        for (j = 0; j &lt; errors.length; j++) {
-                            if (errors[j].element.attr(&quot;data-fv-name&quot;) === target) {
-                                hide_field = true;
-                                break;
-                            }
-                        }
-                        if (hide_field) {
-                            error.element.closest(&quot;.row&quot;).slideUp(100);
-                        }
-                        else {
-                            error.element.closest(&quot;.row&quot;).slideDown(100);
-                        }
-                    }
-
                     div = error.element.closest(&quot;.row&quot;).find(&quot;.error_message&quot;);
                     text = div.text();
                     div.text(text + (text.length &gt; 0 ? &quot;; &quot; : &quot;&quot;) + error.message);
@@ -360,10 +327,14 @@
                     &lt;/div&gt;
                     &lt;div class=&quot;col-xs-5 error_message&quot;&gt;&lt;/div&gt;
                 &lt;/div&gt;
-                &lt;div class=&quot;row&quot;&gt;
-                    &lt;div class=&quot;col-xs-6&quot;&gt;
-                        &lt;label&gt;This number depends on n1&lt;/label&gt;
-                        &lt;input type=&quot;text&quot; data-fv-validate=&quot;number&quot; data-fv-depends-on=&quot;n1&quot; /&gt;
+                &lt;div class=&quot;row special-fv-row&quot; style=&quot;display: none;&quot;&gt;
+                    &lt;div class=&quot;form-group col-xs-6&quot;&gt;
+                        &lt;label&gt;This number depends on n1 to be valid&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; class=&quot;form-control&quot;
+                            data-fv-validate=&quot;number&quot;
+                            data-fv-depends-on=&quot;n1&quot;
+                            data-fv-dependency-action-targets=&quot;.special-fv-row&quot;
+                            data-fv-dependency-action-duration=&quot;200&quot; /&gt;
                     &lt;/div&gt;
                     &lt;div class=&quot;col-xs-1&quot;&gt;
                         &lt;div class=&quot;error_state&quot;&gt;&lt;/div&gt;
