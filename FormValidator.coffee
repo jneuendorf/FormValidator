@@ -77,7 +77,7 @@ class window.FormValidator
         for phase of VALIDATION_PHASES
             grouped_errors[phase] = (error for error in errors when error.phase is phase)
 
-        for phase in @ERROR_MESSAGE_CONFIG.PHASE_ORDER when grouped_errors[phase].length > 0
+        for phase in ERROR_MESSAGE_CONFIG.PHASE_ORDER when grouped_errors[phase].length > 0
             error_message_parts.push @_build_error_message(phase, grouped_errors[phase], build_mode, locale)
 
         return error_message_parts.join(delimiter)
@@ -115,19 +115,20 @@ class window.FormValidator
         @dependency_error_classes = options.dependency_error_classes or @form.attr("data-fv-dependency-error-classes") or "fv-invalid-dependency"
         @dependency_change_action = options.dependency_change_action or @form.attr("data-fv-dependency-change-action") or DEPENDENCY_CHANGE_ACTIONS.DEFAULT
 
-        @validators             = $.extend {}, CLASS.validators, options.validators
-        @validation_options     = options.validation_options or null
-        @constraint_validators  = $.extend {}, CLASS.constraint_validators, options.constraint_validators
-        @build_mode             = options.build_mode or BUILD_MODES.DEFAULT
+        @validators = $.extend {}, CLASS.validators, options.validators
+        @validation_options = options.validation_options or null
+        @constraint_validators = $.extend {}, CLASS.constraint_validators, options.constraint_validators
+        @build_mode = options.build_mode or BUILD_MODES.DEFAULT
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
-        @error_mode             = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
-        @locale                 = options.locale or "en"
+        @error_mode = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
+        @locale = options.locale or "en"
 
-        @error_target_getter    = options.error_target_getter or null
-        @field_getter           = options.field_getter or null
-        @required_field_getter  = options.required_field_getter or null
-        @preprocessors          = $.extend CLASS.default_preprocessors, options.preprocessors or {}
-        @postprocessors         = options.postprocessors or {}
+        @error_target_getter = options.error_target_getter or null
+        @dependency_action_target_getter = options.dependency_action_target_getter or null
+        @field_getter = options.field_getter or null
+        @required_field_getter = options.required_field_getter or null
+        @preprocessors = $.extend CLASS.default_preprocessors, options.preprocessors or {}
+        @postprocessors = options.postprocessors or {}
 
         @group                  = options.group or null
         # modification of the errors possible before they are applied to DOM
@@ -260,7 +261,7 @@ class window.FormValidator
 
     _find_targets: (targets, element, delimiter = /\s*\;\s*/g) ->
         if typeof targets is "string"
-            return (@_find_target(target, element) for target in targets.split(delimiter))
+            return (@_find_target(target, element) for target in targets.split(delimiter) when target.trim())
         return targets or []
 
     _find_target: (target, element) ->
@@ -280,10 +281,19 @@ class window.FormValidator
 
     # how to find the correct data-fv-error-targets attribute for an element
     _get_error_targets: (element, type) ->
-        return @error_target_getter?(element, type) or
+        target_list = @error_target_getter?(element, type) or
             element.attr("data-fv-error-targets") or
             element.closest("[data-fv-error-targets]").attr("data-fv-error-targets") or
             DEFAULT_ATTR_VALUES.ERROR_TARGETS
+        return @_find_targets(target_list, element)
+
+    # how to find the correct data-fv-error-targets attribute for an element
+    _get_dependency_change_targets: (element, type) ->
+        target_list = @dependency_action_target_getter?(element, type) or
+            element.attr("data-fv-dependency-action-targets") or
+            element.closest("[data-fv-dependency-action-targets]").attr("data-fv-dependency-action-targets") or
+            DEFAULT_ATTR_VALUES.DEPENDENCY_ACTION_TARGETS
+        return @_find_targets(target_list, element)
 
     # create list of sets where each set is 1 unit for counting progress
     # returns: 1. array of arrays, 2. jquery set, or 3. array of jquery
@@ -561,6 +571,10 @@ class window.FormValidator
         else
             if data.valid isnt false
                 data.valid = false
+
+        if data.dependency_changed and not data.dependency_change_targets?
+            @_cache_attribute elem, data, "dependency_change_targets", () ->
+                return @_get_dependency_change_targets(elem, type)
 
         # cache error targets because error classes will be applied to them in the next step (form modifcation)
         if options.apply_error_classes is true and not data.error_targets?

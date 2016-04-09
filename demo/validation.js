@@ -18,7 +18,7 @@ $(document).ready(function() {
 
 
     var form_validator = FormValidator.new(my_form, {
-        error_target_getter: function(e, t, i) {
+        error_target_getter: function(e, t) {
             var name = e.attr("name");
             if (name) {
                 var group = $("[name='" + name + "']");
@@ -27,6 +27,9 @@ $(document).ready(function() {
                 }
             }
             return e;
+        },
+        dependency_action_target_getter: function(e, t) {
+            return this.error_target_getter(e, t);
         },
         error_mode: FormValidator.ERROR_MODES.SIMPLE,
         dependency_change_action: FormValidator.DEPENDENCY_CHANGE_ACTIONS.SHOW

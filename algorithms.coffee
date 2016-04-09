@@ -56,7 +56,11 @@ group_arr_by = (arr, get_prop) ->
         grouped[key].push elem
     return grouped
 
-
+$_from_arr = (arr) ->
+    res = $()
+    for elem in arr
+        res = res.add(elem)
+    return res
 
 
 

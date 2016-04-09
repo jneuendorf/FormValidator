@@ -10,9 +10,9 @@ class FormModifier
             @error_output_mode = ERROR_OUTPUT_MODES.DEFAULT
 
     # class_kind is either "error_classes" or "dependency_error_classes"
-    _apply_classes: (element, error_targets, classes, is_valid) ->
-        if error_targets?
-            targets = @form_validator._find_targets(error_targets, element)
+    _apply_classes: (element, targets, classes, is_valid) ->
+        if targets?
+            # targets = @form_validator._find_targets(error_targets, element)
             for target, i in targets
                 if target not instanceof jQuery
                     target = targets.eq(i)
@@ -113,10 +113,13 @@ class FormModifier
         return @["_process_#{constraint.name}"]?(constraint, element, data) or false
 
     _on_dependency_change: (action, element, data, valid) ->
-        CLASS = FormValidator
-        if data.depends_on.length > 0 and data.error_targets?
+        if data.depends_on.length > 0 and data.dependency_change_targets?
             if @form_validator.dependency_change_action not instanceof Function
-                CLASS.dependency_change_actions[action]?.call(CLASS.dependency_change_actions, data.error_targets, valid)
+                FormValidator.dependency_change_actions[action]?.call(
+                    FormValidator.dependency_change_actions
+                    $_from_arr(data.dependency_change_targets)
+                    valid
+                )
             else
                 @form_validator.dependency_change_action(element, valid)
         return @
