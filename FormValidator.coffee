@@ -573,6 +573,7 @@ class window.FormValidator
             @_cache_attribute elem, data, "dependency_action_targets", () ->
                 return @_get_dependency_action_targets(elem, type)
             @_cache_attribute(elem, data, "dependency_action_duration")
+            data.dependency_action_duration = parseInt(data.dependency_action_duration, 10)
 
         # cache error targets because error classes will be applied to them in the next step (form modifcation)
         if options.apply_error_classes is true and not data.error_targets?

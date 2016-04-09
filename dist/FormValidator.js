@@ -2008,6 +2008,7 @@ window.FormValidator = (function() {
         return this._get_dependency_action_targets(elem, type);
       });
       this._cache_attribute(elem, data, "dependency_action_duration");
+      data.dependency_action_duration = parseInt(data.dependency_action_duration, 10);
     }
     if (options.apply_error_classes === true && (data.error_targets == null)) {
       this._cache_attribute(elem, data, "error_targets", function() {
