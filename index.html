@@ -383,10 +383,10 @@
                 </div>
                 <div class="col-xs-5 error_message"></div>
             </div>
-            <div class="row" style="display: none;">
+            <div class="row special-fv-row" style="display: none;">
                 <div class="form-group col-xs-6">
                     <label>This number depends on n1 to be valid</label>
-                    <input type="text" class="form-control" data-fv-validate="number" data-fv-depends-on="n1" />
+                    <input type="text" class="form-control" data-fv-validate="number" data-fv-depends-on="n1" data-fv-dependency-action-targets=".special-fv-row" />
                 </div>
                 <div class="col-xs-1">
                     <div class="error_state"></div>
@@ -432,6 +432,7 @@
                     error_target_getter: function(element, type) {
                         return element.closest(".row").find(".error_state");
                     },
+                    dependency_change_action: FormValidator.DEPENDENCY_CHANGE_ACTIONS.SLIDE,
                     locale: form.find(".example3.locale option:selected").val()
                 });
                 var errors = validator.validate();
@@ -440,21 +441,21 @@
                 for (i = 0; i < errors.length; i++) {
                     error = errors[i];
 
-                    if ((target = error.element.attr("data-fv-depends-on")) != null) {
-                        hide_field = false;
-                        for (j = 0; j < errors.length; j++) {
-                            if (errors[j].element.attr("data-fv-name") === target) {
-                                hide_field = true;
-                                break;
-                            }
-                        }
-                        if (hide_field) {
-                            error.element.closest(".row").slideUp(100);
-                        }
-                        else {
-                            error.element.closest(".row").slideDown(100);
-                        }
-                    }
+                    // if ((target = error.element.attr("data-fv-depends-on")) != null) {
+                    //     hide_field = false;
+                    //     for (j = 0; j < errors.length; j++) {
+                    //         if (errors[j].element.attr("data-fv-name") === target) {
+                    //             hide_field = true;
+                    //             break;
+                    //         }
+                    //     }
+                    //     if (hide_field) {
+                    //         error.element.closest(".row").slideUp(100);
+                    //     }
+                    //     else {
+                    //         error.element.closest(".row").slideDown(100);
+                    //     }
+                    // }
 
                     div = error.element.closest(".row").find(".error_message");
                     text = div.text();
