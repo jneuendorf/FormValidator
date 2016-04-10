@@ -13,8 +13,7 @@ get_permutations = (arr) ->
     return results
 
 
-# from https://github.com/blazs/subsets
-# TODO:40 add credit
+# @Thanks to https://github.com/blazs/subsets for the inspiration!
 get_subsets = (set, k) ->
     subsets = []
     n = set.length
