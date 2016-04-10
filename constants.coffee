@@ -90,7 +90,7 @@ DEFAULT_ATTR_VALUES =
     INCLUDE_MIN: "true"
 
 # define which constraint-validator options are compatible with a constraint validator
-# they are accessible in the according constraint validator in the options object
+# they are accessible in the according constraint validator in the options object (as last parameter)
 # used in _validate_constraints()
 # => constraint validator options:
 #    - data-fv-include-max
