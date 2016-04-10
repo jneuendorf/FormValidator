@@ -1108,7 +1108,7 @@ If you define a constraint to a validator so that the combination does not make 
                                         <div role="tabpanel" class="tab-pane " id="configuration">
                         <h4>List of configuration constants</h4>
 <p>
-    The following configuration constants are attached to the <code>FormValidator</code> class.<br>
+    The following configuration constants are attached to the <code>FormValidator</code> class. They can be used as parameters for functions that expect some parameters to have certain values.<br>
     If it has a <code>DEFAULT</code> property it points to the according constant marked with <span class="label label-option">default</span>.<br>
     Most of them simulate <code>enum</code> of other languages but some of them can be used as variables. Those are marked with <span class="label label-var">variable</span>.
 </p>
@@ -1240,7 +1240,7 @@ If you define a constraint to a validator so that the combination does not make 
     </dd>
 </dl>
 <br>
-<h4>Configuring internal parameters (advanced)</h4>
+<h4>Configuring internal parameters (advanced!)</h4>
 <p>
     If you want to change some of <code>FormValidator's</code> behavior without modifying its source code directly you can use the <code>FormValidator.configure</code> method:
     <dl>
@@ -1258,42 +1258,47 @@ If you define a constraint to a validator so that the combination does not make 
                     The groups defined in that array must be disjoint.
                 </li>
                 <li>
-                    <code>constraint_validator_options_in_locale_key</code><br>
-                    <!-- # define when to include a constraint validator option in the locale key (and when not - if not matching the below value)
-                    # value can also be: function(String locale) -> Mixed value
-                    # i.e. for include_max a function could be defined if different locales formulate the according error message differently:
-                    # - EN could be like 'the value is not less than {{max}}' (max is not included in valid range => locale key = "constraint_max") and
-                    # - DE could be like 'is not less than or equal to {{max}}' (max is included in valid range => locale key = "constraint_max_include_max")
-                    # => in that case the function would look like:
-                    # (locale) ->
-                    #   if locale is "en"
-                    #       return false
-                    #   if locale is "de"
-                    #       return true
-                    #   # all other locales...
-                    #   return something -->
+                    <code>constraint_validator_options_in_locale_key (Object (String to Boolean|Function))</code><br>
+                    Defines when to include a constraint-validator option in the locale key. Instead of a Boolean value also a function can be set as value. It must then look like
+                    <code class="quote">function(String locale) -> Boolean</code>
+                    One example: You want a custom error message for the constraint <code>max</code> with the <code>include_max</code> option and for some reason you don't want to have the <code>include_max</code> part in the error message for only <code>lang_A</code> but for all other languages. In that case you would modify the object like so:
+
+                    <pre class="brush: js">
+                        constraint_validator_options_in_locale_key.include_max = function(locale) {
+                            if (locale === 'lang_A') {
+                                return false;
+                            }
+                            return true;
+                    </pre>
                 </li>
                 <li>
-                    <code>constraint_validator_options</code><br>
-                    <!-- # define which constraint-validator options are compatible with a constraint validator
-                    # they are accessible in the according constraint validator in the options object (last parameter)
-                    # used in _validate_constraints()
-                    # => constraint validator options:
-                    #    - data-fv-include-max
-                    #    - data-fv-include-min
-                    #    - data-fv-regex-flags -->
+                    <code>constraint_validator_options (Object (String to Array (of String)))</code><br>
+                    Defines what constraint-validator options are compatible with a constraint validator.
+                    The options are accessible in the according constraint validator in the (3rd) <code>options</code> parameter.<br>
+                    By default it loosk like this:
+                    <pre class="brush: js">
+                    {
+                        max: [&quot;include_max&quot;],
+                        max_length: [&quot;enforce_max_length&quot;],
+                        min: [&quot;include_min&quot;],
+                        min_length: [&quot;enforce_min_length&quot;],
+                        regex: [&quot;regex_flags&quot;]
+                    }</pre>
                 </li>
                 <li>
                     <code>locale_message_builders</code><br>
-
+                    By default no locale-message builder is defined. If you define one it will be preferred over the message builder of the current build mode. For each locale there can be 1 locale-message builder for each build mode.<br>
+                    For more details <code>git checkout</code> the source code or contact me.
                 </li>
                 <li>
                     <code>message_builders</code><br>
-
+                    A message builder is defined for each of the <code>FormValidator.BUILD_MODES</code>. They take the data from a <code>MessageDataCreator</code> and stringify it in some way.<br>
+                    For more details <code>git checkout</code> the source code or contact me.
                 </li>
                 <li>
                     <code>message_data_creators</code><br>
-
+                    A message-data creator is defined for each of the <code>FormValidator.VALIDATION_PHASES</code>. They take the errors of an element and generate all the necessary data for building an error message from it.<br>
+                    For more details <code>git checkout</code> the source code or contact me.
                 </li>
             </ul>
         </dd>
