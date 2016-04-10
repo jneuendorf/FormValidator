@@ -29,6 +29,11 @@ ul.spaced li {
 .label-var {
     background-color: #155799;
 }
+code.quote {
+    display: block;
+    margin: 20px 0px 20px 0px;
+    text-align: center;
+}
 
 
 h3.project-tagline {
