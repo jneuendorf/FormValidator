@@ -5,7 +5,11 @@
         <pre class="brush: xml">
             &lt;script type=&quot;text/javascript&quot; src=&quot;/path/to/FormValidator(.min).js&quot;&gt;&lt;/script&gt;
         </pre>
-        The development version (FormValidator.js) throws more exceptions and prints errors. Therefore, it is recommended to be used for more convenient development. ;)
+        <h5>Optioanally, include a theme shipped with it.</h5>
+        <pre class="brush: xml">
+            &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;/path/to/theme.default(.min).css&quot; media=&quot;screen&quot;&gt;
+        </pre>
+        The development version (<code>FormValidator.js</code>) throws more exceptions and prints errors. Therefore, it is recommended to be used for development due to more convenience. ;)
     </div>
     <div class="col-xs-12">
         <h4>Create a form and set some attributes</h4>
@@ -16,7 +20,7 @@
             <a class="goto" href="#" data-href="#attribute_index">attribute index</a>.
         </h5>
         <pre class="brush: xml">
-            &lt;form id=&quot;my_form&quot; data-fv-error-classes=&quot;invalid&quot; data-fv-error-targets=&quot;self&quot;&gt;
+            &lt;form id=&quot;my_form&quot; data-fv-error-targets=&quot;self&quot;&gt;
                 &lt;div&gt;
                     &lt;label&gt;Email address&lt;/label&gt;
                     &lt;input type=&quot;text&quot; data-fv-validate=&quot;email&quot; /&gt;

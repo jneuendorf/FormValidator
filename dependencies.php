@@ -47,13 +47,16 @@
                     The same as <code>show</code> but without animnation (changes the <code>display</code> style).
                 </li>
             </ul>
-            * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change if jQuery changes it.
+            * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change if jQuery changes it. It can be overriden using the <code>data-fv-dependency-action-duration</code> attribute.<br>
+            To override the duration for a single field use the attribute on that element. To override it for all fields use the attribute on the form itself (or whatever <code>form</code> parameter you passed to the new <code>FormValidator</code>).
         </p>
 
         <h4>Cycle detection</h4>
         <p>
             <strong>There is none!</strong><br>
-            So you must make sure you do not define cyclic dependencies. Since dependencies are defined as a list of targets you could use a selector to find a dependency's element (or multiple). In that case you should be careful to match only the wanted elements.<br>
+            When caching the fields are topologically sorted. The sorting method will throw an Error if there are any cyclic dependencies. But of course, you should try to avoid them in the first place.<br>
+            <br>
+            Since dependencies are defined as a list of targets you could use a selector to find a dependency's element (or multiple). In that case you should be careful to match only the wanted elements.<br>
             Using the <code>data-fv-name</code> attribute should be easier and safer to use and is therefore recommended.
         </p>
     </div>

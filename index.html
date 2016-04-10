@@ -137,7 +137,11 @@
         <pre class="brush: xml">
             &lt;script type=&quot;text/javascript&quot; src=&quot;/path/to/FormValidator(.min).js&quot;&gt;&lt;/script&gt;
         </pre>
-        The development version (FormValidator.js) throws more exceptions and prints errors. Therefore, it is recommended to be used for more convenient development. ;)
+        <h5>Optioanally, include a theme shipped with it.</h5>
+        <pre class="brush: xml">
+            &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;/path/to/theme.default(.min).css&quot; media=&quot;screen&quot;&gt;
+        </pre>
+        The development version (<code>FormValidator.js</code>) throws more exceptions and prints errors. Therefore, it is recommended to be used for development due to more convenience. ;)
     </div>
     <div class="col-xs-12">
         <h4>Create a form and set some attributes</h4>
@@ -148,7 +152,7 @@
             <a class="goto" href="#" data-href="#attribute_index">attribute index</a>.
         </h5>
         <pre class="brush: xml">
-            &lt;form id=&quot;my_form&quot; data-fv-error-classes=&quot;invalid&quot; data-fv-error-targets=&quot;self&quot;&gt;
+            &lt;form id=&quot;my_form&quot; data-fv-error-targets=&quot;self&quot;&gt;
                 &lt;div&gt;
                     &lt;label&gt;Email address&lt;/label&gt;
                     &lt;input type=&quot;text&quot; data-fv-validate=&quot;email&quot; /&gt;
@@ -768,13 +772,16 @@ If you define a constraint to a validator so that the combination does not make 
                     The same as <code>show</code> but without animnation (changes the <code>display</code> style).
                 </li>
             </ul>
-            * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change if jQuery changes it.
+            * The duration used for the animation is jQuery's default value (currently <code>400&nbsp;ms</code>). It is hardcoded though and will therefore not change if jQuery changes it. It can be overriden using the <code>data-fv-dependency-action-duration</code> attribute.<br>
+            To override the duration for a single field use the attribute on that element. To override it for all fields use the attribute on the form itself (or whatever <code>form</code> parameter you passed to the new <code>FormValidator</code>).
         </p>
 
         <h4>Cycle detection</h4>
         <p>
             <strong>There is none!</strong><br>
-            So you must make sure you do not define cyclic dependencies. Since dependencies are defined as a list of targets you could use a selector to find a dependency's element (or multiple). In that case you should be careful to match only the wanted elements.<br>
+            When caching the fields are topologically sorted. The sorting method will throw an Error if there are any cyclic dependencies. But of course, you should try to avoid them in the first place.<br>
+            <br>
+            Since dependencies are defined as a list of targets you could use a selector to find a dependency's element (or multiple). In that case you should be careful to match only the wanted elements.<br>
             Using the <code>data-fv-name</code> attribute should be easier and safer to use and is therefore recommended.
         </p>
     </div>
