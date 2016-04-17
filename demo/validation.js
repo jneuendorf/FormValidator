@@ -31,8 +31,8 @@ $(document).ready(function() {
         dependency_action_target_getter: function(e, t) {
             return this.error_target_getter(e, t);
         },
-        error_mode: FormValidator.ERROR_MODES.SIMPLE,
-        dependency_change_action: FormValidator.DEPENDENCY_CHANGE_ACTIONS.SHOW
+        // error_mode: FormValidator.ERROR_MODES.SIMPLE,
+        dependency_change_action: FormValidator.DEPENDENCY_CHANGE_ACTIONS.ENABLE
     });
     $(".error_output_mode").change(function(evt) {
         form_validator.form_modifier.error_output_mode = $(this).find(":selected").val();

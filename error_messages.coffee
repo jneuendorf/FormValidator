@@ -79,7 +79,7 @@ $.extend locales.en, {
     value_email_many_at: "'{{value}}' address can only have one @ symbol"
     value_email_dot: "'{{value}}' must have a correct ending (i.e. '.com')"
     value_integer: "'{{value}}' must be an integer"
-    value_integer_float: "'{{value}}' must not be decimal"
+    value_integer_float: "'{{value}}' must not be a decimal"
     value_number: "'{{value}}' must be a number"
     value_phone: "'{{value}}' can only contain numbers, spaces, and the characters '+-/()'"
     value_radio: "One of the radio buttons must be selected"
