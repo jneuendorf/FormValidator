@@ -58,6 +58,7 @@ class FormModifier
         # else:
         # 1st initialization
         if not element.data("_fv_popover")?
+            element_focussed = null
             element
                 .popover {
                     html: true
@@ -68,13 +69,17 @@ class FormModifier
                 }
                 .focus () ->
                     element.popover("show")
+                    element_focussed = true
                     return false
                 .blur () ->
                     element.popover("hide")
+                    element_focussed = false
                     return true
                 .click () ->
                     if document.activeElement is @
-                        element.popover("toggle")
+                        if not element_focussed
+                            element.popover("toggle")
+                    element_focussed = false
                     return true
         element.data("_fv_popover", message).popover("hide")
         return @

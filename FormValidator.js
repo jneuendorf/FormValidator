@@ -1218,11 +1218,13 @@ FormModifier = (function() {
   };
 
   FormModifier.prototype._set_message_popover = function(message, element, data) {
+    var element_focussed;
     if (data.type === "checkbox" || data.type === "radio" || data.type === "select") {
       element.attr("title", message);
       return this;
     }
     if (element.data("_fv_popover") == null) {
+      element_focussed = null;
       element.popover({
         html: true,
         placement: element.attr("data-placement") || "right",
@@ -1232,14 +1234,19 @@ FormModifier = (function() {
         trigger: "manual"
       }).focus(function() {
         element.popover("show");
+        element_focussed = true;
         return false;
       }).blur(function() {
         element.popover("hide");
+        element_focussed = false;
         return true;
       }).click(function() {
         if (document.activeElement === this) {
-          element.popover("toggle");
+          if (!element_focussed) {
+            element.popover("toggle");
+          }
         }
+        element_focussed = false;
         return true;
       });
     }
