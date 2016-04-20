@@ -10,7 +10,11 @@ COFFEE_FILES = namespaces.coffee \
 				FormModifier.coffee $(PROJECT_NAME).coffee \
 				event_handlers.coffee
 DEBUG_FILE = debug.coffee
-TEST_FILES = test_validators.coffee test_general_behavior.coffee test_dependencies.coffee test_constraints.coffee $(PROJECT_NAME).test.coffee
+TEST_FILES = spec/test_validators.coffee \
+				spec/test_general_behavior.coffee \
+				spec/test_dependencies.coffee \
+				spec/test_constraints.coffee \
+				spec/$(PROJECT_NAME).test.coffee
 
 CSS_FILES = theme.default theme.bootstrap
 
@@ -25,7 +29,7 @@ make:
 
 
 test: make
-	cat $(TEST_FILES) | coffee --compile --stdio > $(PROJECT_NAME).test.js
+	cat $(TEST_FILES) | coffee --compile --stdio > ./spec/$(PROJECT_NAME).test.js
 
 min:
 	cat $(COFFEE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).temp.js
