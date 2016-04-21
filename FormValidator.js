@@ -482,7 +482,10 @@ constraint_validators = {
     return value.length >= min_length;
   },
   regex: function(value, regex, options) {
-    return (new RegExp(regex, options.flags)).test(value);
+    if (!(regex instanceof RegExp)) {
+      regex = new RegExp(regex, options.flags);
+    }
+    return regex.test(value);
   },
   whitelist: function(value, whitelist) {
     var char, l, len;
@@ -1523,6 +1526,7 @@ window.FormValidator = (function() {
     this.validators = $.extend({}, CLASS.validators, options.validators);
     this.validation_options = options.validation_options || null;
     this.constraint_validators = $.extend({}, CLASS.constraint_validators, options.constraint_validators);
+    this.validator_call_context = $.extend({}, this.validators, this.constraint_validators);
     this.build_mode = options.build_mode || BUILD_MODES.DEFAULT;
     this.error_mode = CLASS.ERROR_MODES[options.error_mode] != null ? options.error_mode : CLASS.ERROR_MODES.DEFAULT;
     this.locale = options.locale || "en";
@@ -1784,7 +1788,7 @@ window.FormValidator = (function() {
     if (validator == null) {
       throw new Error("FormValidator::_validate_value: No validator found for type '" + type + "'. Make sure the type is correct or define a validator!");
     }
-    validation = validator.call(this.validators, value, element);
+    validation = validator.call(this.validator_call_context, value, element);
     if (validation === false) {
       validation = {
         error_message_type: type
@@ -1869,7 +1873,7 @@ window.FormValidator = (function() {
     }
     for (m = 0, len1 = constraints.length; m < len1; m++) {
       constraint = constraints[m];
-      if (constraint.validator.call(this.constraint_validators, value, constraint.value, constraint.options) === true) {
+      if (constraint.validator.call(this.validator_call_context, value, constraint.value, constraint.options) === true) {
         results[constraint.name] = true;
       } else {
         result = {};

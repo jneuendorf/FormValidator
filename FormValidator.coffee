@@ -118,6 +118,9 @@ class window.FormValidator
         @validators = $.extend {}, CLASS.validators, options.validators
         @validation_options = options.validation_options or null
         @constraint_validators = $.extend {}, CLASS.constraint_validators, options.constraint_validators
+
+        @validator_call_context = $.extend {}, @validators, @constraint_validators
+
         @build_mode = options.build_mode or BUILD_MODES.DEFAULT
         # option for always using the simplest error message (i.e. the value '1.2' for 'integer' would print the error message 'integer' instead of 'integer_float')
         @error_mode = if CLASS.ERROR_MODES[options.error_mode]? then options.error_mode else CLASS.ERROR_MODES.DEFAULT
@@ -353,7 +356,7 @@ class window.FormValidator
         validator = @validators[type]
         if not validator?
             throw new Error("FormValidator::_validate_value: No validator found for type '#{type}'. Make sure the type is correct or define a validator!")
-        validation = validator.call(@validators, value, element)
+        validation = validator.call(@validator_call_context, value, element)
 
         # if a simple return value was used (false/string containing the error message type) => create object
         if validation is false
@@ -440,7 +443,7 @@ class window.FormValidator
             @_set_element_data(element, data)
 
         for constraint in constraints
-            if constraint.validator.call(@constraint_validators, value, constraint.value, constraint.options) is true
+            if constraint.validator.call(@validator_call_context, value, constraint.value, constraint.options) is true
                 results[constraint.name] = true
             else
                 # create object with details about what's wrong

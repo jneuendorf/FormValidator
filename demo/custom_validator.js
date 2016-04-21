@@ -6,9 +6,7 @@ $(document).ready(function() {
         error_output_mode: FormValidator.ERROR_OUTPUT_MODES.BELOW,
         validators: {
             product_key: function(str, elem) {
-                // XXXX-XXXX-XXXX-XXXX
-                // return /^(\d{4}\-){3}\d{4}$/.test(str);
-                return /^\d\d\d\d\-\d\d\d\d\-\d\d\d\d\-\d\d\d\d$/.test(str);
+                return this.regex(str, /^\d\d\d\d\-\d\d\d\d\-\d\d\d\d\-\d\d\d\d$/);
             }
         }
     });

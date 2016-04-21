@@ -17,7 +17,9 @@ constraint_validators =
     min_length: (value, min_length) ->
         return value.length >= min_length
     regex: (value, regex, options) ->
-        return (new RegExp(regex, options.flags)).test(value)
+        if regex not instanceof RegExp
+            regex = new RegExp(regex, options.flags)
+        return regex.test(value)
     whitelist: (value, whitelist) ->
         for char in whitelist when value.indexOf(char) < 0
             return false
