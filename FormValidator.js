@@ -519,8 +519,12 @@ include_constraint_option_in_locale_key = function(option, value, locale) {
 };
 
 locales = {
-  de: {},
-  en: {}
+  de: {
+    and: "und"
+  },
+  en: {
+    and: "and"
+  }
 };
 
 $.extend(locales.de, {
