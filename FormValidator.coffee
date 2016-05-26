@@ -94,8 +94,6 @@ class window.FormValidator
         return form_validator
 
     @new_without_modifier: (form, options) ->
-        if DEBUG and form not instanceof jQuery
-            throw new Error("FormValidator::constructor: Invalid form given (must be a jQuery object)!")
         return new @(form, null, options)
 
     ###*
@@ -133,10 +131,9 @@ class window.FormValidator
         @preprocessors = $.extend CLASS.default_preprocessors, options.preprocessors or {}
         @postprocessors = options.postprocessors or {}
 
-        @group                  = options.group or null
+        @group = options.group or null
         # modification of the errors possible before they are applied to DOM
-        @process_errors         = options.process_errors or null
-
+        @process_errors = options.process_errors or null
         @_field_order = null
 
 
@@ -355,7 +352,7 @@ class window.FormValidator
         {value} = value_info
         validator = @validators[type]
         if not validator?
-            throw new Error("FormValidator::_validate_value: No validator found for type '#{type}'. Make sure the type is correct or define a validator!")
+            throw new Error("FormValidator::_validate_value: No validator found for type '#{type}'. Make sure the type is correct or define an according validator!")
         validation = validator.call(@validator_call_context, value, element)
 
         # if a simple return value was used (false/string containing the error message type) => create object
