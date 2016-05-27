@@ -11,6 +11,11 @@ class window.FormValidator
     ########################################################################################################################
     # CLASS CONFIGURATION
 
+    # try to take sequence class from built-in closure
+    if typeof Sequence isnt "undefined"
+        @_sequence_class = Sequence
+    else
+        @_sequence_class = null
     # defined in constraint_validators.coffee
     @constraint_validators = constraint_validators
     # defined in validators.coffee
@@ -48,6 +53,11 @@ class window.FormValidator
             message_builders: message_builders
             message_data_creators: message_data_creators
         }
+        return @
+
+    # can be used to define a custom sequence class (for handling async ajax requests)
+    @set_sequence_class: (sequence_class) ->
+        @_sequence_class = sequence_class
         return @
 
     # for FormValidator.new see CONSTRUCTORS section
@@ -675,7 +685,7 @@ class window.FormValidator
 
             # skip empty optional elements
             if options.all is false and not is_required and (value_info.value.length is 0 or type is "radio" or type is "checkbox")
-                # NOTE:40 if an optional value was invalid and was emptied the error target's error classes should be removed
+                # TODO:40 if an optional value was invalid and was emptied the error target's error classes should be removed
                 if not data.error_targets?
                     data = @_cache_attribute elem, data, "error_targets", () ->
                         return @_get_error_targets(elem, type)
