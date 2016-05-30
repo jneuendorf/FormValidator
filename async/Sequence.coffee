@@ -9,36 +9,13 @@ class Sequence
 
     ################################################################################################
     # CONSTRUCTOR
-    constructor: (data = [], start = true) ->
+    constructor: (data = []) ->
         @data = data
         @idx = 0
         @_doneCallbacks = []
         @_isDone = false
-
-        # indicates what param mode was chosen in the previous function:
-        # - defined params attribute        -> EXPLICIT
-        # - context in return value         -> CONTEXT
-        # OR
-        # - nothing (= take prev result))   -> IMPLICIT
         @_parameterMode = @constructor.PARAM_MODES.EXPLICIT
-
-        if start is true
-            @start()
-
-    ###*
-    * This method starts the Sequence in case it has been created with `false` as start parameter.
-    * @method start
-    * @param newData {Array}
-    * Optional. If an array is given it will replace the possibly previously set data.
-    * @return This istance. {Sequence}
-    * @chainable
-    *###
-    start: (newData) ->
-        if newData instanceof Array
-            @data = newData
-
         @_invokeNextFunction()
-        return @
 
     _createParamListFromContext: (func, context) ->
         if context not instanceof Array
@@ -63,7 +40,6 @@ class Sequence
     * @return This istance. {Sequence}
     * @chainable
     *###
-    # _invokeNextFunction: (prevRes, callbackArgs...) ->
     _invokeNextFunction: (args...) ->
         CLASS = @constructor
         data = @data[@idx]
@@ -105,7 +81,6 @@ class Sequence
                         }
                         @idx
                     )
-
                 try
                     res = func.apply(scope or window, newParams)
                 catch error

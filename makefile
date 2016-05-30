@@ -25,35 +25,32 @@ TEST_FILES = spec/test_validators.coffee \
 CSS_FILES = theme.default theme.bootstrap
 
 
-bundle:
+
+bundle: pre sass
+	php $(PROJECT_NAME).coffee -- '_sync.coffee' > temp && mv temp $(PROJECT_NAME).coffee
 	# compile coffee with --bare because we add our own function wrapper for jQuery namespace
 	cat $(DEBUG_FILE) $(COMMON_FILES) $(BUNDLE_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).js
-	echo '(function($$){' | cat - $(PROJECT_NAME).js > temp && mv temp $(PROJECT_NAME).js
-	echo '})(jQuery)' >> $(PROJECT_NAME).js
-	sh make/make_sass.sh $(CSS_FILES)
+	# add function wrapper for jQuery namespace
+	sh make/make_jquery_wrapper.sh $(PROJECT_NAME).js
+	# restore original coffee file
+	mv $(PROJECT_NAME).orig.coffee $(PROJECT_NAME).coffee
 
-core:
+core: sass
 	# compile coffee with --bare because we add our own function wrapper for jQuery namespace
 	cat $(DEBUG_FILE) $(COMMON_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).core.js
-	echo '(function($$){' | cat - $(PROJECT_NAME).core.js > temp && mv temp $(PROJECT_NAME).core.js
-	echo '})(jQuery)' >> $(PROJECT_NAME).core.js
-	sh make/make_sass.sh $(CSS_FILES)
+	sh make/make_jquery_wrapper.sh $(PROJECT_NAME).core.js
 
-bundle_min:
+bundle_min: sass_min
 	cat $(COMMON_FILES) $(BUNDLE_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).temp.js
-	echo '(function($$){' | cat - $(PROJECT_NAME).temp.js > temp && mv temp $(PROJECT_NAME).temp.js
-	echo '})(jQuery)' >> $(PROJECT_NAME).temp.js
+	sh make/make_jquery_wrapper.sh $(PROJECT_NAME).temp.js
 	uglifyjs $(PROJECT_NAME).temp.js -o $(PROJECT_NAME).min.js -c drop_console=true -d DEBUG=false -m
 	rm -f $(PROJECT_NAME).temp.js
-	sh make/make_sass_compressed.sh $(CSS_FILES)
 
-core_min:
+core_min: sass_min
 	cat $(COMMON_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).temp.js
-	echo '(function($$){' | cat - $(PROJECT_NAME).temp.js > temp && mv temp $(PROJECT_NAME).temp.js
-	echo '})(jQuery)' >> $(PROJECT_NAME).temp.js
+	sh make/make_jquery_wrapper.sh $(PROJECT_NAME).temp.js
 	uglifyjs $(PROJECT_NAME).temp.js -o $(PROJECT_NAME).core.min.js -c drop_console=true -d DEBUG=false -m
 	rm -f $(PROJECT_NAME).temp.js
-	sh make/make_sass_compressed.sh $(CSS_FILES)
 
 dist: bundle core bundle_min core_min
 	cp $(PROJECT_NAME).js dist
@@ -66,7 +63,14 @@ test: bundle
 	cat $(TEST_FILES) | coffee --compile --stdio > ./spec/$(PROJECT_NAME).test.js
 	# TODO: run tests!
 
-# clean:
-# 	rm -f $(PROJECT_NAME).js
-# 	rm -f $(PROJECT_NAME).test.js
-# 	rm -f $(PROJECT_NAME).min.js
+########################################
+# HELPERS
+pre:
+	cp $(PROJECT_NAME).coffee $(PROJECT_NAME).orig.coffee
+	sed -e 's/###<?php/<?php/g' -e 's/?>###/?>/g' $(PROJECT_NAME).coffee > temp && mv temp $(PROJECT_NAME).coffee
+
+sass:
+	sh make/make_sass.sh $(CSS_FILES)
+
+sass_min:
+	sh make/make_sass_compressed.sh $(CSS_FILES)

@@ -348,41 +348,17 @@ Sequence = (function() {
     EXPLICIT: "EXPLICIT"
   };
 
-  function Sequence(data, start) {
+  function Sequence(data) {
     if (data == null) {
       data = [];
-    }
-    if (start == null) {
-      start = true;
     }
     this.data = data;
     this.idx = 0;
     this._doneCallbacks = [];
     this._isDone = false;
     this._parameterMode = this.constructor.PARAM_MODES.EXPLICIT;
-    if (start === true) {
-      this.start();
-    }
-  }
-
-
-  /**
-  * This method starts the Sequence in case it has been created with `false` as start parameter.
-  * @method start
-  * @param newData {Array}
-  * Optional. If an array is given it will replace the possibly previously set data.
-  * @return This istance. {Sequence}
-  * @chainable
-  *
-   */
-
-  Sequence.prototype.start = function(newData) {
-    if (newData instanceof Array) {
-      this.data = newData;
-    }
     this._invokeNextFunction();
-    return this;
-  };
+  }
 
   Sequence.prototype._createParamListFromContext = function(func, context) {
     var argName, l, len, paramList, temp;
@@ -2002,6 +1978,62 @@ window.FormValidator = (function() {
     return result;
   };
 
+  FormValidator.prototype.cache = function() {
+    var data, dep, dependency_data, elem, fields, i, id, id_to_elem, key, l, len, len1, m, o, ref;
+    fields = this._get_fields(this.form);
+    dependency_data = {};
+    id_to_elem = {};
+    for (i = l = 0, ref = fields.length; 0 <= ref ? l < ref : l > ref; i = 0 <= ref ? ++l : --l) {
+      elem = fields.eq(i);
+      data = {};
+      for (m = 0, len = REQUIRED_CACHE.length; m < len; m++) {
+        key = REQUIRED_CACHE[m];
+        data[key] = this._get_attribute_value_for_key(elem, key);
+      }
+      data.depends_on = this._find_targets(data.depends_on, elem, /^\s*\;\s*$/g);
+      data.id = i;
+      if (data.dependency_change_action == null) {
+        data.dependency_change_action = this.dependency_change_action;
+      }
+      for (o = 0, len1 = OPTIONAL_CACHE.length; o < len1; o++) {
+        key = OPTIONAL_CACHE[o];
+        data[key] = null;
+      }
+      data.errors = {};
+      data.errors[VALIDATION_PHASES.DEPENDENCIES] = [];
+      data.errors[VALIDATION_PHASES.VALUE] = [];
+      data.errors[VALIDATION_PHASES.CONSTRAINTS] = [];
+      this._set_element_data(elem, data);
+      id_to_elem[data.id] = elem;
+      dependency_data[data.id] = (function() {
+        var len2, q, ref1, results1;
+        ref1 = data.depends_on;
+        results1 = [];
+        for (q = 0, len2 = ref1.length; q < len2; q++) {
+          dep = ref1[q];
+          results1.push(this._get_element_data(dep).id);
+        }
+        return results1;
+      }).call(this);
+    }
+    this.fields = {
+      all: fields,
+      required: this._get_required(fields),
+      ordered: (function() {
+        var len2, q, ref1, results1;
+        ref1 = toposort(dependency_data);
+        results1 = [];
+        for (q = 0, len2 = ref1.length; q < len2; q++) {
+          id = ref1[q];
+          results1.push(id_to_elem[id]);
+        }
+        return results1;
+      })()
+    };
+    console.log("validation order:", toposort(dependency_data));
+    return this;
+  };
+
   FormValidator.prototype._validate_value = function(element, data, value_info) {
     var type, validation, validator, value;
     type = data.type;
@@ -2239,62 +2271,6 @@ window.FormValidator = (function() {
     data.last_validation = this.last_validation;
     this._set_element_data(elem, data);
     return errors;
-  };
-
-  FormValidator.prototype.cache = function() {
-    var data, dep, dependency_data, elem, fields, i, id, id_to_elem, key, l, len, len1, m, o, ref;
-    fields = this._get_fields(this.form);
-    dependency_data = {};
-    id_to_elem = {};
-    for (i = l = 0, ref = fields.length; 0 <= ref ? l < ref : l > ref; i = 0 <= ref ? ++l : --l) {
-      elem = fields.eq(i);
-      data = {};
-      for (m = 0, len = REQUIRED_CACHE.length; m < len; m++) {
-        key = REQUIRED_CACHE[m];
-        data[key] = this._get_attribute_value_for_key(elem, key);
-      }
-      data.depends_on = this._find_targets(data.depends_on, elem, /^\s*\;\s*$/g);
-      data.id = i;
-      if (data.dependency_change_action == null) {
-        data.dependency_change_action = this.dependency_change_action;
-      }
-      for (o = 0, len1 = OPTIONAL_CACHE.length; o < len1; o++) {
-        key = OPTIONAL_CACHE[o];
-        data[key] = null;
-      }
-      data.errors = {};
-      data.errors[VALIDATION_PHASES.DEPENDENCIES] = [];
-      data.errors[VALIDATION_PHASES.VALUE] = [];
-      data.errors[VALIDATION_PHASES.CONSTRAINTS] = [];
-      this._set_element_data(elem, data);
-      id_to_elem[data.id] = elem;
-      dependency_data[data.id] = (function() {
-        var len2, q, ref1, results1;
-        ref1 = data.depends_on;
-        results1 = [];
-        for (q = 0, len2 = ref1.length; q < len2; q++) {
-          dep = ref1[q];
-          results1.push(this._get_element_data(dep).id);
-        }
-        return results1;
-      }).call(this);
-    }
-    this.fields = {
-      all: fields,
-      required: this._get_required(fields),
-      ordered: (function() {
-        var len2, q, ref1, results1;
-        ref1 = toposort(dependency_data);
-        results1 = [];
-        for (q = 0, len2 = ref1.length; q < len2; q++) {
-          id = ref1[q];
-          results1.push(id_to_elem[id]);
-        }
-        return results1;
-      })()
-    };
-    console.log("validation order:", toposort(dependency_data));
-    return this;
   };
 
 
