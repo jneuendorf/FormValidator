@@ -2,6 +2,7 @@
 // this PHP code is for making the file only
 require_once __DIR__.'/make/make_funcs.php';
 $part = __DIR__.'/'.$argv[2];
+$is_core = $argv[3];
 ?>###
 class window.FormValidator
 
@@ -16,11 +17,6 @@ class window.FormValidator
     ########################################################################################################################
     # CLASS CONFIGURATION
 
-    # try to take sequence class from built-in closure
-    if typeof Sequence isnt "undefined"
-        @_sequence_class = Sequence
-    else
-        @_sequence_class = null
     # defined in constraint_validators.coffee
     @constraint_validators = constraint_validators
     # defined in validators.coffee
@@ -104,8 +100,14 @@ class window.FormValidator
         if DEBUG and form not instanceof jQuery
             throw new Error("FormValidator::constructor: Invalid form given (must be a jQuery object)!")
         form_validator = new @(form, null, options)
-        form_modifier = new FormModifier(form_validator, options)
-        form_validator.form_modifier = form_modifier
+        ###<?php
+        if (!$is_core) {
+            echo "form_validator.form_modifier = new FormModifier(form_validator, options)\n";
+        }
+        else {
+            echo "\n";
+        }
+        ?>###
         return form_validator
 
     @new_without_modifier: (form, options) ->

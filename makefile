@@ -15,8 +15,6 @@ CORE_FILES = validators.coffee constraint_validators.coffee \
 # files for the complete bundle (incl. form modifier)
 COMPLETE_FILES = dependency_change_actions.coffee \
 				FormModifier.coffee
-# files for the complete bundle + support for asynchronous requests
-COMPLETE_ASYNC_FILES = async/Sequence.coffee
 TEST_FILES = spec/test_validators.coffee \
 				spec/test_general_behavior.coffee \
 				spec/test_dependencies.coffee \
@@ -28,51 +26,41 @@ CSS_FILES = theme.default theme.bootstrap
 
 
 complete: pre sass
-	php $(PROJECT_NAME).coffee -- '_sync.coffee' > temp && mv temp $(PROJECT_NAME).coffee
+	php $(PROJECT_NAME).coffee -- '_sync.coffee' 'false' > temp && mv temp $(PROJECT_NAME).coffee
 	# core files must be after complete files because FormValidator needs the dependency_change_actions on load
 	# compile coffee with --bare because we add our own function wrapper for jQuery namespace
-	cat $(DEBUG_FILE) $(COMMON_FILES) $(COMPLETE_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).js
+	cat $(DEBUG_FILE) $(COMMON_FILES) $(COMPLETE_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > dist/$(PROJECT_NAME).js
 	# add function wrapper for jQuery namespace
-	sh make/make_jquery_wrapper.sh $(PROJECT_NAME).js
+	sh make/make_jquery_wrapper.sh dist/$(PROJECT_NAME).js
 	# restore original coffee file
 	mv $(PROJECT_NAME).orig.coffee $(PROJECT_NAME).coffee
 
 complete_async: pre sass
-	php $(PROJECT_NAME).coffee -- '_async.coffee' > temp && mv temp $(PROJECT_NAME).coffee
-	# core files must be after complete files because FormValidator needs the dependency_change_actions on load
-	# compile coffee with --bare because we add our own function wrapper for jQuery namespace
-	cat $(DEBUG_FILE) $(COMMON_FILES) $(COMPLETE_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).async.js
-	# add function wrapper for jQuery namespace
-	sh make/make_jquery_wrapper.sh $(PROJECT_NAME).async.js
-	# restore original coffee file
+	php $(PROJECT_NAME).coffee -- '_async.coffee' 'false' > temp && mv temp $(PROJECT_NAME).coffee
+	cat $(DEBUG_FILE) $(COMMON_FILES) $(COMPLETE_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > dist/$(PROJECT_NAME).async.js
+	sh make/make_jquery_wrapper.sh dist/$(PROJECT_NAME).async.js
 	mv $(PROJECT_NAME).orig.coffee $(PROJECT_NAME).coffee
 
 core: pre sass
-	cat $(DEBUG_FILE) $(COMMON_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).core.js
-	sh make/make_jquery_wrapper.sh $(PROJECT_NAME).core.js
+	php $(PROJECT_NAME).coffee -- '_sync.coffee' 'true' > temp && mv temp $(PROJECT_NAME).coffee
+	cat $(DEBUG_FILE) $(COMMON_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > dist/$(PROJECT_NAME).core.js
+	sh make/make_jquery_wrapper.sh dist/$(PROJECT_NAME).core.js
 	mv $(PROJECT_NAME).orig.coffee $(PROJECT_NAME).coffee
 
-complete_min: sass_min
-	cat $(COMMON_FILES) $(COMPLETE_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).temp.js
-	sh make/make_jquery_wrapper.sh $(PROJECT_NAME).temp.js
-	uglifyjs $(PROJECT_NAME).temp.js -o $(PROJECT_NAME).min.js -c drop_console=true -d DEBUG=false -m
-	rm -f $(PROJECT_NAME).temp.js
-	mv $(PROJECT_NAME).orig.coffee $(PROJECT_NAME).coffee
+min: complete complete_async core sass_min
+	# complete
+	sed -e 's/DEBUG = true//g' dist/$(PROJECT_NAME).js > temp
+	uglifyjs temp -o dist/$(PROJECT_NAME).min.js -c drop_console=true -m
+	# async
+	sed -e 's/DEBUG = true//g' dist/$(PROJECT_NAME).async.js > temp
+	uglifyjs temp -o dist/$(PROJECT_NAME).async.min.js -c drop_console=true -m
+	# core
+	sed -e 's/DEBUG = true//g' dist/$(PROJECT_NAME).core.js > temp
+	uglifyjs temp -o dist/$(PROJECT_NAME).core.min.js -c drop_console=true -m
+	rm temp
 
-core_min: pre sass_min
-	cat $(COMMON_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > $(PROJECT_NAME).temp.js
-	sh make/make_jquery_wrapper.sh $(PROJECT_NAME).temp.js
-	uglifyjs $(PROJECT_NAME).temp.js -o $(PROJECT_NAME).core.min.js -c drop_console=true -d DEBUG=false -m
-	rm -f $(PROJECT_NAME).temp.js
 
-dist: complete core complete_min core_min
-	cp $(PROJECT_NAME).js dist
-	cp $(PROJECT_NAME).core.js dist
-	cp $(PROJECT_NAME).async.js dist
-	# minified versions
-	cp $(PROJECT_NAME).min.js dist
-	cp $(PROJECT_NAME).core.min.js dist
-	cp $(PROJECT_NAME).async.min.js dist
+dist: complete async core min
 	# copy css files (incl. minified versions)
 	sh make/make_dist_copy.sh $(CSS_FILES)
 
