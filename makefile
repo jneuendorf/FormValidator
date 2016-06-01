@@ -26,7 +26,7 @@ CSS_FILES = theme.default theme.bootstrap
 
 
 complete: pre sass
-	php $(PROJECT_NAME).coffee -- '_sync.coffee' 'false' > temp && mv temp $(PROJECT_NAME).coffee
+	php $(PROJECT_NAME).coffee -- '_sync.coffee' 'complete' > temp && mv temp $(PROJECT_NAME).coffee
 	# core files must be after complete files because FormValidator needs the dependency_change_actions on load
 	# compile coffee with --bare because we add our own function wrapper for jQuery namespace
 	cat $(DEBUG_FILE) $(COMMON_FILES) $(COMPLETE_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > dist/$(PROJECT_NAME).js
@@ -36,13 +36,13 @@ complete: pre sass
 	mv $(PROJECT_NAME).orig.coffee $(PROJECT_NAME).coffee
 
 complete_async: pre sass
-	php $(PROJECT_NAME).coffee -- '_async.coffee' 'false' > temp && mv temp $(PROJECT_NAME).coffee
+	php $(PROJECT_NAME).coffee -- '_async.coffee' 'complete_async' > temp && mv temp $(PROJECT_NAME).coffee
 	cat $(DEBUG_FILE) $(COMMON_FILES) $(COMPLETE_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > dist/$(PROJECT_NAME).async.js
 	sh make/make_jquery_wrapper.sh dist/$(PROJECT_NAME).async.js
 	mv $(PROJECT_NAME).orig.coffee $(PROJECT_NAME).coffee
 
 core: pre sass
-	php $(PROJECT_NAME).coffee -- '_sync.coffee' 'true' > temp && mv temp $(PROJECT_NAME).coffee
+	php $(PROJECT_NAME).coffee -- '_sync.coffee' 'core' > temp && mv temp $(PROJECT_NAME).coffee
 	cat $(DEBUG_FILE) $(COMMON_FILES) $(CORE_FILES) | coffee --compile --stdio --bare > dist/$(PROJECT_NAME).core.js
 	sh make/make_jquery_wrapper.sh dist/$(PROJECT_NAME).core.js
 	mv $(PROJECT_NAME).orig.coffee $(PROJECT_NAME).coffee

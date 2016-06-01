@@ -5,7 +5,7 @@ function readfile_indent($filename, $indentation=4) {
     $lines = explode("\n", $contents);
     foreach ($lines as $i => $line) {
         // skip indentation for 1st line because the php code is already indented
-        if ($i > 0) {
+        if ($i > 0 && !empty($line)) {
             $lines[$i] = str_repeat(' ', $indentation).$line;
         }
     }
